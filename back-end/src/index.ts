@@ -9,6 +9,7 @@ import { buildSchema } from 'type-graphql';
 import { getDatabase, initializeRepositories } from './database/utils';
 import AppUser from './entities/AppUser.entity';
 import { getSessionIdInCookie } from './http-utils';
+import { connectionToRabbitMQ } from './rabbitmq/config';
 import AppUserResolver from './resolvers/AppUser/AppUser.resolver';
 import AppUserRepository from './services/AppUser.service';
 
@@ -51,6 +52,7 @@ const startServer = async () => {
   const { url } = await server.listen({ port: port });
   await initializeRepositories();
   await getDatabase();
+  await connectionToRabbitMQ();
 
   console.log(`🚀  Server ready at ${url}`);
 };
