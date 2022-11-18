@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  back-end:
+    build: ./back-end
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      SERVER_PORT: ${SERVER_PORT}
+      RABBIT_AMQP_URL: ${RABBIT_AMQP_URL}
+      NODEMAILER_USER: ${NODEMAILER_USER}
+      NODEMAILER_PASS: ${NODEMAILER_PASS}
+      RESET_PASSWORD_EXPIRATION_DELAY: ${RESET_PASSWORD_EXPIRATION_DELAY}
+    ports:
+      - 4069:4069
+    volumes:
+      - ./back-end/src:/app/src
+      - /app/node_modules
+    depends_on:
+      - database
+      - rabbitmq
+
+  web-app:
+    build: ./web-app
+    ports:
+      - 3000:3000
+    volumes:
+      - ./web-app/src:/app/src
+      - /app/node_modules
+    depends_on:
+      - back-end
+
+  database:
+    image: postgres:14.5-alpine
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - database-content:/var/lib/postgresql/data
+    expose:
+      - 5432
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+volumes:
+  database-content:
