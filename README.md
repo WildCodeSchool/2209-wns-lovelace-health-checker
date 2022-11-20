@@ -15,6 +15,8 @@ cd web-app && npm i && cd ..
 
 Docker and Docker Compose are required on host system.
 
+Rename `.env-sample` to `.env` and set all required values.
+
 Build and start in dev mode:
 
 ```
