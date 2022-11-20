@@ -1,18 +1,18 @@
 import { compareSync, hashSync } from 'bcryptjs';
 
-import AppUser from '../entities/AppUser.entity';
 import Session from '../entities/Session.entity';
-import AppUserRepository from '../repositories/AppUser.repository';
+import User from '../entities/User.entity';
+import UserRepository from '../repositories/User.repository';
 import SessionRepository from './Session.service';
 
-export default class AppUserService extends AppUserRepository {
+export default class UserService extends UserRepository {
   static createUser(
     firstName: string,
     lastName: string,
     emailAddress: string,
     password: string
-  ): Promise<AppUser> {
-    const user = new AppUser(
+  ): Promise<User> {
+    const user = new User(
       firstName,
       lastName,
       emailAddress,
@@ -22,19 +22,19 @@ export default class AppUserService extends AppUserRepository {
   }
 
   static async signIn(
-    emailAddress: string,
+    email: string,
     password: string
-  ): Promise<{ user: AppUser; session: Session }> {
-    const user = await this.findByEmailAddress(emailAddress);
+  ): Promise<{ user: User; session: Session }> {
+    const user = await this.findByEmailAddress(email);
 
-    if (!user || !compareSync(password, user.hashedPassword)) {
+    if (!user || !compareSync(password, user.password)) {
       throw new Error("Identifiants incorrects.");
     }
     const session = await SessionRepository.createSession(user);
     return { user, session };
   }
 
-  static async findBySessionId(sessionId: string): Promise<AppUser | null> {
+  static async findBySessionId(sessionId: string): Promise<User | null> {
     const session = await SessionRepository.findById(sessionId);
     if (!session) {
       return null;

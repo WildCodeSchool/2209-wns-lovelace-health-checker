@@ -1,5 +1,5 @@
-import { IsEmail, Matches, MinLength } from "class-validator";
-import { ArgsType, Field } from "type-graphql";
+import { IsEmail, Matches, MinLength } from 'class-validator';
+import { ArgsType, Field } from 'type-graphql';
 
 const passwordRegExp = new RegExp(
   "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})"
@@ -11,15 +11,15 @@ export class SignUpArgs {
   @MinLength(1, {
     message: "Le prénom doit faire au moins un caractère de long.",
   })
-  firstName: string;
+  firstname: string;
 
   @Field()
   @MinLength(1, { message: "Le nom doit faire au moins un caractère de long." })
-  lastName: string;
+  lastname: string;
 
   @Field()
   @IsEmail()
-  emailAddress: string;
+  email: string;
 
   @Field()
   @Matches(passwordRegExp, {
@@ -33,7 +33,7 @@ export class SignUpArgs {
 export class SignInArgs {
   @Field()
   @IsEmail()
-  emailAddress: string;
+  email: string;
 
   @Field()
   password: string;

@@ -1,7 +1,7 @@
 import { DataSource, EntityTarget } from 'typeorm';
 
 import SessionRepository from '../repositories/Session.repository';
-import AppUserRepository from '../services/AppUser.service';
+import UserRepository from '../repositories/User.repository';
 
 const dataSource = new DataSource({
   type: "postgres",
@@ -21,6 +21,6 @@ export const getRepository = async (entity: EntityTarget<any>) => {
 };
 
 export const initializeRepositories = async () => {
-  await AppUserRepository.initializeRepository();
+  await UserRepository.initializeRepository();
   await SessionRepository.initializeRepository();
 };

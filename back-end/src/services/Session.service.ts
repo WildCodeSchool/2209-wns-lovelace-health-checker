@@ -1,9 +1,9 @@
-import AppUser from '../entities/AppUser.entity';
 import Session from '../entities/Session.entity';
+import User from '../entities/User.entity';
 import SessionRepository from '../repositories/Session.repository';
 
 export default class SessionService extends SessionRepository {
-  static createSession(user: AppUser): Promise<Session> {
+  static createSession(user: User): Promise<Session> {
     const session = new Session(user);
     return this.saveSession(session);
   }

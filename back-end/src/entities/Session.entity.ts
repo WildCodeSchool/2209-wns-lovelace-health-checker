@@ -1,24 +1,24 @@
 import { randomBytes } from 'crypto';
 import { BeforeInsert, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 
-import AppUser from './AppUser.entity';
+import User from './User.entity';
 
 @Entity()
 export default class Session {
-  constructor(user: AppUser) {
+  constructor(user: User) {
     this.user = user;
   }
 
   @PrimaryColumn("varchar", {
-    length: 32,
+    length: 64,
   })
   id: string;
 
-  @ManyToOne(() => AppUser, { eager: true })
-  user: AppUser;
+  @ManyToOne(() => User, { eager: true })
+  user: User;
 
   @BeforeInsert()
   setId() {
-    this.id = randomBytes(16).toString("hex");
+    this.id = randomBytes(32).toString("hex");
   }
 }

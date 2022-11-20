@@ -7,14 +7,14 @@ import * as dotenv from 'dotenv';
 import { buildSchema } from 'type-graphql';
 
 import { getDatabase, initializeRepositories } from './database/utils';
-import AppUser from './entities/AppUser.entity';
+import User from './entities/User.entity';
 import { getSessionIdInCookie } from './http-utils';
 import { connectionToRabbitMQ } from './rabbitmq/config';
-import AppUserResolver from './resolvers/AppUser/AppUser.resolver';
-import AppUserRepository from './services/AppUser.service';
+import UserResolver from './resolvers/User/User.resolver';
+import UserService from './services/User.service';
 
 export type GlobalContext = ExpressContext & {
-  user: AppUser | null;
+  user: User | null;
 };
 
 dotenv.config();
@@ -22,7 +22,7 @@ dotenv.config();
 const startServer = async () => {
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [AppUserResolver],
+      resolvers: [UserResolver],
       authChecker: async ({ context }) => {
         return Boolean(context.user);
       },
@@ -31,7 +31,7 @@ const startServer = async () => {
       const sessionId = getSessionIdInCookie(context);
       const user = !sessionId
         ? null
-        : await AppUserRepository.findBySessionId(sessionId);
+        : await UserService.findBySessionId(sessionId);
 
       return { res: context.res, req: context.req, user };
     },
