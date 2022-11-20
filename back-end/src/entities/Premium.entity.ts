@@ -8,11 +8,13 @@ import User from './User.entity';
 @ObjectType()
 export default class Premium {
   constructor(
+    user: User,
     startDate: Date,
     endDate: Date,
     billingType: string,
     price: number
   ) {
+    this.user = user;
     this.startDate = startDate;
     this.endDate = endDate;
     this.billingType = billingType;

@@ -64,12 +64,6 @@ export default class User {
   @Length(8, 120)
   password: string;
 
-  @Column({ default: true })
-  @Field()
-  @IsBoolean()
-  @IsNotEmpty()
-  isAgreedTerms: boolean;
-
   @Column({ default: new Date() })
   @Field()
   @IsDate()
