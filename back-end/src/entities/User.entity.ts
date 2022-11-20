@@ -77,23 +77,23 @@ export default class User {
   createdAt: Date;
 
   @Column({ nullable: true, default: null })
-  @Field()
+  @Field({ nullable: true })
   @IsDate()
   updatedAt: Date;
 
   @Column({ nullable: true, default: null })
-  @Field()
+  @Field({ nullable: true })
   @IsDate()
   lastLoggedAt: Date;
 
   @Column({ nullable: true, default: null })
   @Index({ unique: true })
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   customerId: string;
 
   @Column({ nullable: true, default: null })
-  @Field()
+  @Field({ nullable: true })
   @IsBoolean()
   hasCanceledPremium: boolean;
 

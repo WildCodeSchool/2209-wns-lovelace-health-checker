@@ -13,7 +13,7 @@ export default class UserRepository {
     return this.repository.save(user);
   }
 
-  protected static findByEmailAddress(email: string): Promise<User | null> {
+  protected static findByEmail(email: string): Promise<User | null> {
     return this.repository.findOneBy({ email });
   }
 

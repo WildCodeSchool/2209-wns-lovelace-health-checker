@@ -10,7 +10,8 @@ import { SignInArgs, SignUpArgs } from './User.input';
 export default class UserResolver {
   @Mutation(() => User)
   signUp(
-    @Args() { firstname, lastname, email, password }: SignUpArgs
+    @Args()
+    { firstname, lastname, email, password, passwordConfirmation }: SignUpArgs
   ): Promise<User> {
     return UserService.createUser(firstname, lastname, email, password);
   }

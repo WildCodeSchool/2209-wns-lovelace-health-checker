@@ -7,17 +7,12 @@ import SessionRepository from './Session.service';
 
 export default class UserService extends UserRepository {
   static createUser(
-    firstName: string,
-    lastName: string,
-    emailAddress: string,
+    firstname: string,
+    lastname: string,
+    email: string,
     password: string
   ): Promise<User> {
-    const user = new User(
-      firstName,
-      lastName,
-      emailAddress,
-      hashSync(password)
-    );
+    const user = new User(firstname, lastname, email, hashSync(password));
     return this.saveUser(user);
   }
 
@@ -25,7 +20,7 @@ export default class UserService extends UserRepository {
     email: string,
     password: string
   ): Promise<{ user: User; session: Session }> {
-    const user = await this.findByEmailAddress(email);
+    const user = await this.findByEmail(email);
 
     if (!user || !compareSync(password, user.password)) {
       throw new Error("Identifiants incorrects.");
