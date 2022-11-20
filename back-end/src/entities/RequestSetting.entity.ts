@@ -1,7 +1,8 @@
 import { IsBoolean, IsNotEmpty, IsString, MinLength } from 'class-validator';
 import { Field, ID, ObjectType } from 'type-graphql';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+import AlertSetting from './AlertSetting.entity';
 import User from './User.entity';
 
 export enum Frequency {
@@ -74,4 +75,12 @@ export default class RequestSetting {
   @Field({ nullable: true })
   @IsString()
   headers: string;
+
+  @OneToMany(
+    () => AlertSetting,
+    (alertSetting) => alertSetting.requestSetting,
+    { eager: true }
+  )
+  @Field(() => [AlertSetting])
+  alerts: AlertSetting[];
 }

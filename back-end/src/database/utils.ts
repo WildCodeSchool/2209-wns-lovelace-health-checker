@@ -1,5 +1,6 @@
 import { DataSource, EntityTarget } from 'typeorm';
 
+import AlertSettingRepository from '../repositories/AlertSetting.repository';
 import PremiumRepository from '../repositories/Premium.repository';
 import RequestSettingRepository from '../repositories/RequestSetting.repository';
 import SessionRepository from '../repositories/Session.repository';
@@ -27,4 +28,5 @@ export const initializeRepositories = async () => {
   await SessionRepository.initializeRepository();
   await PremiumRepository.initializeRepository();
   await RequestSettingRepository.initializeRepository();
+  await AlertSettingRepository.initializeRepository();
 };

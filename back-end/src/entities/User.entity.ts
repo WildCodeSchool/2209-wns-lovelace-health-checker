@@ -1,6 +1,8 @@
 import { IsBoolean, IsDate, IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
 import { Field, ID, ObjectType } from 'type-graphql';
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
+import RequestSetting from './RequestSetting.entity';
 
 export enum Status {
   PENDING = "pending",
@@ -136,4 +138,8 @@ export default class User {
   @Column({ nullable: true, default: null })
   @IsDate()
   accountConfirmationTokenCreatedAt: Date;
+
+  @OneToMany(() => RequestSetting, (requestSetting) => requestSetting.user)
+  @Field(() => [RequestSetting])
+  requests: RequestSetting[];
 }
