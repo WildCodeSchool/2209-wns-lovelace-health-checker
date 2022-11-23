@@ -10,7 +10,7 @@ export default class RequestSettingRepository {
     this.repository = await getRepository(RequestSetting);
   }
 
-  protected static saveRequestRepository(
+  protected static saveRequestSetting(
     requestSetting: RequestSetting
   ): Promise<RequestSetting> {
     return this.repository.save(requestSetting);

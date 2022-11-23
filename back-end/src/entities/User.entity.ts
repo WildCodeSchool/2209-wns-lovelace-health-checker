@@ -29,6 +29,7 @@ export default class User {
     this.lastname = lastname;
     this.email = email;
     this.password = password;
+    this.createdAt = new Date();
   }
 
   @PrimaryGeneratedColumn("uuid")
@@ -66,7 +67,7 @@ export default class User {
   @Length(8, 120)
   password: string;
 
-  @Column({ default: new Date() })
+  @Column()
   @Field()
   @IsDate()
   @IsNotEmpty()
