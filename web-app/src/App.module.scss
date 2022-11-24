@@ -1,13 +1,12 @@
-@use "variables";
+@use "variables.scss";
 
 .container {
-  max-width: 800px;
+  max-width: variables.$desktopContainerSize;
   margin-left: auto;
   margin-right: auto;
-  padding: 24px;
   background-color: white;
 }
 
 .background {
-  background-color: variables.$backgroundColor;
+  background-color: variables.$desktopContainerMarginColor;
 }
