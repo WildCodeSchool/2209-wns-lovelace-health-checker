@@ -1,12 +1,14 @@
-$desktopContainerMarginColor: rgb(235, 245, 255, 0.33);
+$desktopContainerMarginColor: rgba(89, 89, 89, 0.1); // rgb(235, 245, 255, 0.33)
 $backgroundBlue: rgb(235, 245, 255, 0.65);
+$appBackgroundImage: url("./assets/images/background_image.png");
+$appMinWidth: 360px;
 
-$desktopContainerSize: 800px;
+$desktopContainerSize: 1024px;
 $desktopPadding: 48px;
 $mobilePadding: 24px;
 
-$mobileHomepageTitleSize: 24px;
-$desktopHomepageTitleSize: 36px;
+$mobileHomepageTitleSize: 32px;
+$desktopHomepageTitleSize: 40px;
 $mobileTitleSize: 16px;
 $desktopTitleSize: 24px;
 $mainSize: 12px;
