@@ -1,0 +1,56 @@
+@use "../../variables.scss";
+
+.searchBarContainer {
+  background-color: variables.$mainColor;
+  height: 320px;
+  padding: 0px variables.$mobilePadding;
+  @media (min-width: 576px) {
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0px variables.$desktopPadding;
+  }
+  .logoContainer {
+    margin-top: 8px;
+    @media (min-width: 576px) {
+      display: none;
+    }
+  }
+  .logo {
+    width: 45px;
+    height: 50px;
+    cursor: pointer;
+  }
+  h1 {
+    color: #ffffff;
+    font-size: variables.$mobileHomepageTitleSize;
+    @media (min-width: 576px) {
+      font-size: variables.$desktopHomepageTitleSize;
+    }
+  }
+  .searchBar {
+    height: 48px;
+    width: 100%;
+    padding-left: 16px;
+    color: variables.$secondTextColor;
+    border: none;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    @media (min-width: 576px) {
+      margin-top: 0;
+    }
+  }
+  .searchButton {
+    min-width: 48px;
+    max-width: 48px;
+    min-height: 48px;
+    max-height: 48px;
+    background-color: variables.$secondColor;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    cursor: pointer;
+    @media (min-width: 576px) {
+      margin-top: 0;
+    }
+  }
+}

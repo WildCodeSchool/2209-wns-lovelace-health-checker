@@ -1,0 +1,77 @@
+@use "../../variables.scss";
+
+.navbar {
+  height: variables.$mobileNavbarHeight;
+  width: 100%;
+  border-top: 1px solid #ebf5ff31;
+  position: fixed;
+  bottom: 0;
+  background-color: variables.$mainColor;
+  @media (min-width: 576px) {
+    height: variables.$desktopNavbarHeight;
+    position: sticky;
+    top: 0;
+    border-top: none;
+    border-bottom: 1px solid #ebf5ff31;
+  }
+  .mobileNavbar {
+    @media (min-width: 576px) {
+      display: none !important;
+    }
+  }
+  .desktopNavbar {
+    padding: 0px variables.$desktopPadding;
+    display: flex !important;
+    font-size: 14px;
+    display: none !important;
+    @media (min-width: 576px) {
+      display: flex !important;
+    }
+    .primaryButton {
+      width: 80px;
+      height: 32px;
+      border-radius: 3px;
+      border: none;
+      color: variables.$darkestColor;
+    }
+    .primaryButton:hover {
+      background-color: variables.$lightestColor;
+    }
+    .secondaryButton {
+      width: 80px;
+      height: 32px;
+      border-radius: 3px;
+      border: 1px solid white;
+      background-color: transparent;
+      color: white;
+    }
+    .secondaryButton:hover {
+      border: 1px solid variables.$lightestColor;
+      color: variables.$lightestColor;
+    }
+  }
+}
+
+.logo {
+  width: 45px;
+  height: 50px;
+  cursor: pointer;
+}
+
+.bi {
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.biBookmarkCheck {
+  cursor: pointer;
+  color: variables.$premiumColor;
+}
+
+.navlink {
+  font-size: 10px;
+  margin: 0;
+  @media (min-width: 576px) {
+    font-size: 14px;
+  }
+}
