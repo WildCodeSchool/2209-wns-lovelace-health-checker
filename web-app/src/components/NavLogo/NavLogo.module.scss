@@ -1,0 +1,19 @@
+@use "../../variables.scss";
+
+.logo {
+  width: 45px;
+  height: 50px;
+  cursor: pointer;
+}
+
+.navLogo {
+  background-color: variables.$mainColor;
+  padding: 0px variables.$mobilePadding;
+  height: variables.$desktopNavbarHeight;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid #ebf5ff31;
+  @media (min-width: 576px) {
+    display: none !important;
+  }
+}

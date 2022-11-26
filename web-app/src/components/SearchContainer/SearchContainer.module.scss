@@ -10,17 +10,6 @@
     justify-content: space-between;
     padding: 0px variables.$desktopPadding;
   }
-  .logoContainer {
-    margin-top: 8px;
-    @media (min-width: 576px) {
-      display: none;
-    }
-  }
-  .logo {
-    width: 45px;
-    height: 50px;
-    cursor: pointer;
-  }
   h1 {
     color: #ffffff;
     font-size: variables.$mobileHomepageTitleSize;
