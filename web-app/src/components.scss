@@ -1,0 +1,20 @@
+@use "variables.scss";
+
+@mixin button {
+  width: 100%;
+  height: 48px;
+  border-radius: 5px;
+  font-weight: 600;
+}
+
+@mixin primaryButton {
+  background-color: variables.$mainColor;
+  color: white;
+  border: none;
+}
+
+@mixin secondaryButton {
+  background-color: white;
+  color: variables.$mainColor;
+  border: 1px solid variables.$mainColor;
+}

@@ -1,0 +1,38 @@
+@use "../../variables.scss";
+
+tr {
+  text-align: center;
+}
+
+td,
+th {
+  width: 33%;
+  color: variables.$darkestColor;
+  font-size: 12px;
+  @media (min-width: 576px) {
+    font-size: initial;
+  }
+}
+
+th {
+  font-weight: variables.$tableHeadFontWeight;
+}
+
+thead {
+  background-color: variables.$lightestColor;
+}
+
+table {
+  width: auto;
+  @media (min-width: 768px) {
+    width: 70% !important;
+  }
+}
+
+.available {
+  color: variables.$successColor;
+}
+
+.notAvailable {
+  color: variables.$errorColor;
+}
