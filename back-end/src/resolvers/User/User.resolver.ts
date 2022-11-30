@@ -4,7 +4,7 @@ import { GlobalContext } from '../..';
 import User from '../../entities/User.entity';
 import { setSessionIdInCookie } from '../../http-utils';
 import UserService from '../../services/User.service';
-import { SignInArgs, SignUpArgs } from './User.input';
+import { ConfirmAccountArgs, ResendAccountConfirmationTokenArgs, SignInArgs, SignUpArgs } from './User.input';
 
 @Resolver(User)
 export default class UserResolver {
@@ -14,6 +14,18 @@ export default class UserResolver {
     { firstname, lastname, email, password, passwordConfirmation }: SignUpArgs
   ): Promise<User> {
     return UserService.createUser(firstname, lastname, email, password);
+  }
+
+  @Mutation(() => String)
+  resendAccountConfirmationToken(
+    @Args() { email }: ResendAccountConfirmationTokenArgs
+  ): Promise<string> {
+    return UserService.resendAccountConfirmationToken(email);
+  }
+
+  @Mutation(() => String)
+  confirmAccount(@Args() { token }: ConfirmAccountArgs): Promise<string> {
+    return UserService.confirmAccount(token);
   }
 
   @Mutation(() => User)

@@ -14,7 +14,15 @@ export default class SessionRepository {
     return this.repository.save(session);
   }
 
+  static findById(id: string): Promise<Session | null> {
+    return this.repository.findOneBy({ id });
+  }
+
   static async clearRepository(): Promise<void> {
     this.repository.delete({});
+  }
+
+  static async deleteSession(id: string): Promise<void> {
+    this.repository.delete({ id });
   }
 }
