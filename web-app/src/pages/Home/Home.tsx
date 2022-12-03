@@ -1,47 +1,114 @@
-import { gql, useQuery } from '@apollo/client';
-import { useState } from 'react';
+import { gql, useMutation } from "@apollo/client";
+import { useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
-import HomepageRequestTable from '../../components/HomepageRequestTable/HomepageRequestTable';
-import SearchContainer from '../../components/SearchContainer/SearchContainer';
-import styles from './Home.module.scss';
+import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
+import HomepageRequestTable from "../../components/HomepageRequestTable/HomepageRequestTable";
+import styles from "./Home.module.scss";
 
-const TEST_URL = gql`
-  query TestURL {
-    availability
-    statusCode
-    duration
+const URL = gql`
+  mutation Search($url: String!) {
+    search(url: $url) {
+      availability
+      statusCode
+      duration
+    }
   }
 `;
 
+type SearchInput = {
+  url: string;
+};
+const expression =
+  /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
+const urlRegExp = new RegExp(expression);
+
 const Home = () => {
-  const [url, setUrl] = useState("DUMMY_URL");
-  const { data, loading, error } = useQuery<any>(TEST_URL);
+  const [url, setUrl] = useState("");
+  const [search, { data, loading }] = useMutation<any, any>(URL);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SearchInput>({ criteriaMode: "all" });
+
+  const onSubmit: SubmitHandler<SearchInput> = async (url) => {
+    setUrl(url.url);
+    console.log(url.url);
+    try {
+      await search({
+        variables: { url },
+      });
+      console.log(data);
+    } catch (error) {
+      console.log(data);
+      toast.error(
+        "Oops, it seems that something went wrong... Please try again",
+        {
+          position: toast.POSITION.BOTTOM_RIGHT,
+        }
+      );
+    }
+  };
 
   return (
     <>
-      <SearchContainer />
+      <div className={`d-flex flex-column ${styles.searchBarContainer}`}>
+        <h1 className="col-sm-5 col-9 my-5">
+          Enter a website URL and check its availability
+        </h1>
+        <div className="col-sm-6 col-12">
+          <form onSubmit={handleSubmit(onSubmit)} className="d-flex">
+            <input
+              className={`is-invalid ${styles.searchBar}`}
+              type="text"
+              defaultValue={""}
+              placeholder="https://example.com"
+              {...register("url", {
+                required: "URL is required",
+                pattern: { value: urlRegExp, message: "URL format is invalid" },
+              })}
+            />
+            <button
+              type="submit"
+              className={`d-flex justify-content-center align-items-center ${styles.searchButton}`}
+            >
+              <i className="bi bi-search"></i>
+            </button>
+          </form>
+          <div className={styles.errorMessage}>
+            <FormErrorMessage errors={errors} name={"url"} />
+          </div>
+        </div>
+      </div>
+
       <div className={styles.container}>
-        {/* Result container */}
-        {loading || data || error ? (
+        {loading || data ? (
           <div className="mb-5">
             <p className="m-0">
-              {loading
-                ? "We are testing " + url
-                : data || error
-                ? "Result for " + url
-                : ""}
+              {loading ? (
+                "We are testing " + url
+              ) : data ? (
+                "Result for " + url
+              ) : (
+                <></>
+              )}
             </p>
             <div
               className={`d-flex justify-content-center align-items-center ${styles.requestContainer}`}
             >
-              {false ? (
+              {loading ? (
                 <div className={styles.loader}></div>
-              ) : (
+              ) : data ? (
+                // TODO : replace values by data.value
                 <HomepageRequestTable
                   availability={true}
                   statusCode={200}
                   duration={700}
                 />
+              ) : (
+                <></>
               )}
             </div>
           </div>
