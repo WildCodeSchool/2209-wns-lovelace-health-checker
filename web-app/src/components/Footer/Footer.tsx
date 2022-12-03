@@ -1,11 +1,11 @@
-import styles from './Footer.module.scss';
+import styles from "./Footer.module.scss";
 
 const Footer = () => {
   return (
     <footer
       className={`d-flex flex-column justify-content-center ${styles.footer}`}
     >
-      <ul className={styles.navList}>
+      <ul>
         <li>
           <a href="/">Legals</a>
         </li>

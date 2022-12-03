@@ -1,10 +1,12 @@
 @use "variables.scss";
 
 @mixin button {
+  transition: all 0.3s ease-in-out;
   width: 100%;
   height: 48px;
   border-radius: 5px;
   font-weight: 600;
+  cursor: pointer;
 }
 
 @mixin primaryButton {
@@ -13,8 +15,38 @@
   border: none;
 }
 
+@mixin primaryButtonHover {
+  background-color: white;
+  border: 2px solid variables.$mainColor;
+  color: variables.$mainColor;
+}
+
 @mixin secondaryButton {
   background-color: white;
   color: variables.$mainColor;
-  border: 1px solid variables.$mainColor;
+  border: 2px solid variables.$mainColor;
+}
+
+@mixin secondaryButtonHover {
+  background-color: variables.$mainColor;
+  color: white;
+}
+
+@mixin loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid variables.$mainColor;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+  @keyframes rotation {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 }

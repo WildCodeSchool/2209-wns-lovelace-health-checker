@@ -1,61 +1,6 @@
 @use "../../variables.scss";
 @import "../../components.scss";
 
-.title {
-  color: variables.$darkestColor;
-  font-size: variables.$desktopTitleSize;
-}
-
-.container {
-  padding: variables.$mobilePadding;
-  @media (min-width: 576px) {
-    padding: variables.$desktopPadding;
-  }
-  .requestContainer {
-    width: 100%;
-    height: 120px;
-  }
-  .button {
-    @include button;
-    height: 60px;
-    @media (min-width: 576px) {
-      min-width: auto;
-      width: 300px;
-      height: 60px;
-    }
-  }
-  .primaryButton {
-    @include primaryButton;
-  }
-  .secondaryButton {
-    @include secondaryButton;
-  }
-}
-
-.text {
-  color: variables.$darkestColor;
-  font-size: 16px;
-}
-
-.loader {
-  width: 48px;
-  height: 48px;
-  border: 5px solid variables.$mainColor;
-  border-bottom-color: transparent;
-  border-radius: 50%;
-  display: inline-block;
-  box-sizing: border-box;
-  animation: rotation 1s linear infinite;
-  @keyframes rotation {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-}
-
 .searchBarContainer {
   background-color: variables.$mainColor;
   height: 320px;
@@ -101,6 +46,45 @@
   }
   .errorMessage {
     padding-top: 10px;
-    color: white;
+    color: white !important;
+  }
+}
+
+.contentContainer {
+  padding: variables.$mobilePadding;
+  @media (min-width: 576px) {
+    padding: variables.$desktopPadding;
+  }
+  .requestContainer {
+    width: 100%;
+    height: 120px;
+    .loader {
+      @include loader;
+    }
+  }
+  h2 {
+    margin-top: 16px;
+  }
+  .button {
+    @include button;
+    height: 60px;
+    margin-top: 16px;
+    @media (min-width: 576px) {
+      min-width: auto;
+      width: 300px;
+      height: 60px;
+    }
+  }
+  .primaryButton {
+    @include primaryButton;
+    &:hover {
+      @include primaryButtonHover;
+    }
+  }
+  .secondaryButton {
+    @include secondaryButton;
+    &:hover {
+      @include secondaryButtonHover;
+    }
   }
 }
