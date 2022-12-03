@@ -48,6 +48,7 @@ const Home = () => {
         "Oops, it seems that something went wrong... Please try again",
         {
           position: toast.POSITION.BOTTOM_RIGHT,
+          toastId: 1,
         }
       );
     }
@@ -56,7 +57,7 @@ const Home = () => {
   return (
     <div>
       <div className={`d-flex flex-column ${styles.searchBarContainer}`}>
-        <h1 className="col-sm-5 col-9 my-5">
+        <h1 className="col-sm-5 col-10 my-5">
           Enter a website URL and check its availability
         </h1>
         <div className="col-sm-6 col-12">
