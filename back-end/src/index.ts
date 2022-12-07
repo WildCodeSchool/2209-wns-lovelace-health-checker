@@ -10,6 +10,7 @@ import { getDatabase, initializeRepositories } from './database/utils';
 import User from './entities/User.entity';
 import { getSessionIdInCookie } from './http-utils';
 import { connectionToRabbitMQ } from './rabbitmq/config';
+import RequestResultResolver from './resolvers/RequestResult/RequestResult.resolver';
 import UserResolver from './resolvers/User/User.resolver';
 import UserService from './services/User.service';
 
@@ -22,7 +23,7 @@ dotenv.config();
 const startServer = async () => {
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver],
+      resolvers: [UserResolver, RequestResultResolver],
       authChecker: async ({ context }) => {
         return Boolean(context.user);
       },

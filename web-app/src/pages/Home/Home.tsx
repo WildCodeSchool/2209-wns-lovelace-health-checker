@@ -1,17 +1,17 @@
-import { gql, useMutation } from "@apollo/client";
-import { useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
+import { gql, useMutation } from '@apollo/client';
+import { useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
-import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
-import HomepageRequestTable from "../../components/HomepageRequestTable/HomepageRequestTable";
-import styles from "./Home.module.scss";
+import FormErrorMessage from '../../components/ErrorMessage/FormErrorMessage';
+import HomepageRequestTable from '../../components/HomepageRequestTable/HomepageRequestTable';
+import { CheckUrlMutation, CheckUrlMutationVariables } from '../../gql/graphql';
+import styles from './Home.module.scss';
 
 const URL = gql`
-  mutation Search($url: String!) {
-    search(url: $url) {
-      availability
+  mutation CheckUrl($url: String!) {
+    checkUrl(url: $url) {
       statusCode
       duration
     }
@@ -27,23 +27,23 @@ const urlRegExp = new RegExp(expression);
 
 const Home = () => {
   const [url, setUrl] = useState("");
-  const [search, { data, loading }] = useMutation<any, any>(URL);
+  const [search, { data, loading }] = useMutation<
+    CheckUrlMutation,
+    CheckUrlMutationVariables
+  >(URL);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<SearchInput>({ criteriaMode: "all" });
 
-  const onSubmit: SubmitHandler<SearchInput> = async (url) => {
-    setUrl(url.url);
-    console.log(url.url);
+  const onSubmit: SubmitHandler<any> = async (urlToTest) => {
+    setUrl(urlToTest.url);
     try {
       await search({
         variables: { url },
       });
-      console.log(data);
     } catch (error) {
-      console.log(data);
       toast.error(
         "Oops, it seems that something went wrong... Please try again",
         {
@@ -105,9 +105,9 @@ const Home = () => {
               ) : data ? (
                 // TODO : replace values by data.value
                 <HomepageRequestTable
-                  availability={true}
-                  statusCode={200}
-                  duration={700}
+                  /* isAvailable={data.isAvailable} */
+                  statusCode={data.checkUrl.statusCode}
+                  duration={data.checkUrl.duration}
                 />
               ) : (
                 <></>

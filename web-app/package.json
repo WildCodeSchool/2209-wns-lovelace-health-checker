@@ -52,7 +52,6 @@
   "proxy": "http://back-end:4069",
   "devDependencies": {
     "@graphql-codegen/cli": "2.13.7",
-    "@graphql-codegen/client-preset": "^1.0.7",
-    "sass": "^1.56.1"
+    "@graphql-codegen/client-preset": "^1.0.7"
   }
 }
