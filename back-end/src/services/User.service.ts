@@ -31,12 +31,12 @@ export default class UserService extends UserRepository {
 
   static resendAccountConfirmationToken = async (email: string) => {
     const user = await UserRepository.findByEmail(email);
-    if (!user) throw Error("L'utilisateur n'a pas pu être récupéré");
+    if (!user) throw Error("User not found");
     if (
       (user.status == Status.ACTIVE && user.accountConfirmationToken == null) ||
       user.accountConfirmationToken == ""
     )
-      throw new Error("Votre compte est déjà actif");
+      throw new Error("Account already active");
     const message = {
       firstname: user.firstname,
       email: user.email,
@@ -45,27 +45,27 @@ export default class UserService extends UserRepository {
     };
 
     sendMessageOnAccountCreationEmailQueue(message);
-    return "Votre demande a bien été prise en compte";
+    return "Your request has been processed successfully";
   };
 
   static confirmAccount = async (confirmationToken: string) => {
     const user = await this.getUserByAccountConfirmationToken(
       confirmationToken
     );
-    if (!user) throw Error("Impossible de récupérer l'utilisateur");
+    if (!user) throw Error("User not found");
 
     if (user.status === Status.ACTIVE || user.status === Status.INACTIVE) {
-      throw Error("Le code de confirmation n'est plus valide");
+      throw Error("Confirmation code is no longer valid");
     }
 
     if (user.accountConfirmationToken !== confirmationToken) {
-      throw Error("Le code de confirmation n'est pas valide");
+      throw Error("Confirmation code is not valid");
     }
 
     user.status = Status.ACTIVE;
     user.accountConfirmationToken = "";
     await this.saveUser(user);
-    return "Votre compte a bien été confirmé";
+    return "Your account has been confirmed";
   };
 
   static async signIn(
@@ -75,7 +75,7 @@ export default class UserService extends UserRepository {
     const user = await this.findByEmail(email);
 
     if (!user || !compareSync(password, user.password)) {
-      throw new Error("Identifiants incorrects.");
+      throw new Error("Incorrect credentials");
     }
     const session = await SessionRepository.createSession(user);
     return { user, session };
@@ -91,7 +91,7 @@ export default class UserService extends UserRepository {
 
   static askForNewPassword = async (email: string) => {
     const user = await this.findByEmail(email);
-    if (!user) throw Error("L'email n'a pas pu être récupéré");
+    if (!user) throw Error("Email not found");
 
     user.resetPasswordToken = randomBytes(16).toString("hex");
     await this.saveUser(user);
