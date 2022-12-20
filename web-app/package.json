@@ -27,8 +27,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "test-watch": "jest --watchAll",
-    "test-coverage": "jest --collect-coverage",
+    "test:coverage": "jest --collect-coverage",
+    "test:watch": "jest --watchAll",
+    "test:watch-coverage": "jest --watchAll --collect-coverage",
     "eject": "react-scripts eject",
     "gql-codegen": "graphql-codegen --config codegen.ts"
   },
