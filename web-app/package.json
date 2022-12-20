@@ -24,7 +24,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "WATCHPACK_POLLING=true react-scripts start --hot",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "test:coverage": "jest --collect-coverage",
