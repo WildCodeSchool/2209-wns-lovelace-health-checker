@@ -39,7 +39,7 @@ export default class UserResolver {
     @Args() { email }: AskForNewPasswordArgs
   ): Promise<string> {
     await UserService.askForNewPassword(email);
-    return "Votre demande a bien été prise en compte";
+    return "Your request has been processed successfully";
   }
 
   @Mutation(() => User)
