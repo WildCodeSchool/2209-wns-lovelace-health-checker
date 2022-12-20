@@ -1,6 +1,5 @@
 import { DataSource, EntityTarget } from 'typeorm';
 
-import { DATABASE_URL, NODE_ENV, TEST_DATABASE_URL } from '../config';
 import AlertRepository from '../repositories/Alert.repository';
 import AlertSettingRepository from '../repositories/AlertSetting.repository';
 import PremiumRepository from '../repositories/Premium.repository';
@@ -11,19 +10,15 @@ import UserRepository from '../repositories/User.repository';
 
 const dataSource = new DataSource({
   type: "postgres",
-  url: NODE_ENV === "test" ? TEST_DATABASE_URL : DATABASE_URL,
+  url: process.env.DATABASE_URL,
   synchronize: true,
-  entities: [
-    __dirname + `/../entities/**/*.entity.${NODE_ENV === "test" ? "js" : "ts"}`,
-  ],
+  entities: [__dirname + "/../entities/**/*.entity.js"],
   logging: ["query", "error"],
 });
 
 export const getDatabase = async (): Promise<void> => {
   await dataSource.initialize();
-  console.log(
-    `${NODE_ENV} === "test" ? "Successfully connected to database." : "Successfully connected to test database."`
-  );
+  console.log("Successfully connected to database.");
 };
 
 export const getRepository = async (entity: EntityTarget<any>) => {
@@ -38,8 +33,4 @@ export const initializeRepositories = async () => {
   await AlertSettingRepository.initializeRepository();
   await RequestResultRepository.initializeRepository();
   await AlertRepository.initializeRepository();
-};
-
-export const closeConnection = async () => {
-  await dataSource.destroy();
 };
