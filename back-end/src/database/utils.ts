@@ -21,7 +21,9 @@ const dataSource = new DataSource({
 
 export const getDatabase = async (): Promise<void> => {
   await dataSource.initialize();
-  console.log("Successfully connected to database.");
+  console.log(
+    `${NODE_ENV} === "test" ? "Successfully connected to database." : "Successfully connected to test database."`
+  );
 };
 
 export const getRepository = async (entity: EntityTarget<any>) => {
@@ -36,4 +38,8 @@ export const initializeRepositories = async () => {
   await AlertSettingRepository.initializeRepository();
   await RequestResultRepository.initializeRepository();
   await AlertRepository.initializeRepository();
+};
+
+export const closeConnection = async () => {
+  await dataSource.destroy();
 };
