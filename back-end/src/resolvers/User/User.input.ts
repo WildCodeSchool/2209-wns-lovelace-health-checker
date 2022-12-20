@@ -70,6 +70,13 @@ export class ResendAccountConfirmationTokenArgs {
 }
 
 @ArgsType()
+export class AskForNewPasswordArgs {
+  @Field()
+  @IsEmail()
+  email: string;
+}
+
+@ArgsType()
 export class ConfirmAccountArgs {
   @Field()
   token: string;

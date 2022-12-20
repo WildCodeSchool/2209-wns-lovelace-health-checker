@@ -4,7 +4,13 @@ import { GlobalContext } from '../..';
 import User from '../../entities/User.entity';
 import { setSessionIdInCookie } from '../../http-utils';
 import UserService from '../../services/User.service';
-import { ConfirmAccountArgs, ResendAccountConfirmationTokenArgs, SignInArgs, SignUpArgs } from './User.input';
+import {
+  AskForNewPasswordArgs,
+  ConfirmAccountArgs,
+  ResendAccountConfirmationTokenArgs,
+  SignInArgs,
+  SignUpArgs,
+} from './User.input';
 
 @Resolver(User)
 export default class UserResolver {
@@ -26,6 +32,14 @@ export default class UserResolver {
   @Mutation(() => String)
   confirmAccount(@Args() { token }: ConfirmAccountArgs): Promise<string> {
     return UserService.confirmAccount(token);
+  }
+
+  @Mutation(() => String)
+  async askForNewPassword(
+    @Args() { email }: AskForNewPasswordArgs
+  ): Promise<string> {
+    await UserService.askForNewPassword(email);
+    return "Votre demande a bien été prise en compte";
   }
 
   @Mutation(() => User)

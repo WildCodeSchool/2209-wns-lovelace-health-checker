@@ -3,7 +3,7 @@ import { randomBytes } from 'crypto';
 
 import Session from '../entities/Session.entity';
 import User, { Status } from '../entities/User.entity';
-import { sendMessageOnAccountCreationEmailQueue } from '../rabbitmq/providers';
+import { sendMessageOnAccountCreationEmailQueue, sendMessageOnResetPasswordEmailQueue } from '../rabbitmq/providers';
 import UserRepository from '../repositories/User.repository';
 import SessionRepository from './Session.service';
 
@@ -32,7 +32,10 @@ export default class UserService extends UserRepository {
   static resendAccountConfirmationToken = async (email: string) => {
     const user = await UserRepository.findByEmail(email);
     if (!user) throw Error("L'utilisateur n'a pas pu être récupéré");
-    if (user.status == Status.ACTIVE && user.accountConfirmationToken == null)
+    if (
+      (user.status == Status.ACTIVE && user.accountConfirmationToken == null) ||
+      user.accountConfirmationToken == ""
+    )
       throw new Error("Votre compte est déjà actif");
     const message = {
       firstname: user.firstname,
@@ -85,4 +88,20 @@ export default class UserService extends UserRepository {
     }
     return session.user;
   }
+
+  static askForNewPassword = async (email: string) => {
+    const user = await this.findByEmail(email);
+    if (!user) throw Error("L'email n'a pas pu être récupéré");
+
+    user.resetPasswordToken = randomBytes(16).toString("hex");
+    await this.saveUser(user);
+
+    const message = {
+      firstname: user.firstname,
+      email: user.email,
+      resetPasswordToken: user.resetPasswordToken,
+    };
+
+    sendMessageOnResetPasswordEmailQueue(message);
+  };
 }
