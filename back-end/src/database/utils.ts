@@ -1,5 +1,6 @@
 import { DataSource, EntityTarget } from 'typeorm';
 
+import { DATABASE_URL, NODE_ENV, TEST_DATABASE_URL } from '../config';
 import AlertRepository from '../repositories/Alert.repository';
 import AlertSettingRepository from '../repositories/AlertSetting.repository';
 import PremiumRepository from '../repositories/Premium.repository';
@@ -10,7 +11,7 @@ import UserRepository from '../repositories/User.repository';
 
 const dataSource = new DataSource({
   type: "postgres",
-  url: process.env.DATABASE_URL,
+  url: NODE_ENV === "test" ? TEST_DATABASE_URL : DATABASE_URL,
   synchronize: true,
   entities: [__dirname + "/../entities/**/*.entity.js"],
   logging: ["query", "error"],
