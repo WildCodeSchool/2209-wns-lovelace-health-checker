@@ -3,7 +3,7 @@ $backgroundBlue: rgb(235, 245, 255, 0.65);
 $appBackgroundImage: url("./assets/images/background_image.png");
 $appMinWidth: 360px;
 
-$desktopContainerSize: 1024px;
+$desktopContainerSize: 992px;
 $desktopPadding: 48px;
 $mobilePadding: 24px;
 
@@ -15,6 +15,8 @@ $desktopHomepageTitleSize: 40px;
 $mobileTitleSize: 16px;
 $desktopTitleSize: 24px;
 $mainSize: 12px;
+
+$tableHeadFontWeight: 600;
 
 $darkestColor: #0f2837;
 $mainColor: #195078;

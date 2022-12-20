@@ -1,5 +1,7 @@
-import logo from '../../assets/images/logo.png';
-import styles from './Navbar.module.scss';
+import { Link } from "react-router-dom";
+
+import logo from "../../assets/images/logo.png";
+import styles from "./Navbar.module.scss";
 
 const Navbar = () => {
   let isLogged: boolean = true;
@@ -13,9 +15,9 @@ const Navbar = () => {
           className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
         >
           <i className={`bi bi-search ${styles.bi}`}></i>
-          <a className={styles.navlink} href="/">
+          <Link className={styles.navlink} to="/">
             Search
-          </a>
+          </Link>
         </div>
 
         {isLogged ? (
@@ -23,9 +25,9 @@ const Navbar = () => {
             className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
           >
             <i className={`bi bi-list-ul ${styles.bi}`}></i>
-            <a className={styles.navlink} href="/">
+            <Link className={styles.navlink} to="/requests">
               Requests
-            </a>
+            </Link>
           </div>
         ) : (
           <></>
@@ -35,9 +37,9 @@ const Navbar = () => {
           className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
         >
           <i className={`bi bi-bookmark-check ${styles.biBookmarkCheck}`}></i>
-          <a className={styles.navlink} href="/">
+          <Link className={styles.navlink} to="/premium">
             Premium
-          </a>
+          </Link>
         </div>
 
         {!isLogged ? (
@@ -45,9 +47,9 @@ const Navbar = () => {
             className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
           >
             <i className={`bi bi-person-plus ${styles.bi}`}></i>
-            <a className={styles.navlink} href="/">
+            <Link className={styles.navlink} to="/sign-up">
               Sign up
-            </a>
+            </Link>
           </div>
         ) : (
           <></>
@@ -58,9 +60,9 @@ const Navbar = () => {
             className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
           >
             <i className={`bi bi-box-arrow-in-right ${styles.bi}`}></i>
-            <a className={styles.navlink} href="/">
+            <Link className={styles.navlink} to="/sign-in">
               Sign in
-            </a>
+            </Link>
           </div>
         ) : (
           <></>
@@ -71,9 +73,9 @@ const Navbar = () => {
             className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
           >
             <i className={`bi bi-person ${styles.bi}`}></i>
-            <a className={styles.navlink} href="/">
+            <Link className={styles.navlink} to="/account">
               Account
-            </a>
+            </Link>
           </div>
         ) : (
           <></>
@@ -84,51 +86,55 @@ const Navbar = () => {
       <div
         className={`col-12 d-flex align-items-center justify-content-between ${styles.desktopNavbar}`}
       >
-        <a href="/">
+        <Link to="/">
           <img className={styles.logo} src={logo} alt="Health Check logo"></img>
-        </a>
+        </Link>
 
         <div className="d-flex align-items-center gap-4">
           <div className={styles.navElement}>
-            <a className={styles.navlink} href="/">
+            <Link className={styles.navlink} to="/">
               Search
-            </a>
+            </Link>
           </div>
 
           {isLogged ? (
             <div className={styles.navElement}>
-              <a className={styles.navlink} href="/">
+              <Link className={styles.navlink} to="/requests">
                 Requests
-              </a>
+              </Link>
             </div>
           ) : (
             <></>
           )}
 
           <div className={styles.navElement}>
-            <a className={styles.navlink} href="/">
+            <Link className={styles.navlink} to="/premium">
               Premium
-            </a>
+            </Link>
           </div>
 
           {isLogged ? (
             <div className={styles.navElement}>
-              <a className={styles.navlink} href="/">
+              <Link className={styles.navlink} to="/account">
                 Account
-              </a>
+              </Link>
             </div>
           ) : (
             <></>
           )}
 
           {!isLogged ? (
-            <button className={styles.primaryButton}>Sign up</button>
+            <Link className="m-0" to="/sign-up">
+              <button className={styles.primaryButton}>Sign up</button>
+            </Link>
           ) : (
             <></>
           )}
 
           {!isLogged ? (
-            <button className={styles.secondaryButton}>Sign in</button>
+            <Link className="m-0" to="/sign-in">
+              <button className={styles.secondaryButton}>Sign in</button>
+            </Link>
           ) : (
             <></>
           )}

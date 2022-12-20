@@ -7,6 +7,7 @@
   position: fixed;
   bottom: 0;
   background-color: variables.$mainColor;
+  z-index: 2;
   @media (min-width: 576px) {
     height: variables.$desktopNavbarHeight;
     position: sticky;

@@ -1,11 +1,90 @@
 @use "../../variables.scss";
+@import "../../components.scss";
 
-.title {
-  color: variables.$darkestColor;
-  font-size: variables.$desktopTitleSize;
+.searchBarContainer {
+  background-color: variables.$mainColor;
+  height: 320px;
+  padding: 0px variables.$mobilePadding;
+  @media (min-width: 576px) {
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0px variables.$desktopPadding;
+  }
+  h1 {
+    color: #ffffff;
+    font-size: variables.$mobileHomepageTitleSize;
+    @media (min-width: 576px) {
+      font-size: variables.$desktopHomepageTitleSize;
+    }
+  }
+  .searchBar {
+    height: 48px;
+    width: 100%;
+    padding-left: 16px;
+    color: variables.$secondTextColor;
+    border: none;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    @media (min-width: 576px) {
+      margin-top: 0;
+    }
+  }
+  .searchButton {
+    min-width: 48px;
+    max-width: 48px;
+    min-height: 48px;
+    max-height: 48px;
+    background-color: variables.$secondColor;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border: none;
+    cursor: pointer;
+    @media (min-width: 576px) {
+      margin-top: 0;
+    }
+  }
+  .errorMessage {
+    padding-top: 10px;
+    color: white !important;
+  }
 }
 
-.text {
-  color: variables.$darkestColor;
-  font-size: 16px;
+.contentContainer {
+  padding: variables.$mobilePadding;
+  @media (min-width: 576px) {
+    padding: variables.$desktopPadding;
+  }
+  .requestContainer {
+    width: 100%;
+    height: 120px;
+    .loader {
+      @include loader;
+    }
+  }
+  h2 {
+    margin-top: 16px;
+  }
+  .button {
+    @include button;
+    height: 60px;
+    margin-top: 16px;
+    @media (min-width: 576px) {
+      min-width: auto;
+      width: 300px;
+      height: 60px;
+    }
+  }
+  .primaryButton {
+    @include primaryButton;
+    &:hover {
+      @include primaryButtonHover;
+    }
+  }
+  .secondaryButton {
+    @include secondaryButton;
+    &:hover {
+      @include secondaryButtonHover;
+    }
+  }
 }

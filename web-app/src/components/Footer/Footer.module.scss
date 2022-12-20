@@ -5,15 +5,15 @@
   height: 120px;
   padding: 0px variables.$mobilePadding;
   margin-bottom: variables.$mobileNavbarHeight;
+  @media (min-width: 576px) {
+    padding: 0px variables.$desktopPadding;
+    margin-bottom: 0;
+  }
   @media (min-width: 676px) {
     height: 60px;
     flex-direction: row !important;
     align-items: center;
     justify-content: space-between !important;
-  }
-  @media (min-width: 576px) {
-    padding: 0px variables.$desktopPadding;
-    margin-bottom: 0;
   }
 }
 
@@ -22,14 +22,10 @@ ul,
   color: #ffffff;
   margin: 0;
   font-size: 14px;
-  list-style-type: none;
 }
 
 ul {
   padding: 0;
-}
-
-.navList {
   @media (min-width: 676px) {
     display: flex;
   }
@@ -37,9 +33,7 @@ ul {
 
 a {
   color: white;
-  text-decoration: none;
   margin-bottom: 4px;
-
   @media (min-width: 676px) {
     margin-right: 48px;
     margin-bottom: 0;
