@@ -61,3 +61,23 @@ export class SignInArgs {
   @Field()
   password: string;
 }
+
+@ArgsType()
+export class ResendAccountConfirmationTokenArgs {
+  @Field()
+  @IsEmail()
+  email: string;
+}
+
+@ArgsType()
+export class AskForNewPasswordArgs {
+  @Field()
+  @IsEmail()
+  email: string;
+}
+
+@ArgsType()
+export class ConfirmAccountArgs {
+  @Field()
+  token: string;
+}
