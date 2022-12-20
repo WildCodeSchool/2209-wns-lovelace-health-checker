@@ -1,10 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
-import logo from "../../assets/images/logo.png";
-import styles from "./Navbar.module.scss";
+import logo from '../../assets/images/logo.png';
+import styles from './Navbar.module.scss';
 
 const Navbar = () => {
-  let isLogged: boolean = true;
+  let isLogged: boolean = false;
   return (
     <nav className={`d-flex justify-content-between ${styles.navbar}`}>
       {/* Mobile */}
