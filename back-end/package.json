@@ -6,6 +6,8 @@
   "scripts": {
     "test": "jest",
     "test-coverage": "jest --collect-coverage",
+    "test-watch": "jest --watch",
+    "test-watch-coverage": "jest --watch --collect-coverage",
     "build": "tsc",
     "start": "node dist/index.js",
     "start:watch": "tsc && (tsc -w & nodemon dist/index.js)"
