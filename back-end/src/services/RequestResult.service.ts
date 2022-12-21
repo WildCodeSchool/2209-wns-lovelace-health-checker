@@ -1,26 +1,25 @@
-import { HomepageRequestResult } from '../models/requestResult.model';
-import RequestResultRepository from '../repositories/RequestResult.repository';
+import RequestResult from "../entities/RequestResult.entity";
+import RequestSetting from "../entities/RequestSetting.entity";
+import User from "../entities/User.entity";
+import RequestResultRepository from "../repositories/RequestResult.repository";
 
 export default class RequestResultService extends RequestResultRepository {
-  static checkUrl(url: string): HomepageRequestResult {
-    setTimeout(() => {}, 3000);
-    let isAvailable: boolean;
-    let statusCode: number;
-    let duration: number;
-    if (Math.floor(Math.random() * 2) == 0) {
-      isAvailable = true;
-      statusCode = 200;
-    } else {
-      isAvailable = false;
-      statusCode = 404;
+  static async checkUrl(url: string): Promise<RequestResult> {
+    const startTimer: number = Date.now();
+    const dummyRequestSetting = new RequestSetting(new User("", "", "", ""), url, 0, false)
+    try {
+      const response = await fetch(new URL(url));
+      return new RequestResult(
+        dummyRequestSetting,
+        response.status,
+        Date.now() - startTimer
+      );
+    } catch (error) {
+      return new RequestResult(
+        dummyRequestSetting,
+        404,
+        Date.now() - startTimer
+      );
     }
-    duration = Math.floor(Math.random() * 9001);
-
-    const homepageRequestResult: HomepageRequestResult = {
-      isAvailable,
-      statusCode,
-      duration,
-    };
-    return homepageRequestResult;
   }
 }

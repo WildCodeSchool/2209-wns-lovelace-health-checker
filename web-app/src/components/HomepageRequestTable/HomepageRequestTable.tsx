@@ -3,9 +3,11 @@ import styles from './HomepageRequestTable.module.scss';
 const HomepageRequestTable = ({
   statusCode,
   duration,
+  getIsAvailable,
 }: {
   statusCode: number;
   duration: number;
+  getIsAvailable: boolean;
 }) => {
   return (
     <table className="table table-bordered">
@@ -19,12 +21,11 @@ const HomepageRequestTable = ({
       <tbody>
         <tr>
           <td>
-            {/* {isAvailable ? (
+            {getIsAvailable ? (
               <i className={`bi bi-check-circle ${styles.available}`}></i>
             ) : (
               <i className={`bi bi-x-circle ${styles.notAvailable}`}></i>
-            )} */}
-            Availability
+            )}
           </td>
           <td>{statusCode}</td>
           <td>{duration}ms</td>
