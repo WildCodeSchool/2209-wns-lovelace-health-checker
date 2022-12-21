@@ -1,5 +1,5 @@
 import { gql, useMutation } from '@apollo/client';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -51,6 +51,31 @@ const SignUp = () => {
     SignUpMutationVariables
   >(USER);
 
+  useEffect(() => {
+    if (error?.graphQLErrors) {
+      if (
+        error?.graphQLErrors[0].message.toString() ===
+        "Argument Validation Error"
+      ) {
+        toast.error(
+          "Unable to create your account because the registration form contains one or more invalid fields.",
+          {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 1,
+          }
+        );
+      } else {
+        toast.error(
+          "Oops... It seems that something went wront, please try again.",
+          {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 1,
+          }
+        );
+      }
+    }
+  }, [error]);
+
   const {
     register,
     handleSubmit,
@@ -69,35 +94,15 @@ const SignUp = () => {
     useState("password");
 
   const onSubmit: SubmitHandler<any> = async (informations) => {
-    try {
-      await signUp({
-        variables: {
-          email: informations.email,
-          firstname: informations.firstname,
-          lastname: informations.lastname,
-          password: informations.password,
-          passwordConfirmation: informations.passwordConfirmation,
-        },
-      });
-    } catch (e) {
-      if (
-        error?.graphQLErrors[0].message.toString() ===
-        "Argument Validation Error"
-      ) {
-        toast.error("One or many values into form are wrong", {
-          position: toast.POSITION.BOTTOM_RIGHT,
-          toastId: 1,
-        });
-      } else {
-        toast.error(
-          "Oops... It seems that something went wront, please try again",
-          {
-            position: toast.POSITION.BOTTOM_RIGHT,
-            toastId: 1,
-          }
-        );
-      }
-    }
+    await signUp({
+      variables: {
+        email: informations.email,
+        firstname: informations.firstname,
+        lastname: informations.lastname,
+        password: informations.password,
+        passwordConfirmation: informations.passwordConfirmation,
+      },
+    });
   };
 
   return (
@@ -163,7 +168,7 @@ const SignUp = () => {
                   pattern: {
                     value: firstNameAndLastNameRegExp,
                     message:
-                      "Last name must not contain numbers or special characters",
+                      "First name must not contain numbers or special characters",
                   },
                 })}
                 id="firstname"
