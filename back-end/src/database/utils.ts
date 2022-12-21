@@ -16,11 +16,17 @@ const dataSource = new DataSource({
   entities: [
     __dirname + `/../entities/**/*.entity.${NODE_ENV === "test" ? "ts" : "js"}`,
   ],
-  logging: ["query", "error"],
+  logging: NODE_ENV === "development" ? ["query", "error"] : ["error"],
 });
 
-export const getDatabase = async (): Promise<void> => {
-  await dataSource.initialize();
+let initialized = false;
+export const getDatabase = async (): Promise<DataSource> => {
+  console.log(NODE_ENV);
+  if (!initialized) {
+    await dataSource.initialize();
+    initialized = true;
+    console.log("Successfully connected to database.");
+  }
   console.log(
     `${
       NODE_ENV === "test"
@@ -28,6 +34,7 @@ export const getDatabase = async (): Promise<void> => {
         : "Successfully connected to database."
     }`
   );
+  return dataSource;
 };
 
 export const getRepository = async (entity: EntityTarget<any>) => {
