@@ -8,7 +8,7 @@ import FormErrorMessage from '../../components/ErrorMessage/FormErrorMessage';
 import { SignUpMutation, SignUpMutationVariables } from '../../gql/graphql';
 import styles from './SignUp.module.scss';
 
-const USER = gql`
+export const SIGN_UP = gql`
   mutation SignUp(
     $firstname: String!
     $lastname: String!
@@ -49,7 +49,7 @@ const SignUp = () => {
   const [signUp, { data, loading, error }] = useMutation<
     SignUpMutation,
     SignUpMutationVariables
-  >(USER);
+  >(SIGN_UP);
 
   useEffect(() => {
     if (error?.graphQLErrors) {
