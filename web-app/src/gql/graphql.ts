@@ -27,14 +27,32 @@ export type AlertSetting = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  askForNewPassword: Scalars['String'];
   checkUrl: RequestResult;
+  confirmAccount: Scalars['String'];
+  resendAccountConfirmationToken: Scalars['String'];
   signIn: User;
   signUp: User;
 };
 
 
+export type MutationAskForNewPasswordArgs = {
+  email: Scalars['String'];
+};
+
+
 export type MutationCheckUrlArgs = {
   url: Scalars['String'];
+};
+
+
+export type MutationConfirmAccountArgs = {
+  token: Scalars['String'];
+};
+
+
+export type MutationResendAccountConfirmationTokenArgs = {
+  email: Scalars['String'];
 };
 
 

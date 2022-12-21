@@ -14,7 +14,7 @@ const dataSource = new DataSource({
   url: NODE_ENV === "test" ? TEST_DATABASE_URL : DATABASE_URL,
   synchronize: true,
   entities: [
-    __dirname + `/../entities/**/*.entity.${NODE_ENV === "test" ? "js" : "ts"}`,
+    __dirname + `/../entities/**/*.entity.${NODE_ENV === "test" ? "ts" : "js"}`,
   ],
   logging: ["query", "error"],
 });
@@ -22,7 +22,11 @@ const dataSource = new DataSource({
 export const getDatabase = async (): Promise<void> => {
   await dataSource.initialize();
   console.log(
-    `${NODE_ENV} === "test" ? "Successfully connected to database." : "Successfully connected to test database."`
+    `${
+      NODE_ENV === "test"
+        ? "Successfully connected to TEST database."
+        : "Successfully connected to database."
+    }`
   );
 };
 
