@@ -1,19 +1,20 @@
-import { gql, useMutation } from '@apollo/client';
-import { useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { gql, useMutation } from "@apollo/client";
+import { useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
-import FormErrorMessage from '../../components/ErrorMessage/FormErrorMessage';
-import HomepageRequestTable from '../../components/HomepageRequestTable/HomepageRequestTable';
-import { CheckUrlMutation, CheckUrlMutationVariables } from '../../gql/graphql';
-import styles from './Home.module.scss';
+import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
+import HomepageRequestTable from "../../components/HomepageRequestTable/HomepageRequestTable";
+import { CheckUrlMutation, CheckUrlMutationVariables } from "../../gql/graphql";
+import styles from "./Home.module.scss";
 
 const URL = gql`
   mutation CheckUrl($url: String!) {
     checkUrl(url: $url) {
-      statusCode
+      getIsAvailable
       duration
+      statusCode
     }
   }
 `;
@@ -41,7 +42,7 @@ const Home = () => {
     setUrl(urlToTest.url);
     try {
       await search({
-        variables: { url },
+        variables: { url: urlToTest.url },
       });
     } catch (error) {
       toast.error(
@@ -103,9 +104,8 @@ const Home = () => {
               {loading ? (
                 <div className={styles.loader}></div>
               ) : data ? (
-                // TODO : replace values by data.value
                 <HomepageRequestTable
-                  /* isAvailable={data.isAvailable} */
+                  getIsAvailable={data.checkUrl.getIsAvailable}
                   statusCode={data.checkUrl.statusCode}
                   duration={data.checkUrl.duration}
                 />
