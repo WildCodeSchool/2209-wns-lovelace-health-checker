@@ -13,6 +13,7 @@
   position: sticky;
   top: 0;
   border-bottom: 1px solid #ebf5ff31;
+  z-index: 2;
   @media (min-width: 576px) {
     display: none !important;
   }
