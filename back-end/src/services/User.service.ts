@@ -80,6 +80,7 @@ export default class UserService extends UserRepository {
     if (!user || !compareSync(password, user.password)) {
       throw new Error("Incorrect credentials");
     }
+
     const session = await SessionRepository.createSession(user);
     return { user, session };
   }
