@@ -1,8 +1,8 @@
-import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Field, ID, ObjectType } from 'type-graphql';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { Field, ID, ObjectType } from "type-graphql";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-import RequestSetting from './RequestSetting.entity';
+import RequestSetting from "./RequestSetting.entity";
 
 @Entity("request_result")
 @ObjectType()
@@ -45,4 +45,20 @@ export default class RequestResult {
   @ManyToOne(() => RequestSetting)
   @Field(() => RequestSetting)
   requestSetting: RequestSetting;
+
+  @Field(() => Boolean)
+  getIsAvailable() {
+    switch (this.statusCode.toString().charAt(0)) {
+      case "2":
+        return true;
+      case "3":
+        return true;
+      case "4":
+        return false;
+      case "5":
+        return false;
+      default:
+        return false;
+    }
+  }
 }
