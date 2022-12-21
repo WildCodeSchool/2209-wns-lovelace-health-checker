@@ -74,6 +74,7 @@ const Home = () => {
               })}
             />
             <button
+              disabled={loading}
               type="submit"
               className={`d-flex justify-content-center align-items-center ${styles.searchButton}`}
             >
