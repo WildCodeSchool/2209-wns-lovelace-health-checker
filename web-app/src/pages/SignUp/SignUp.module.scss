@@ -74,4 +74,26 @@
   .eye {
     cursor: pointer;
   }
+
+  .success {
+    font-size: 4rem;
+    color: variables.$successColor;
+  }
+
+  .signUpForm {
+    position: relative;
+    .loaderContainer {
+      background-color: rgba(255, 255, 255, 0.667);
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 2;
+      @media (min-width: 576px) {
+        background-color: #ebf5ff9e;
+      }
+      .loader {
+        @include loader;
+      }
+    }
+  }
 }
