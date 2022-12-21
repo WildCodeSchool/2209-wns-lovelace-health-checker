@@ -1,8 +1,10 @@
+import { ExpressContext } from 'apollo-server-express';
 import { compareSync, hashSync } from 'bcryptjs';
 import { randomBytes } from 'crypto';
 
 import Session from '../entities/Session.entity';
 import User, { Status } from '../entities/User.entity';
+import { getSessionIdInCookie } from '../http-utils';
 import { sendMessageOnAccountCreationEmailQueue, sendMessageOnResetPasswordEmailQueue } from '../rabbitmq/providers';
 import UserRepository from '../repositories/User.repository';
 import SessionRepository from './Session.service';
@@ -16,6 +18,7 @@ export default class UserService extends UserRepository {
   ): Promise<User> {
     const user = new User(firstname, lastname, email, hashSync(password));
     user.accountConfirmationToken = randomBytes(32).toString("hex");
+    user.accountConfirmationTokenCreatedAt = new Date();
 
     if (!user.accountConfirmationToken)
       new Error("Account confirmation token could not be created.");
@@ -94,6 +97,7 @@ export default class UserService extends UserRepository {
     if (!user) throw Error("Email not found");
 
     user.resetPasswordToken = randomBytes(16).toString("hex");
+    user.resetPasswordTokenCreatedAt = new Date();
     await this.saveUser(user);
 
     const message = {
@@ -103,5 +107,25 @@ export default class UserService extends UserRepository {
     };
 
     sendMessageOnResetPasswordEmailQueue(message);
+  };
+
+  static resetPassword = async (
+    password: string,
+    resetPasswordToken: string
+  ) => {
+    const user = await this.getUserByResetPasswordToken(resetPasswordToken);
+    if (!user) throw Error("Le token n'est pas valide");
+
+    user.password = hashSync(password);
+    user.resetPasswordToken = "";
+    user.updatedAt = new Date();
+
+    await this.saveUser(user);
+  };
+
+  static logout = async (context: ExpressContext) => {
+    const sessionId = getSessionIdInCookie(context);
+    if (!sessionId) throw new Error("You're not signed in");
+    await SessionRepository.deleteSessionById(sessionId);
   };
 }

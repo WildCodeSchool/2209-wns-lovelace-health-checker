@@ -22,7 +22,7 @@ export default class SessionRepository {
     this.repository.delete({});
   }
 
-  static async deleteSession(id: string): Promise<void> {
+  static async deleteSessionById(id: string): Promise<void> {
     this.repository.delete({ id });
   }
 }
