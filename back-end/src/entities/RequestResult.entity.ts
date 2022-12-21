@@ -49,14 +49,12 @@ export default class RequestResult {
   @Field(() => Boolean)
   getIsAvailable() {
     switch (this.statusCode.toString().charAt(0)) {
+      case "1":
       case "2":
-        return true;
       case "3":
         return true;
       case "4":
-        return false;
       case "5":
-        return false;
       default:
         return false;
     }
