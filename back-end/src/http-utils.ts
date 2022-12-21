@@ -1,5 +1,5 @@
-import { ExpressContext } from "apollo-server-express";
-import { parse } from "cookie";
+import { ExpressContext } from 'apollo-server-express';
+import { parse } from 'cookie';
 
 const MAX_AGE_DAYS = 365;
 
@@ -24,4 +24,8 @@ export const getSessionIdInCookie = (
   }
   const parsedCookies = parse(rawCookies);
   return parsedCookies.sessionId;
+};
+
+export const deleteSessionIdInCookie = (ctx: ExpressContext) => {
+  ctx.res.clearCookie("sessionId");
 };

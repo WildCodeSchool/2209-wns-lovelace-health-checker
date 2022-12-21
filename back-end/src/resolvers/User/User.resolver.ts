@@ -2,12 +2,13 @@ import { Args, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 
 import { GlobalContext } from '../..';
 import User from '../../entities/User.entity';
-import { setSessionIdInCookie } from '../../http-utils';
+import { deleteSessionIdInCookie, setSessionIdInCookie } from '../../http-utils';
 import UserService from '../../services/User.service';
 import {
   AskForNewPasswordArgs,
   ConfirmAccountArgs,
   ResendAccountConfirmationTokenArgs,
+  ResetPasswordArgs,
   SignInArgs,
   SignUpArgs,
 } from './User.input';
@@ -42,6 +43,14 @@ export default class UserResolver {
     return "Your request has been processed successfully";
   }
 
+  @Mutation(() => String)
+  async resetPassword(
+    @Args() { token, password }: ResetPasswordArgs
+  ): Promise<string> {
+    await UserService.resetPassword(password, token);
+    return "Your password has been updated successfully";
+  }
+
   @Mutation(() => User)
   async signIn(
     @Args() { email, password }: SignInArgs,
@@ -50,6 +59,14 @@ export default class UserResolver {
     const { user, session } = await UserService.signIn(email, password);
     setSessionIdInCookie(context, session.id);
     return user;
+  }
+
+  @Authorized()
+  @Mutation(() => String)
+  async signOut(@Ctx() context: GlobalContext): Promise<string> {
+    await UserService.logout(context);
+    deleteSessionIdInCookie(context);
+    return "You've been signed out securely";
   }
 
   @Authorized()

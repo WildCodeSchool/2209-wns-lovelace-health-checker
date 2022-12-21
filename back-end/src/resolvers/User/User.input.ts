@@ -1,4 +1,4 @@
-import { IsEmail, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 import { ArgsType, Field } from 'type-graphql';
 
 import { Match } from '../../utils/match.decorator';
@@ -74,6 +74,27 @@ export class AskForNewPasswordArgs {
   @Field()
   @IsEmail()
   email: string;
+}
+
+@ArgsType()
+export class ResetPasswordArgs {
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+
+  @Field()
+  @Matches(passwordRegExp, {
+    message:
+      "Password must have at least 8 characters, one upper case, one lower case, and one number",
+  })
+  password: string;
+
+  @Field()
+  @Match("password", {
+    message: "Passwords don't match",
+  })
+  passwordConfirmation: string;
 }
 
 @ArgsType()

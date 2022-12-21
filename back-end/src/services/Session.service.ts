@@ -7,4 +7,8 @@ export default class SessionService extends SessionRepository {
     const session = new Session(user);
     return this.saveSession(session);
   }
+
+  static deleteSessionById(id: string): Promise<void> {
+    return this.deleteSessionById(id);
+  }
 }

@@ -26,4 +26,10 @@ export default class UserRepository {
   ): Promise<User | null> => {
     return this.repository.findOneBy({ accountConfirmationToken: token });
   };
+
+  protected static getUserByResetPasswordToken = async (
+    token: string
+  ): Promise<User | null> => {
+    return this.repository.findOneBy({ resetPasswordToken: token });
+  };
 }
