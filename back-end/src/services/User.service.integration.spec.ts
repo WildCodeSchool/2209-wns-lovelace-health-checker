@@ -3,17 +3,14 @@ import UserService from './User.service';
 
 describe("UserService integration", () => {
   beforeAll(async () => {
-    console.log("initializeRepositories");
     await initializeRepositories();
   });
 
   afterAll(async () => {
-    console.log("closeConnection");
     await closeConnection();
   });
 
   beforeEach(async () => {
-    // eslint-disable-next-line no-restricted-syntax
     const database = await getDatabase();
     for (const entity of database.entityMetadatas) {
       const repository = database.getRepository(entity.name);
