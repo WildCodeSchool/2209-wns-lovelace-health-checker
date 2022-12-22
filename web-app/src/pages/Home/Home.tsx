@@ -94,7 +94,7 @@ const Home = () => {
         <h1 className="col-sm-5 col-10 my-5">
           Enter a website URL and check its availability
         </h1>
-        <div className="col-sm-6 col-12">
+        <div className="col-sm-6 col-12 position-relative">
           <form onSubmit={handleSubmit(onSubmit)} className="d-flex">
             <input
               className={`is-invalid ${styles.searchBar}`}
@@ -114,7 +114,7 @@ const Home = () => {
               <i className="bi bi-search"></i>
             </button>
           </form>
-          <div className={styles.errorMessage}>
+          <div className={`position-absolute ${styles.errorMessage}`}>
             <FormErrorMessage errors={errors} name={"url"} />
           </div>
         </div>
