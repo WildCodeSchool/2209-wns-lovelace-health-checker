@@ -8,6 +8,7 @@ import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
 import HomepageRequestTable from "../../components/HomepageRequestTable/HomepageRequestTable";
 import { CheckUrlMutation, CheckUrlMutationVariables } from "../../gql/graphql";
 import styles from "./Home.module.scss";
+import { getErrorMessage } from "../../utils";
 
 const URL = gql`
   mutation CheckUrl($url: String!) {
@@ -22,8 +23,9 @@ const URL = gql`
 type SearchInput = {
   url: string;
 };
+// TODO : variabiliser dans un fichier de config
 const expression =
-  /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
+  /^(http|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/;
 const urlRegExp = new RegExp(expression);
 
 const Home = () => {
@@ -31,7 +33,48 @@ const Home = () => {
   const [search, { data, loading }] = useMutation<
     CheckUrlMutation,
     CheckUrlMutationVariables
-  >(URL);
+  >(URL, {
+    onError: (error) => {
+      switch (getErrorMessage(error)) {
+        // TODO : variabiliser ce message d'erreur
+        case "Request Timeout":
+          // TODO : variabiliser la durée dans un fichier de config
+          toast.error(
+            "Maximum duration for premium request exceed (15 seconds)",
+            {
+              position: toast.POSITION.BOTTOM_RIGHT,
+              toastId: 2,
+              autoClose: false,
+            }
+          );
+          break;
+        // TODO : variabiliser ce message d'erreur
+        case "Fetch Failed":
+          toast.error("No response from this URL, try another URL", {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 3,
+            autoClose: false,
+          });
+          break;
+        // TODO : variabiliser ce message d'erreur
+        case "Invalid URL":
+          toast.error("This URL's format is invalid", {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 4,
+            autoClose: false,
+          });
+          break;
+        default:
+          toast.error(
+            "Oops, it seems that something went wrong... Please try again",
+            {
+              position: toast.POSITION.BOTTOM_RIGHT,
+              toastId: 1,
+            }
+          );
+      }
+    },
+  });
   const {
     register,
     handleSubmit,
@@ -40,19 +83,9 @@ const Home = () => {
 
   const onSubmit: SubmitHandler<any> = async (urlToTest) => {
     setUrl(urlToTest.url);
-    try {
-      await search({
-        variables: { url: urlToTest.url },
-      });
-    } catch (error) {
-      toast.error(
-        "Oops, it seems that something went wrong... Please try again",
-        {
-          position: toast.POSITION.BOTTOM_RIGHT,
-          toastId: 1,
-        }
-      );
-    }
+    await search({
+      variables: { url: urlToTest.url },
+    });
   };
 
   return (
@@ -74,6 +107,7 @@ const Home = () => {
               })}
             />
             <button
+              disabled={loading}
               type="submit"
               className={`d-flex justify-content-center align-items-center ${styles.searchButton}`}
             >
@@ -91,9 +125,9 @@ const Home = () => {
           <div className="mb-5">
             <p className="m-0">
               {loading ? (
-                "We are testing " + url
+                `We are testing ${url}`
               ) : data ? (
-                "Result for " + url
+                `Result for ${url} :`
               ) : (
                 <></>
               )}
