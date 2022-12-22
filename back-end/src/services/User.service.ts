@@ -19,9 +19,6 @@ export default class UserService extends UserRepository {
     const user = new User(firstname, lastname, email, hashSync(password));
     user.accountConfirmationToken = randomBytes(32).toString("hex");
     user.accountConfirmationTokenCreatedAt = new Date();
-
-    if (!user.accountConfirmationToken)
-      new Error("Account confirmation token could not be created.");
     const savedUser = await this.saveUser(user);
     const message = {
       firstname: user.firstname,

@@ -23,6 +23,21 @@ describe("UserService integration", () => {
     }
   });
 
+  describe("createUser", () => {
+    describe("when user is created", () => {
+      it("exists in user table", () => {});
+      it("datas match user inputs", () => {});
+      it("password is hashed", () => {});
+      it("has proper attributes with correct values", () => {});
+    });
+    describe("setting account confirmation email datas", () => {
+      it("create message object with user informations", () => {});
+    });
+    describe("sendMessageOnAccountCreationEmailQueue", () => {
+      it("should be called", () => {});
+    });
+  });
+
   describe("signIn", () => {
     describe("When email address does not belong to existing user", () => {
       it("throws invalid credentials error", async () => {

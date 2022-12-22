@@ -110,20 +110,23 @@ const SignUp = () => {
       <h1 className={`mb-4`}>Account creation</h1>
       {data ? (
         <div className="text-center">
-          <i className={`bi bi-check-circle ${styles.success}`}></i>
+          <i
+            data-testid="successIcon"
+            className={`bi bi-check-circle ${styles.success}`}
+          ></i>
           <p>
             Your account has been created successfully. Please, check your inbox
             to confirm your account and start using Health Check !
           </p>
         </div>
       ) : (
-        <div className={styles.desktopContainer}>
+        <div data-testid="formContainer" className={styles.desktopContainer}>
           <form className={styles.signUpForm} onSubmit={handleSubmit(onSubmit)}>
             {loading ? (
               <div
                 className={`${styles.loaderContainer} d-flex justify-content-center align-items-center`}
               >
-                <div className={styles.loader}></div>
+                <div className={styles.loader} role="status"></div>
               </div>
             ) : (
               <></>
@@ -213,6 +216,7 @@ const SignUp = () => {
             <div className="form-floating mb-2 mt-3 d-flex">
               <input
                 type={passwordInputType}
+                data-testid="password"
                 defaultValue={""}
                 className={`form-control ${styles.passwordInput}`}
                 {...register("password", {
@@ -248,6 +252,7 @@ const SignUp = () => {
             <div className="form-floating mb-2 mt-3 d-flex">
               <input
                 type={passwordConfirmationInputType}
+                data-testid="passwordConfirmation"
                 defaultValue={""}
                 className={`form-control ${styles.passwordInput}`}
                 {...register("passwordConfirmation", {
@@ -318,7 +323,7 @@ const SignUp = () => {
       {data ? (
         <></>
       ) : (
-        <>
+        <div data-testid="alreadyRegistered">
           <hr className={styles.separator} />
           <p className={styles.alreadyRegistered}>
             Already registered ?{" "}
@@ -326,7 +331,7 @@ const SignUp = () => {
               Sign in
             </Link>
           </p>
-        </>
+        </div>
       )}
     </div>
   );

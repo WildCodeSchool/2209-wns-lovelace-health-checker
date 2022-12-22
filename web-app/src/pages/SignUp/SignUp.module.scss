@@ -13,6 +13,7 @@
       padding: variables.$desktopPadding;
       width: 550px;
       border-radius: 20px;
+      margin-bottom: 24px;
       background-color: variables.$lightestColor;
     }
   }
@@ -20,7 +21,7 @@
     margin-top: 36px;
     margin-bottom: 24px;
     @media (min-width: 576px) {
-      margin-top: 0px;
+      display: none;
     }
   }
   .alreadyRegistered {
