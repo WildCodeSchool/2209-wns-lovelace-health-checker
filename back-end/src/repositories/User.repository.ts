@@ -4,7 +4,7 @@ import { getRepository } from '../database/utils';
 import User from '../entities/User.entity';
 
 export default class UserRepository {
-  protected static repository: Repository<User>;
+  static repository: Repository<User>;
   static async initializeRepository() {
     this.repository = await getRepository(User);
   }

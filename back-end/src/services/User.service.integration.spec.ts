@@ -1,7 +1,20 @@
-import { closeConnection, getDatabase, initializeRepositories } from '../database/utils';
-import UserService from './User.service';
+import { hashSync } from "bcryptjs";
+
+import {
+  closeConnection,
+  getDatabase,
+  initializeRepositories,
+} from "../database/utils";
+import User, { Status } from "../entities/User.entity";
+import UserRepository from "../repositories/User.repository";
+import UserService from "./User.service";
 
 describe("UserService integration", () => {
+  const emailAddress = "unknown@user.com";
+  function createUser() {
+    return new User("Jean", "Wilder", emailAddress, hashSync("jean-password"));
+  }
+
   beforeAll(async () => {
     await initializeRepositories();
   });
@@ -37,8 +50,7 @@ describe("UserService integration", () => {
 
   describe("signIn", () => {
     describe("When email address does not belong to existing user", () => {
-      it("throws invalid credentials error", async () => {
-        const emailAddress = "unknown@user.com";
+      it.only("throws invalid credentials error", async () => {
         expect(() =>
           UserService.signIn(emailAddress, "whatever")
         ).rejects.toThrowError("Incorrect credentials");
@@ -46,10 +58,52 @@ describe("UserService integration", () => {
     });
 
     describe("When email address belongs to existing user", () => {
-      const emailAddress = "jean@user.com";
+      const emailAddress = "johndoe@example.fr";
       describe("When password invalid", () => {
-        it("throws invalid credentials error", async () => {});
+        it("throws invalid credentials error", async () => {
+          const user = createUser();
+          await UserRepository.repository.save(user);
+
+          expect(async () => {
+            await UserService.signIn(emailAddress, "jean-wrong-password");
+          }).rejects.toThrowError("Incorrect credentials");
+        });
+      });
+      describe("when password valid", () => {
+        describe("when user account is active", () => {
+          it("returns user and session", async () => {
+            const user = createUser();
+            user.status = Status.ACTIVE;
+            user.accountConfirmationToken = "";
+            await UserRepository.repository.save(user);
+
+            const result = await UserService.signIn(
+              emailAddress,
+              "jean-password"
+            );
+            expect(result).toHaveProperty("user");
+            expect(result).toHaveProperty("session");
+            expect(result.user.accountConfirmationToken).toBe("");
+            expect(result.user.email).toEqual(emailAddress);
+          });
+        });
+        describe("when user account is inactive or pending", () => {
+          it("throws account not activated error", async () => {
+            const user = createUser();
+            await UserRepository.repository.save(user);
+
+            expect(async () => {
+              await UserService.signIn(emailAddress, "jean-password");
+            }).rejects.toThrowError(
+              "Your account is not active, click on the link in your email to activate it"
+            );
+          });
+        });
       });
     });
+  });
+
+  describe("confirmAccount", () => {
+    describe("when confirmationToken doesn't exist", () => {});
   });
 });

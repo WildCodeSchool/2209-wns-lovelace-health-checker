@@ -1,13 +1,16 @@
-import { ExpressContext } from 'apollo-server-express';
-import { compareSync, hashSync } from 'bcryptjs';
-import { randomBytes } from 'crypto';
+import { ExpressContext } from "apollo-server-express";
+import { compareSync, hashSync } from "bcryptjs";
+import { randomBytes } from "crypto";
 
-import Session from '../entities/Session.entity';
-import User, { Status } from '../entities/User.entity';
-import { getSessionIdInCookie } from '../http-utils';
-import { sendMessageOnAccountCreationEmailQueue, sendMessageOnResetPasswordEmailQueue } from '../rabbitmq/providers';
-import UserRepository from '../repositories/User.repository';
-import SessionRepository from './Session.service';
+import Session from "../entities/Session.entity";
+import User, { Status } from "../entities/User.entity";
+import { getSessionIdInCookie } from "../http-utils";
+import {
+  sendMessageOnAccountCreationEmailQueue,
+  sendMessageOnResetPasswordEmailQueue,
+} from "../rabbitmq/providers";
+import UserRepository from "../repositories/User.repository";
+import SessionRepository from "./Session.service";
 
 export default class UserService extends UserRepository {
   static async createUser(
@@ -82,6 +85,12 @@ export default class UserService extends UserRepository {
       throw new Error("Incorrect credentials");
     }
 
+    if (user.status === Status.PENDING || user.status === Status.INACTIVE) {
+      throw new Error(
+        "Your account is not active, click on the link in your email to activate it"
+      );
+    }
+
     const session = await SessionRepository.createSession(user);
     return { user, session };
   }
@@ -116,7 +125,7 @@ export default class UserService extends UserRepository {
     resetPasswordToken: string
   ) => {
     const user = await this.getUserByResetPasswordToken(resetPasswordToken);
-    if (!user) throw Error("Le token n'est pas valide");
+    if (!user) throw Error("Token is no longer valid");
 
     user.password = hashSync(password);
     user.resetPasswordToken = "";
