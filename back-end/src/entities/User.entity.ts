@@ -30,6 +30,7 @@ export default class User {
     this.email = email;
     this.password = password;
     this.createdAt = new Date();
+    this.accountConfirmationTokenCreatedAt = new Date();
   }
 
   @PrimaryGeneratedColumn("uuid")

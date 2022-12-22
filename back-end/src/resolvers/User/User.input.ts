@@ -14,20 +14,22 @@ const regExp = RegExp(
 @ArgsType()
 export class SignUpArgs {
   @Field()
+  @IsNotEmpty()
   @MinLength(2, {
-    message: "Firstname must have at least 2 characters",
+    message: "First name must have at least 2 characters",
   })
-  @MaxLength(100, { message: "Firstname must have maximum 100 characters" })
+  @MaxLength(100, { message: "First name must have maximum 100 characters" })
   @Matches(regExp, {
-    message: "Firstname must not contain numbers or special characters",
+    message: "First name must not contain numbers or special characters",
   })
   firstname: string;
 
   @Field()
-  @MinLength(2, { message: "Lastname must have at least 2 characters" })
-  @MaxLength(100, { message: "Lastname must have maximum 100 characters" })
+  @IsNotEmpty()
+  @MinLength(2, { message: "Last name must have at least 2 characters" })
+  @MaxLength(100, { message: "Last name must have maximum 100 characters" })
   @Matches(regExp, {
-    message: "Lastname must not contain numbers or special characters",
+    message: "Last name must not contain numbers or special characters",
   })
   lastname: string;
 
