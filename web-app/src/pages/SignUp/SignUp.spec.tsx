@@ -2,17 +2,21 @@ import '@testing-library/jest-dom';
 
 import { MockedProvider, MockedResponse } from '@apollo/client/testing';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
+import * as toastify from 'react-toastify';
 
 import { SignUpMutation } from '../../gql/graphql';
 import SignUp, { SIGN_UP } from './SignUp';
 
+jest.mock("react-toastify");
+
 const renderSignUp = (mock?: any) => {
   render(
     <MockedProvider mocks={mock}>
-      <SignUp />
-    </MockedProvider>,
-    { wrapper: BrowserRouter }
+      <MemoryRouter>
+        <SignUp />
+      </MemoryRouter>
+    </MockedProvider>
   );
 };
 
@@ -68,19 +72,44 @@ const SIGN_UP_SUCCESS_MOCK: MockedResponse<SignUpMutation> = {
   },
 };
 
+const SIGN_UP_EMAIL_ALREADY_USED_MOCK: MockedResponse<SignUpMutation> = {
+  request: {
+    query: SIGN_UP,
+    variables: {
+      firstname: "Vianney",
+      lastname: "Accart",
+      email: "vianneyaccart@gmail.com",
+      password: "Vianney69",
+      passwordConfirmation: "Vianney69",
+    },
+  },
+  error: new Error("This email is already used"),
+};
+
 describe("SignUp", () => {
   it("should renders", async () => {
     renderSignUp();
   });
 
-  it("render link to sign in", () => {});
+  it("render link to sign in", () => {
+    renderSignUp();
+    expect(screen.getByRole("link", { name: "Sign in" })).toBeInTheDocument();
+  });
+  it("navigate to /sign-in when click sign in link", () => {
+    renderSignUp();
+  });
 
   describe("form", () => {
     describe("password visibility", () => {
       it("should display password when click on eye icon", () => {});
       it("should not display password when click on slash eye icon", () => {});
     });
-    it("render link to terms and conditions", () => {});
+    it("render link to terms and conditions", () => {
+      renderSignUp();
+      expect(
+        screen.getByRole("link", { name: "terms and conditions" })
+      ).toBeInTheDocument();
+    });
     describe("after form submission", () => {
       it("render required errors messages when inputs are empty and terms checkbox is unchecked", async () => {
         renderSignUp();
@@ -90,6 +119,24 @@ describe("SignUp", () => {
         await waitFor(() => {
           expect(screen.getByText("Email is required")).toBeInTheDocument();
         });
+      });
+
+      it("render error toast if email is already used", async () => {
+        renderSignUp([SIGN_UP_EMAIL_ALREADY_USED_MOCK]);
+        submitForm(
+          "vianneyaccart@gmail.com",
+          "Vianney",
+          "Accart",
+          "Vianney69",
+          "Vianney69"
+        );
+        await waitFor(() => {
+          expect(toastify.toast.error).toHaveBeenCalledTimes(1);
+        });
+        expect(toastify.toast.error).toHaveBeenCalledWith(
+          "This email is already used",
+          { position: "bottom-right", toastId: 2 }
+        );
       });
 
       it("renders a loader awaiting response", async () => {

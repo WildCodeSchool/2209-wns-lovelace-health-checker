@@ -1,5 +1,5 @@
 import { gql, useMutation } from '@apollo/client';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -46,35 +46,38 @@ const firstNameAndLastNameRegExp = new RegExp(
 const passwordRegExp = new RegExp("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$");
 
 const SignUp = () => {
-  const [signUp, { data, loading, error }] = useMutation<
+  const [signUp, { data, loading }] = useMutation<
     SignUpMutation,
     SignUpMutationVariables
-  >(SIGN_UP);
-
-  useEffect(() => {
-    if (error?.graphQLErrors) {
-      if (
-        error?.graphQLErrors[0].message.toString() ===
-        "Argument Validation Error"
-      ) {
-        toast.error(
-          "Unable to create your account because the registration form contains one or more invalid fields.",
-          {
+  >(SIGN_UP, {
+    onError: (error) => {
+      switch (error.message) {
+        case "Argument Validation Error":
+          toast.error(
+            "Unable to create your account because the registration form contains one or more invalid fields.",
+            {
+              position: toast.POSITION.BOTTOM_RIGHT,
+              toastId: 1,
+            }
+          );
+          break;
+        case "This email is already used":
+          toast.error("This email is already used", {
             position: toast.POSITION.BOTTOM_RIGHT,
-            toastId: 1,
-          }
-        );
-      } else {
-        toast.error(
-          "Oops... It seems that something went wront, please try again.",
-          {
-            position: toast.POSITION.BOTTOM_RIGHT,
-            toastId: 1,
-          }
-        );
+            toastId: 2,
+          });
+          break;
+        default:
+          toast.error(
+            "Oops... It seems that something went wront, please try again.",
+            {
+              position: toast.POSITION.BOTTOM_RIGHT,
+              toastId: 3,
+            }
+          );
       }
-    }
-  }, [error]);
+    },
+  });
 
   const {
     register,
