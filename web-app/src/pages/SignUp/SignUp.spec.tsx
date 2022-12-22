@@ -2,7 +2,8 @@ import '@testing-library/jest-dom';
 
 import { MockedProvider, MockedResponse } from '@apollo/client/testing';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { createMemoryHistory, MemoryHistory } from 'history';
+import { MemoryRouter, Router } from 'react-router-dom';
 import * as toastify from 'react-toastify';
 
 import { SignUpMutation } from '../../gql/graphql';
@@ -16,6 +17,16 @@ const renderSignUp = (mock?: any) => {
       <MemoryRouter>
         <SignUp />
       </MemoryRouter>
+    </MockedProvider>
+  );
+};
+
+const renderSignUpWithHistory = (history: MemoryHistory, mock?: any) => {
+  render(
+    <MockedProvider mocks={mock}>
+      <Router location={history.location} navigator={history}>
+        <SignUp />
+      </Router>
     </MockedProvider>
   );
 };
@@ -95,20 +106,43 @@ describe("SignUp", () => {
     renderSignUp();
     expect(screen.getByRole("link", { name: "Sign in" })).toBeInTheDocument();
   });
-  it("navigate to /sign-in when click sign in link", () => {
-    renderSignUp();
+  it("navigate to /sign-in when click sign in link", async () => {
+    const history = createMemoryHistory();
+    renderSignUpWithHistory(history);
+    fireEvent.click(screen.getByRole("link", { name: "Sign in" }));
+    await waitFor(() => {
+      expect(history.location.pathname).toBe("/sign-in");
+    });
   });
 
   describe("form", () => {
-    describe("password visibility", () => {
-      it("should display password when click on eye icon", () => {});
-      it("should not display password when click on slash eye icon", () => {});
+    describe("password visibility toggle", () => {
+      it("should switch between type password (masked) and type text (readable)", () => {
+        renderSignUp();
+        const passwordInput = screen.getByTestId("password");
+        const eyeIcon = screen.getByTestId("passwordEye");
+        expect(passwordInput).toHaveAttribute("type", "password");
+        fireEvent.click(eyeIcon);
+        expect(passwordInput).toHaveAttribute("type", "text");
+        fireEvent.click(eyeIcon);
+        expect(passwordInput).toHaveAttribute("type", "password");
+      });
     });
     it("render link to terms and conditions", () => {
       renderSignUp();
       expect(
         screen.getByRole("link", { name: "terms and conditions" })
       ).toBeInTheDocument();
+    });
+    it("navigate to /terms when click terms link", async () => {
+      const history = createMemoryHistory();
+      renderSignUpWithHistory(history);
+      fireEvent.click(
+        screen.getByRole("link", { name: "terms and conditions" })
+      );
+      await waitFor(() => {
+        expect(history.location.pathname).toBe("/terms");
+      });
     });
     describe("after form submission", () => {
       it("render required errors messages when inputs are empty and terms checkbox is unchecked", async () => {
