@@ -21,19 +21,18 @@ const dataSource = new DataSource({
 
 let initialized = false;
 export const getDatabase = async (): Promise<DataSource> => {
-  console.log(NODE_ENV);
   if (!initialized) {
     await dataSource.initialize();
     initialized = true;
-    console.log("Successfully connected to database.");
+    console.log(
+      `${
+        NODE_ENV === "test"
+          ? "Successfully connected to TEST database."
+          : "Successfully connected to database."
+      }`
+    );
   }
-  console.log(
-    `${
-      NODE_ENV === "test"
-        ? "Successfully connected to TEST database."
-        : "Successfully connected to database."
-    }`
-  );
+
   return dataSource;
 };
 
