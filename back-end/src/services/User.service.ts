@@ -17,6 +17,10 @@ export default class UserService extends UserRepository {
     password: string
   ): Promise<User> {
     const user = new User(firstname, lastname, email, hashSync(password));
+
+    const userWithDesiredEmail = await UserRepository.findByEmail(email);
+    if (userWithDesiredEmail) throw Error("This email is already used");
+
     user.accountConfirmationToken = randomBytes(32).toString("hex");
     user.accountConfirmationTokenCreatedAt = new Date();
     const savedUser = await this.saveUser(user);
