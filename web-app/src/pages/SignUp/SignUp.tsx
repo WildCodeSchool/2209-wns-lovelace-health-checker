@@ -236,11 +236,13 @@ const SignUp = () => {
               <div className={`input-group-text ${styles.showHidePassword}`}>
                 {passwordInputType === "password" ? (
                   <i
+                    data-testid="passwordEye"
                     onClick={() => setPasswordInputType("text")}
                     className={`bi bi-eye ${styles.eye}`}
                   ></i>
                 ) : (
                   <i
+                    data-testid="passwordEyeSlash"
                     onClick={() => setPasswordInputType("password")}
                     className={`bi bi-eye-slash ${styles.eye}`}
                   ></i>
@@ -299,12 +301,7 @@ const SignUp = () => {
               />
               <label className="form-check-label" htmlFor="agreedTerms">
                 I agree to the{" "}
-                <Link
-                  className={styles.navlink}
-                  to="/terms"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <Link className={styles.navlink} to="/terms">
                   terms and conditions
                 </Link>
               </label>
@@ -330,7 +327,7 @@ const SignUp = () => {
           <hr className={styles.separator} />
           <p className={styles.alreadyRegistered}>
             Already registered ?{" "}
-            <Link className={styles.navlink} to="/signin">
+            <Link className={styles.navlink} to="/sign-in">
               Sign in
             </Link>
           </p>
