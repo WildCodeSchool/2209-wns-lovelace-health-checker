@@ -40,11 +40,24 @@ export default class RequestResultService extends RequestResultRepository {
         Date.now() - startTimer
       );
     } catch (error) {
-      return new RequestResult(
-        dummyRequestSetting,
-        404,
-        Date.now() - startTimer
-      );
+      if (error instanceof DOMException && error.name) {
+        switch (error.name) {
+          case "AbortError":
+            // TODO : variabiliser ce message d'erreur
+            throw Error("Request Timeout");
+        }
+      }
+      if (error instanceof TypeError && error.message) {
+        switch (error.message) {
+          case "fetch failed":
+            // TODO : variabiliser ce message d'erreur
+            throw Error("Fetch Failed");
+          case "Invalid URL":
+            // TODO : variabiliser ce message d'erreur
+            throw Error("Invalid URL");
+        }
+      }
+      throw Error("Unkwown Error");
     }
   }
 }
