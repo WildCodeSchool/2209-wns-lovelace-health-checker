@@ -1,16 +1,13 @@
-import { ExpressContext } from "apollo-server-express";
-import { compareSync, hashSync } from "bcryptjs";
-import { randomBytes } from "crypto";
+import { ExpressContext } from 'apollo-server-express';
+import { compareSync, hashSync } from 'bcryptjs';
+import { randomBytes } from 'crypto';
 
-import Session from "../entities/Session.entity";
-import User, { Status } from "../entities/User.entity";
-import { getSessionIdInCookie } from "../http-utils";
-import {
-  sendMessageOnAccountCreationEmailQueue,
-  sendMessageOnResetPasswordEmailQueue,
-} from "../rabbitmq/providers";
-import UserRepository from "../repositories/User.repository";
-import SessionRepository from "./Session.service";
+import Session from '../entities/Session.entity';
+import User, { Status } from '../entities/User.entity';
+import { getSessionIdInCookie } from '../http-utils';
+import { sendMessageOnAccountCreationEmailQueue, sendMessageOnResetPasswordEmailQueue } from '../rabbitmq/providers';
+import UserRepository from '../repositories/User.repository';
+import SessionRepository from './Session.service';
 
 export default class UserService extends UserRepository {
   static async createUser(
@@ -59,15 +56,7 @@ export default class UserService extends UserRepository {
     const user = await this.getUserByAccountConfirmationToken(
       confirmationToken
     );
-    if (!user) throw Error("User not found");
-
-    if (user.status === Status.ACTIVE || user.status === Status.INACTIVE) {
-      throw Error("Confirmation code is no longer valid");
-    }
-
-    if (user.accountConfirmationToken !== confirmationToken) {
-      throw Error("Confirmation code is not valid");
-    }
+    if (!user) throw Error("Invalid confirmation token");
 
     user.status = Status.ACTIVE;
     user.accountConfirmationToken = "";

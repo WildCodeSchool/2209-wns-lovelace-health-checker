@@ -1,13 +1,9 @@
-import { hashSync } from "bcryptjs";
+import { hashSync } from 'bcryptjs';
 
-import {
-  closeConnection,
-  getDatabase,
-  initializeRepositories,
-} from "../database/utils";
-import User, { Status } from "../entities/User.entity";
-import UserRepository from "../repositories/User.repository";
-import UserService from "./User.service";
+import { closeConnection, getDatabase, initializeRepositories } from '../database/utils';
+import User, { Status } from '../entities/User.entity';
+import UserRepository from '../repositories/User.repository';
+import UserService from './User.service';
 
 describe("UserService integration", () => {
   const emailAddress = "unknown@user.com";
@@ -50,7 +46,7 @@ describe("UserService integration", () => {
 
   describe("signIn", () => {
     describe("When email address does not belong to existing user", () => {
-      it.only("throws invalid credentials error", async () => {
+      it("throws invalid credentials error", async () => {
         expect(() =>
           UserService.signIn(emailAddress, "whatever")
         ).rejects.toThrowError("Incorrect credentials");
@@ -58,7 +54,6 @@ describe("UserService integration", () => {
     });
 
     describe("When email address belongs to existing user", () => {
-      const emailAddress = "johndoe@example.fr";
       describe("When password invalid", () => {
         it("throws invalid credentials error", async () => {
           const user = createUser();
@@ -104,6 +99,15 @@ describe("UserService integration", () => {
   });
 
   describe("confirmAccount", () => {
-    describe("when confirmationToken doesn't exist", () => {});
+    describe("when confirmationToken doesn't exist", () => {
+      it("throws Invalid confirmation token", () => {
+        expect(async () => {
+          await UserService.confirmAccount("invalid-token");
+        }).rejects.toThrowError("Invalid confirmation token");
+      });
+    });
+    describe("when confirmation token is valid", () => {
+      it("updates user status", () => {});
+    });
   });
 });
