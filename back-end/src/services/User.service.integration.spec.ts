@@ -1,63 +1,23 @@
-import { hashSync } from 'bcryptjs';
-import { randomBytes } from 'crypto';
-
 import { closeConnection, initializeRepositories, truncateAllTables } from '../database/utils';
-import User, { Status } from '../entities/User.entity';
+import { Status } from '../entities/User.entity';
+import * as provider from '../rabbitmq/providers';
 import UserRepository from '../repositories/User.repository';
 import UserService from './User.service';
+
+const sendMessageOnAccountCreationEmailQueueSpy = () => {
+  jest
+    .spyOn(provider, "sendMessageOnAccountCreationEmailQueue")
+    .mockImplementation((data: any) => {
+      return data;
+    });
+};
 
 describe("UserService integration", () => {
   const emailAddress = "unknown@user.com";
 
-  const createUserSpy = jest.fn();
-  createUserSpy.mockImplementation(
-    async (
-      firstname: string = "John",
-      lastname: string = "Doe",
-      email: string = emailAddress,
-      password: string = "password"
-    ) => {
-      const user = new User(firstname, lastname, email, hashSync(password));
-      const userWithDesiredEmail = await UserRepository.findByEmail(email);
-      if (userWithDesiredEmail) throw Error("This email is already used");
-      user.accountConfirmationToken = randomBytes(32).toString("hex");
-      user.accountConfirmationTokenCreatedAt = new Date();
-      const savedUser = await UserRepository.repository.save(user);
-      buildAccountConfirmationMessageToQueueSpy(user);
-      return savedUser;
-    }
-  );
-
-  const buildAccountConfirmationMessageToQueueSpy = jest.fn();
-  buildAccountConfirmationMessageToQueueSpy.mockImplementation(
-    (user: User, isResent?: boolean) => {
-      let message = {};
-      if (isResent) {
-        message = {
-          firstname: user.firstname,
-          email: user.email,
-          confirmationToken: user.accountConfirmationToken,
-          isResent: true,
-        };
-      } else {
-        message = {
-          firstname: user.firstname,
-          email: user.email,
-          confirmationToken: user.accountConfirmationToken,
-        };
-      }
-      sendMessageOnAccountCreationEmailQueueSpy(message);
-      return message;
-    }
-  );
-
-  const sendMessageOnAccountCreationEmailQueueSpy = jest.fn();
-  sendMessageOnAccountCreationEmailQueueSpy.mockImplementation(() => {
-    return;
-  });
-
   beforeAll(async () => {
     await initializeRepositories();
+    sendMessageOnAccountCreationEmailQueueSpy();
   });
 
   beforeEach(async () => {
@@ -71,21 +31,32 @@ describe("UserService integration", () => {
   describe("createUser", () => {
     describe("when email is already used", () => {
       it("throws 'This email is already used' error", async () => {
-        await createUserSpy("Jane", "Doe");
-        expect(async () => await createUserSpy()).rejects.toThrowError(
-          "This email is already used"
-        );
+        await UserService.createUser("Jane", "Doe", emailAddress, "password");
+        expect(
+          async () =>
+            await UserService.createUser(
+              "John",
+              "Doe",
+              emailAddress,
+              "password"
+            )
+        ).rejects.toThrowError("This email is already used");
       });
     });
     describe("when user is created", () => {
       it("exists in user table", async () => {
-        await createUserSpy();
+        await UserService.createUser("John", "Doe", emailAddress, "password");
         const users = await UserRepository.repository.find();
         expect(users).toHaveLength(1);
         expect(users[0].email).toEqual(emailAddress);
       });
       it("has proper attributes with correct values", async () => {
-        const user = await createUserSpy();
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          "password"
+        );
         const users = await UserRepository.repository.find();
         expect(users[0].id).toHaveLength(36);
         expect(users[0].firstname).toEqual(user.firstname);
@@ -110,8 +81,14 @@ describe("UserService integration", () => {
     });
     describe("buildAccountConfirmationMessageToQueue", () => {
       it("should build a message with correct user informations", async () => {
-        const user = await createUserSpy();
-        const message = buildAccountConfirmationMessageToQueueSpy(user);
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          "password"
+        );
+        const message: any =
+          UserService.buildAccountConfirmationMessageToQueue(user);
         expect(message.firstname).toEqual(user.firstname);
         expect(message.email).toEqual(user.email);
         expect(message.confirmationToken).toEqual(
@@ -119,25 +96,37 @@ describe("UserService integration", () => {
         );
       });
       it("should be called once", async () => {
-        await createUserSpy();
-        expect(buildAccountConfirmationMessageToQueueSpy).toHaveBeenCalledTimes(
-          1
+        const spy = jest.spyOn(
+          UserService,
+          "buildAccountConfirmationMessageToQueue"
         );
+        await UserService.createUser("John", "Doe", emailAddress, "password");
+        expect(spy).toHaveBeenCalledTimes(1);
       });
     });
   });
 
   describe("buildAccountConfirmationMessageToQueue", () => {
     it("should call sendMessageOnAccountCreationEmailQueueSpy once", async () => {
-      await createUserSpy();
+      const sendMessageOnAccountCreationEmailQueueSpy = jest
+        .spyOn(provider, "sendMessageOnAccountCreationEmailQueue")
+        .mockImplementation((data: any) => {
+          return data;
+        });
+      await UserService.createUser("John", "Doe", emailAddress, "password");
       expect(sendMessageOnAccountCreationEmailQueueSpy).toHaveBeenCalledTimes(
         1
       );
     });
     describe("when account confirmation token is sent again", () => {
       it("build a message with isResent property set to true", async () => {
-        const user = await createUserSpy();
-        const message = await buildAccountConfirmationMessageToQueueSpy(
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          "password"
+        );
+        const message: any = UserService.buildAccountConfirmationMessageToQueue(
           user,
           true
         );
@@ -146,8 +135,14 @@ describe("UserService integration", () => {
       });
       describe("when account confirmation token is sent for the first time", () => {
         it("build a message without isResent property", async () => {
-          const user = await createUserSpy();
-          const message = buildAccountConfirmationMessageToQueueSpy(user);
+          const user = await UserService.createUser(
+            "John",
+            "Doe",
+            emailAddress,
+            "password"
+          );
+          const message =
+            UserService.buildAccountConfirmationMessageToQueue(user);
           expect(message).not.toHaveProperty("isResent");
         });
       });
@@ -166,7 +161,7 @@ describe("UserService integration", () => {
     describe("When email address belongs to existing user", () => {
       describe("When password invalid", () => {
         it("throws invalid credentials error", async () => {
-          await createUserSpy();
+          await UserService.createUser("John", "Doe", emailAddress, "password");
           expect(async () => {
             await UserService.signIn(emailAddress, "wrong-password");
           }).rejects.toThrowError("Incorrect credentials");
@@ -175,7 +170,12 @@ describe("UserService integration", () => {
       describe("when password valid", () => {
         describe("when user account is active", () => {
           it("returns user and session", async () => {
-            const user = await createUserSpy();
+            const user = await UserService.createUser(
+              "John",
+              "Doe",
+              emailAddress,
+              "password"
+            );
             user.status = Status.ACTIVE;
             user.accountConfirmationToken = "";
             await UserRepository.repository.save(user);
@@ -189,7 +189,12 @@ describe("UserService integration", () => {
         });
         describe("when user account is inactive or pending", () => {
           it("throws account not activated error", async () => {
-            await createUserSpy();
+            await UserService.createUser(
+              "John",
+              "Doe",
+              emailAddress,
+              "password"
+            );
             expect(async () => {
               await UserService.signIn(emailAddress, "password");
             }).rejects.toThrowError(
@@ -204,7 +209,7 @@ describe("UserService integration", () => {
   describe("confirmAccount", () => {
     describe("when confirmationToken is NOT valid", () => {
       it("throws Invalid confirmation token", async () => {
-        await createUserSpy();
+        await UserService.createUser("John", "Doe", emailAddress, "password");
 
         expect(async () => {
           await UserService.confirmAccount("invalid-token");
@@ -213,7 +218,12 @@ describe("UserService integration", () => {
     });
     describe("when confirmation token is valid", () => {
       it("updates user status and clear accountConfirmationToken and return success message", async () => {
-        const user = await createUserSpy();
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          "password"
+        );
 
         const result = await UserService.confirmAccount(
           user.accountConfirmationToken
