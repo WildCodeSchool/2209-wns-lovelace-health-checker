@@ -40,7 +40,7 @@ const Home = () => {
         case "Request Timeout":
           // TODO : variabiliser la durée dans un fichier de config
           toast.error(
-            "Maximum duration for premium request exceed (15 seconds)",
+            "Maximum duration for non premium request exceeded (15 seconds)",
             {
               position: toast.POSITION.BOTTOM_RIGHT,
               toastId: 2,
