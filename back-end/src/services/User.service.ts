@@ -1,16 +1,13 @@
-import { ExpressContext } from "apollo-server-express";
-import { compareSync, hashSync } from "bcryptjs";
-import { randomBytes } from "crypto";
+import { ExpressContext } from 'apollo-server-express';
+import { compareSync, hashSync } from 'bcryptjs';
+import { randomBytes } from 'crypto';
 
-import Session from "../entities/Session.entity";
-import User, { Status } from "../entities/User.entity";
-import { getSessionIdInCookie } from "../http-utils";
-import {
-  sendMessageOnAccountCreationEmailQueue,
-  sendMessageOnResetPasswordEmailQueue,
-} from "../rabbitmq/providers";
-import UserRepository from "../repositories/User.repository";
-import SessionRepository from "./Session.service";
+import Session from '../entities/Session.entity';
+import User, { Status } from '../entities/User.entity';
+import { getSessionIdInCookie } from '../http-utils';
+import { sendMessageOnAccountCreationEmailQueue, sendMessageOnResetPasswordEmailQueue } from '../rabbitmq/providers';
+import UserRepository from '../repositories/User.repository';
+import SessionRepository from './Session.service';
 
 export default class UserService extends UserRepository {
   static async createUser(
@@ -106,14 +103,6 @@ export default class UserService extends UserRepository {
 
     const session = await SessionRepository.createSession(user);
     return { user, session };
-  }
-
-  static async findBySessionId(sessionId: string): Promise<User | null> {
-    const session = await SessionRepository.findById(sessionId);
-    if (!session) {
-      return null;
-    }
-    return session.user;
   }
 
   static askForNewPassword = async (email: string) => {

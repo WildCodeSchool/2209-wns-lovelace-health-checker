@@ -7,8 +7,6 @@ import UserRepository from '../repositories/User.repository';
 import UserService from './User.service';
 
 describe("UserService integration", () => {
-  jest.mock("./User.service");
-
   const emailAddress = "unknown@user.com";
 
   const createUserSpy = jest.fn();
