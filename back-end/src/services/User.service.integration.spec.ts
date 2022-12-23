@@ -1,14 +1,10 @@
-import { hashSync } from "bcryptjs";
-import { randomBytes } from "crypto";
+import { hashSync } from 'bcryptjs';
+import { randomBytes } from 'crypto';
 
-import {
-  closeConnection,
-  initializeRepositories,
-  truncateAllTables,
-} from "../database/utils";
-import User, { Status } from "../entities/User.entity";
-import UserRepository from "../repositories/User.repository";
-import UserService from "./User.service";
+import { closeConnection, initializeRepositories, truncateAllTables } from '../database/utils';
+import User, { Status } from '../entities/User.entity';
+import UserRepository from '../repositories/User.repository';
+import UserService from './User.service';
 
 describe("UserService integration", () => {
   jest.mock("./User.service");
@@ -208,15 +204,29 @@ describe("UserService integration", () => {
   });
 
   describe("confirmAccount", () => {
-    describe("when confirmationToken doesn't exist", () => {
-      it("throws Invalid confirmation token", () => {
+    describe("when confirmationToken is NOT valid", () => {
+      it("throws Invalid confirmation token", async () => {
+        await createUserSpy();
+
         expect(async () => {
           await UserService.confirmAccount("invalid-token");
         }).rejects.toThrowError("Invalid confirmation token");
       });
     });
     describe("when confirmation token is valid", () => {
-      it("updates user status", () => {});
+      it("updates user status and clear accountConfirmationToken and return success message", async () => {
+        const user = await createUserSpy();
+
+        const result = await UserService.confirmAccount(
+          user.accountConfirmationToken
+        );
+        const confirmedUser = await UserRepository.repository.findOne({
+          where: { id: user.id },
+        });
+        expect(result).toEqual("Your account has been confirmed");
+        expect(confirmedUser?.status).toEqual(Status.ACTIVE);
+        expect(confirmedUser?.accountConfirmationToken).toEqual("");
+      });
     });
   });
 });
