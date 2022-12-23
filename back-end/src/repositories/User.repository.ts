@@ -1,7 +1,8 @@
-import { Repository } from "typeorm";
+import { Repository } from 'typeorm';
 
-import { getRepository } from "../database/utils";
-import User from "../entities/User.entity";
+import { getRepository } from '../database/utils';
+import User from '../entities/User.entity';
+import SessionRepository from './Session.repository';
 
 export default class UserRepository {
   static repository: Repository<User>;
@@ -32,4 +33,12 @@ export default class UserRepository {
   ): Promise<User | null> => {
     return this.repository.findOneBy({ resetPasswordToken: token });
   };
+
+  static async findBySessionId(sessionId: string): Promise<User | null> {
+    const session = await SessionRepository.findById(sessionId);
+    if (!session) {
+      return null;
+    }
+    return session.user;
+  }
 }
