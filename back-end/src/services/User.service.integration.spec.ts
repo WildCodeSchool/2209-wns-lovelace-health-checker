@@ -1,19 +1,10 @@
-<<<<<<< HEAD
-import { hashSync } from "bcryptjs";
-import { randomBytes } from "crypto";
-=======
 import { hashSync } from 'bcryptjs';
 import { randomBytes } from 'crypto';
->>>>>>> a2c8d41 ( Modify email, and implement confirmAccount method tests)
 
-import {
-  closeConnection,
-  initializeRepositories,
-  truncateAllTables,
-} from "../database/utils";
-import User, { Status } from "../entities/User.entity";
-import UserRepository from "../repositories/User.repository";
-import UserService from "./User.service";
+import { closeConnection, initializeRepositories, truncateAllTables } from '../database/utils';
+import User, { Status } from '../entities/User.entity';
+import UserRepository from '../repositories/User.repository';
+import UserService from './User.service';
 
 describe("UserService integration", () => {
   jest.mock("./User.service");
@@ -215,9 +206,7 @@ describe("UserService integration", () => {
   describe("confirmAccount", () => {
     describe("when confirmationToken is NOT valid", () => {
       it("throws Invalid confirmation token", async () => {
-        const user = createUser();
-        user.accountConfirmationToken = randomBytes(32).toString("hex");
-        await UserRepository.repository.save(user);
+        await createUserSpy();
 
         expect(async () => {
           await UserService.confirmAccount("invalid-token");
@@ -226,14 +215,13 @@ describe("UserService integration", () => {
     });
     describe("when confirmation token is valid", () => {
       it("updates user status and clear accountConfirmationToken and return success message", async () => {
-        const user = createUser();
-        user.accountConfirmationToken = randomBytes(32).toString("hex");
-        const savedUser = await UserRepository.repository.save(user);
+        const user = await createUserSpy();
+
         const result = await UserService.confirmAccount(
-          savedUser.accountConfirmationToken
+          user.accountConfirmationToken
         );
         const confirmedUser = await UserRepository.repository.findOne({
-          where: { id: savedUser.id },
+          where: { id: user.id },
         });
         expect(result).toEqual("Your account has been confirmed");
         expect(confirmedUser?.status).toEqual(Status.ACTIVE);
