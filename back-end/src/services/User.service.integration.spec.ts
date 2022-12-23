@@ -46,9 +46,9 @@ describe("UserService integration", () => {
 
   describe("signIn", () => {
     describe("When email address does not belong to existing user", () => {
-      it("throws invalid credentials error", async () => {
-        expect(() =>
-          UserService.signIn(emailAddress, "whatever")
+      it("throws invalid credentials error", () => {
+        expect(
+          async () => await UserService.signIn(emailAddress, "whatever")
         ).rejects.toThrowError("Incorrect credentials");
       });
     });
