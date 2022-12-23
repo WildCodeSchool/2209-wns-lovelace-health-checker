@@ -1,13 +1,13 @@
-import { DataSource, EntityTarget } from 'typeorm';
+import { DataSource, EntityTarget } from "typeorm";
 
-import { DATABASE_URL, NODE_ENV, TEST_DATABASE_URL } from '../config';
-import AlertRepository from '../repositories/Alert.repository';
-import AlertSettingRepository from '../repositories/AlertSetting.repository';
-import PremiumRepository from '../repositories/Premium.repository';
-import RequestResultRepository from '../repositories/RequestResult.repository';
-import RequestSettingRepository from '../repositories/RequestSetting.repository';
-import SessionRepository from '../repositories/Session.repository';
-import UserRepository from '../repositories/User.repository';
+import { DATABASE_URL, NODE_ENV, TEST_DATABASE_URL } from "../config";
+import AlertRepository from "../repositories/Alert.repository";
+import AlertSettingRepository from "../repositories/AlertSetting.repository";
+import PremiumRepository from "../repositories/Premium.repository";
+import RequestResultRepository from "../repositories/RequestResult.repository";
+import RequestSettingRepository from "../repositories/RequestSetting.repository";
+import SessionRepository from "../repositories/Session.repository";
+import UserRepository from "../repositories/User.repository";
 
 const dataSource = new DataSource({
   type: "postgres",
@@ -52,4 +52,14 @@ export const initializeRepositories = async () => {
 
 export const closeConnection = async () => {
   await dataSource.destroy();
+};
+
+export const truncateAllTables = async () => {
+  const database = await getDatabase();
+  for (const entity of database.entityMetadatas) {
+    const repository = database.getRepository(entity.name);
+    await repository.query(
+      `TRUNCATE ${entity.tableName} RESTART IDENTITY CASCADE;`
+    );
+  }
 };

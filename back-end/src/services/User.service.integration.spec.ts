@@ -1,9 +1,13 @@
-import { hashSync } from 'bcryptjs';
+import { hashSync } from "bcryptjs";
 
-import { closeConnection, getDatabase, initializeRepositories } from '../database/utils';
-import User, { Status } from '../entities/User.entity';
-import UserRepository from '../repositories/User.repository';
-import UserService from './User.service';
+import {
+  closeConnection,
+  initializeRepositories,
+  truncateAllTables,
+} from "../database/utils";
+import User, { Status } from "../entities/User.entity";
+import UserRepository from "../repositories/User.repository";
+import UserService from "./User.service";
 
 describe("UserService integration", () => {
   const emailAddress = "unknown@user.com";
@@ -15,18 +19,12 @@ describe("UserService integration", () => {
     await initializeRepositories();
   });
 
-  afterAll(async () => {
-    await closeConnection();
+  beforeEach(async () => {
+    await truncateAllTables();
   });
 
-  beforeEach(async () => {
-    const database = await getDatabase();
-    for (const entity of database.entityMetadatas) {
-      const repository = database.getRepository(entity.name);
-      await repository.query(
-        `TRUNCATE ${entity.tableName} RESTART IDENTITY CASCADE;`
-      );
-    }
+  afterAll(async () => {
+    await closeConnection();
   });
 
   describe("createUser", () => {
