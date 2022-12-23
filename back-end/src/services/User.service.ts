@@ -56,15 +56,7 @@ export default class UserService extends UserRepository {
     const user = await this.getUserByAccountConfirmationToken(
       confirmationToken
     );
-    if (!user) throw Error("User not found");
-
-    if (user.status === Status.ACTIVE || user.status === Status.INACTIVE) {
-      throw Error("Confirmation code is no longer valid");
-    }
-
-    if (user.accountConfirmationToken !== confirmationToken) {
-      throw Error("Confirmation code is not valid");
-    }
+    if (!user) throw Error("Invalid confirmation token");
 
     user.status = Status.ACTIVE;
     user.accountConfirmationToken = "";
@@ -80,6 +72,12 @@ export default class UserService extends UserRepository {
 
     if (!user || !compareSync(password, user.password)) {
       throw new Error("Incorrect credentials");
+    }
+
+    if (user.status === Status.PENDING || user.status === Status.INACTIVE) {
+      throw new Error(
+        "Your account is not active, click on the link in your email to activate it"
+      );
     }
 
     const session = await SessionRepository.createSession(user);
@@ -116,7 +114,7 @@ export default class UserService extends UserRepository {
     resetPasswordToken: string
   ) => {
     const user = await this.getUserByResetPasswordToken(resetPasswordToken);
-    if (!user) throw Error("Le token n'est pas valide");
+    if (!user) throw Error("Token is no longer valid");
 
     user.password = hashSync(password);
     user.resetPasswordToken = "";
