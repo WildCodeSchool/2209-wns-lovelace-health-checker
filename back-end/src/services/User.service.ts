@@ -1,13 +1,16 @@
-import { ExpressContext } from 'apollo-server-express';
-import { compareSync, hashSync } from 'bcryptjs';
-import { randomBytes } from 'crypto';
+import { ExpressContext } from "apollo-server-express";
+import { compareSync, hashSync } from "bcryptjs";
+import { randomBytes } from "crypto";
 
-import Session from '../entities/Session.entity';
-import User, { Status } from '../entities/User.entity';
-import { getSessionIdInCookie } from '../http-utils';
-import { sendMessageOnAccountCreationEmailQueue, sendMessageOnResetPasswordEmailQueue } from '../rabbitmq/providers';
-import UserRepository from '../repositories/User.repository';
-import SessionRepository from './Session.service';
+import Session from "../entities/Session.entity";
+import User, { Status } from "../entities/User.entity";
+import { getSessionIdInCookie } from "../http-utils";
+import {
+  sendMessageOnAccountCreationEmailQueue,
+  sendMessageOnResetPasswordEmailQueue,
+} from "../rabbitmq/providers";
+import UserRepository from "../repositories/User.repository";
+import SessionRepository from "./Session.service";
 
 export default class UserService extends UserRepository {
   static async createUser(
@@ -24,14 +27,42 @@ export default class UserService extends UserRepository {
     user.accountConfirmationToken = randomBytes(32).toString("hex");
     user.accountConfirmationTokenCreatedAt = new Date();
     const savedUser = await this.saveUser(user);
+    this.buildAccountConfirmationMessageToQueue(user);
+    return savedUser;
+  }
+
+  static buildAccountConfirmationMessageToQueue(
+    user: User,
+    isResent?: boolean
+  ) {
+    let message = {};
+    if (isResent) {
+      message = {
+        firstname: user.firstname,
+        email: user.email,
+        confirmationToken: user.accountConfirmationToken,
+        isResent: true,
+      };
+    } else {
+      message = {
+        firstname: user.firstname,
+        email: user.email,
+        confirmationToken: user.accountConfirmationToken,
+      };
+    }
+    sendMessageOnAccountCreationEmailQueue(message);
+    return message;
+  }
+
+  static buildResetPasswordMessageToQueue = (user: User) => {
     const message = {
       firstname: user.firstname,
       email: user.email,
-      confirmationToken: user.accountConfirmationToken,
+      resetPasswordToken: user.resetPasswordToken,
     };
-    sendMessageOnAccountCreationEmailQueue(message);
-    return savedUser;
-  }
+    sendMessageOnResetPasswordEmailQueue(message);
+    return message;
+  };
 
   static resendAccountConfirmationToken = async (email: string) => {
     const user = await UserRepository.findByEmail(email);
@@ -41,14 +72,7 @@ export default class UserService extends UserRepository {
       user.accountConfirmationToken == ""
     )
       throw new Error("Account already active");
-    const message = {
-      firstname: user.firstname,
-      email: user.email,
-      confirmationToken: user.accountConfirmationToken,
-      isResent: true,
-    };
-
-    sendMessageOnAccountCreationEmailQueue(message);
+    this.buildAccountConfirmationMessageToQueue(user, true);
     return "Your request has been processed successfully";
   };
 
@@ -99,14 +123,7 @@ export default class UserService extends UserRepository {
     user.resetPasswordToken = randomBytes(16).toString("hex");
     user.resetPasswordTokenCreatedAt = new Date();
     await this.saveUser(user);
-
-    const message = {
-      firstname: user.firstname,
-      email: user.email,
-      resetPasswordToken: user.resetPasswordToken,
-    };
-
-    sendMessageOnResetPasswordEmailQueue(message);
+    this.buildResetPasswordMessageToQueue(user);
   };
 
   static resetPassword = async (
