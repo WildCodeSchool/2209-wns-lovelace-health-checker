@@ -24,11 +24,11 @@ export const sendConfirmationEmail = (
     .sendMail({
       from: `Health Check <${user}>`,
       to: email,
-      subject: "[Health Check] Confirmez votre inscription",
-      html: `<p>Bonjour ${name},</p>
-          <p>Merci pour votre inscription à Health Check. Merci de confirmer votre adresse email en cliquant sur le lien ci-dessous.</p>
-          <a href=http://localhost:3000/confirmation/${confirmationToken}>Confirmer mon email</a>
-          <p>A très vite !</p>
+      subject: "[Health Check] Confirm your account",
+      html: `<p>Hello ${name},</p>
+          <p>Thank you for registering for Health Check. Please confirm your email address by clicking the link below.</p>
+          <a href=http://localhost:3000/account-confirmation/${confirmationToken}>Confirm your email address</a>
+          <p>See you soon !</p>
           </div>`,
     })
     .catch((err) => console.log(err));
@@ -43,11 +43,11 @@ export const resendConfirmationEmail = (
     .sendMail({
       from: `Health Check <${user}>`,
       to: email,
-      subject: "[Health Check] Confirmez votre inscription",
-      html: `<p>Bonjour ${name},</p>
-          <p>Vous avez demandé à recevoir de nouveau la procédure de confirmation de compte. Merci de confirmer votre adresse email en cliquant sur le lien ci-dessous.</p>
-          <a href=http://localhost:3000/confirmation/${confirmationToken}>Confirmer mon email</a>
-          <p>A très vite !</p>
+      subject: "[Health Check] Confirm your account",
+      html: `<p>Hello ${name},</p>
+          <p>You have requested to receive the account confirmation procedure again. Please confirm your email address by clicking the link below.</p>
+          <a href=http://localhost:3000/account-confirmation/${confirmationToken}>Confirm my email address</a>
+          <p>See you soon !</p>
           </div>`,
     })
     .catch((err) => console.log(err));
@@ -62,13 +62,13 @@ export const sendResetPasswordEmail = (
     .sendMail({
       from: `Health Check <${user}>`,
       to: email,
-      subject: "[Health Check] Réinitialisation de votre mot de passe",
-      html: `<p>Bonjour ${name},</p>
-          <p>Une demande de réinitialisation de mot de passe a été effectuée avec votre adresse email.</p>
-          <p>Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet email.</p>
-          <p>Le lien ci-dessous vous permet de réinitialiser votre mot de passe, mais attention, <strong>il n'est valable que 30 minutes</strong>. Une fois ce délai passé, vous devrez effectuer une nouvelle demande de réinitialisation mot de passe.</p>
-          <a href=http://localhost:3000/reinitialisation/${resetPasswordToken}>Modifier mon mot de passe</a>
-          <p>A très vite !</p>
+      subject: "[Health Check] Reset your password",
+      html: `<p>Hello ${name},</p>
+          <p>A password reset request has been made with your email address..</p>
+          <p>If you did not initiate this request, you can ignore this email.</p>
+          <p>The link below allows you to reset your password, but be careful, <strong>it is only valid for 30 minutes</strong>. Once this period has passed, you will have to make a new password reset request.</p>
+          <a href=http://localhost:3000/reset-password/${resetPasswordToken}>Change my password</a>
+          <p>See you soon !</p>
           </div>`,
     })
     .catch((err) => console.log(err));
