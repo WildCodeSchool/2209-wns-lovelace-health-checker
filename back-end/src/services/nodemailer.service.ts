@@ -22,11 +22,11 @@ export const sendConfirmationEmail = (
 ) => {
   transport
     .sendMail({
-      from: `MyFitnessPartner <${user}>`,
+      from: `Health Check <${user}>`,
       to: email,
-      subject: "[MyFitnessPartner] Confirmez votre inscription",
+      subject: "[Health Check] Confirmez votre inscription",
       html: `<p>Bonjour ${name},</p>
-          <p>Merci pour votre inscription à MyFitnessPartner. Merci de confirmer votre adresse email en cliquant sur le lien ci-dessous.</p>
+          <p>Merci pour votre inscription à Health Check. Merci de confirmer votre adresse email en cliquant sur le lien ci-dessous.</p>
           <a href=http://localhost:3000/confirmation/${confirmationToken}>Confirmer mon email</a>
           <p>A très vite !</p>
           </div>`,
@@ -41,9 +41,9 @@ export const resendConfirmationEmail = (
 ) => {
   transport
     .sendMail({
-      from: `MyFitnessPartner <${user}>`,
+      from: `Health Check <${user}>`,
       to: email,
-      subject: "[MyFitnessPartner] Confirmez votre inscription",
+      subject: "[Health Check] Confirmez votre inscription",
       html: `<p>Bonjour ${name},</p>
           <p>Vous avez demandé à recevoir de nouveau la procédure de confirmation de compte. Merci de confirmer votre adresse email en cliquant sur le lien ci-dessous.</p>
           <a href=http://localhost:3000/confirmation/${confirmationToken}>Confirmer mon email</a>
@@ -60,9 +60,9 @@ export const sendResetPasswordEmail = (
 ) => {
   transport
     .sendMail({
-      from: `MyFitnessPartner <${user}>`,
+      from: `Health Check <${user}>`,
       to: email,
-      subject: "[MyFitnessPartner] Réinitialisation de votre mot de passe",
+      subject: "[Health Check] Réinitialisation de votre mot de passe",
       html: `<p>Bonjour ${name},</p>
           <p>Une demande de réinitialisation de mot de passe a été effectuée avec votre adresse email.</p>
           <p>Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet email.</p>
