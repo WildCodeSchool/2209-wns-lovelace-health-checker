@@ -1,14 +1,20 @@
-import { ExpressContext } from 'apollo-server-express';
-import { compareSync, hashSync } from 'bcryptjs';
-import { randomBytes } from 'crypto';
+import { ExpressContext } from "apollo-server-express";
+import { compareSync, hashSync } from "bcryptjs";
+import { randomBytes } from "crypto";
 
-import Session from '../entities/Session.entity';
-import User, { Status } from '../entities/User.entity';
-import { getSessionIdInCookie } from '../http-utils';
-import { sendMessageOnAccountCreationEmailQueue, sendMessageOnResetPasswordEmailQueue } from '../rabbitmq/providers';
-import UserRepository from '../repositories/User.repository';
-import SessionRepository from './Session.service';
+import Session from "../entities/Session.entity";
+import User, { Status } from "../entities/User.entity";
+import { getSessionIdInCookie } from "../http-utils";
+import {
+  sendMessageOnAccountCreationEmailQueue,
+  sendMessageOnResetPasswordEmailQueue,
+} from "../rabbitmq/providers";
+import UserRepository from "../repositories/User.repository";
+import SessionRepository from "./Session.service";
+import * as dotenv from "dotenv";
+import SessionService from "./Session.service";
 
+dotenv.config();
 export default class UserService extends UserRepository {
   static async createUser(
     firstname: string,
@@ -109,7 +115,7 @@ export default class UserService extends UserRepository {
     const user = await this.findByEmail(email);
     if (!user) throw Error("Email not found");
 
-    user.resetPasswordToken = randomBytes(16).toString("hex");
+    user.resetPasswordToken = randomBytes(32).toString("hex");
     user.resetPasswordTokenCreatedAt = new Date();
     await this.saveUser(user);
     this.buildResetPasswordMessageToQueue(user);
@@ -122,11 +128,39 @@ export default class UserService extends UserRepository {
     const user = await this.getUserByResetPasswordToken(resetPasswordToken);
     if (!user) throw Error("Token is no longer valid");
 
+    const resetPasswordTokenIsValid =
+      this.checkIfResetPasswordTokenIsValid(user);
+
+    if (!resetPasswordTokenIsValid)
+      throw Error(
+        `The ${
+          parseInt(process.env.RESET_PASSWORD_EXPIRATION_DELAY!) / 60000
+        } minute(s) time limit has been exceeded. Please make a new request`
+      );
+
     user.password = hashSync(password);
     user.resetPasswordToken = "";
     user.updatedAt = new Date();
 
+    await SessionService.deleteAllUserSessions(user);
     await this.saveUser(user);
+  };
+
+  static checkIfResetPasswordTokenIsValid = (user: User) => {
+    const resetPasswordTokenExpirationDelay = parseInt(
+      process.env.RESET_PASSWORD_EXPIRATION_DELAY!
+    );
+
+    const comparisonDate = new Date(
+      user.resetPasswordTokenCreatedAt.getTime() +
+        resetPasswordTokenExpirationDelay
+    );
+
+    if (new Date() > comparisonDate) {
+      return false;
+    } else {
+      return true;
+    }
   };
 
   static logout = async (context: ExpressContext) => {
