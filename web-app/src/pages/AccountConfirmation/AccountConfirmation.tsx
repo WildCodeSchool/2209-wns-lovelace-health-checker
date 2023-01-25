@@ -47,7 +47,16 @@ const AccountConfirmation = () => {
     }
   }, [confirmationToken]);
 
-  if (loading) return <p>Confirming account...</p>;
+  if (loading)
+    return (
+      <>
+        <div className={`${styles.contentContainer}`}>
+          <h1>Account Confirmation</h1>
+          <div className={`${styles.loader}`}></div>
+          <p>Confirming account...</p>
+        </div>
+      </>
+    );
 
   if (success)
     return (
@@ -82,8 +91,9 @@ const AccountConfirmation = () => {
             data-testid="errorIcon"
             className={`bi bi-x-circle ${styles.error}`}></i>
           <p>
-            An error has occured, link is invalid or your account is already
-            confirmed.
+            Your unique confirmation token is invalid or has already been used.
+            <br />
+            Please click on link in your email again.
           </p>
         </div>
       </div>

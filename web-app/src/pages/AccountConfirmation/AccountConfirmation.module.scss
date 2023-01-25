@@ -19,3 +19,7 @@
     color: variables.$successColor;
   }
 }
+
+.loader {
+  @include loader;
+}
