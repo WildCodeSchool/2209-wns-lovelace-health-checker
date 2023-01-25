@@ -22,3 +22,23 @@ Build and start in dev mode:
 ```
 ./build-start.dev.sh
 ```
+
+### Run back-end test
+
+Docker and Docker Compose are required on host system.
+
+Make sure you are located on the same folder as the docker-compose.dev.yml file, and that the line `"exclude": ["**/*.test.ts", "**/*.spec.ts", "**/*.mock.ts"]` is NOT commented.
+
+```
+docker compose -f docker-compose.dev.yml exec back-end npm run test
+```
+
+### Run back-end test
+
+Docker and Docker Compose are required on host system.
+
+Make sure you are located on the same folder as the docker-compose.dev.yml file.
+
+```
+docker compose -f docker-compose.dev.yml exec web-app npm run test
+```
