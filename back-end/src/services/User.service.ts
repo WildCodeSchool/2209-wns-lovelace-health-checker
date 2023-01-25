@@ -82,7 +82,7 @@ export default class UserService extends UserRepository {
     user.status = Status.ACTIVE;
     user.accountConfirmationToken = "";
     await this.saveUser(user);
-    return "Your account has been confirmed";
+    return true;
   };
 
   static async signIn(

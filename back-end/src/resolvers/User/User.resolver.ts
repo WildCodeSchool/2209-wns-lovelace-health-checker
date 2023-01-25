@@ -30,8 +30,8 @@ export default class UserResolver {
     return UserService.resendAccountConfirmationToken(email);
   }
 
-  @Mutation(() => String)
-  confirmAccount(@Args() { token }: ConfirmAccountArgs): Promise<string> {
+  @Mutation(() => Boolean)
+  confirmAccount(@Args() { token }: ConfirmAccountArgs): Promise<Boolean> {
     return UserService.confirmAccount(token);
   }
 
