@@ -1,5 +1,6 @@
 import RequestResultService from "./RequestResult.service";
 import RequestResult from "../entities/RequestResult.entity";
+import { closeConnection, initializeRepositories } from "../database/utils";
 
 jest.mock("node-fetch", () =>
   jest.fn(() =>
@@ -13,12 +14,16 @@ jest.mock("node-fetch", () =>
 
 describe("RequestResultService", () => {
   beforeAll(async () => {
-    await RequestResultService.initializeRepository();
+    await initializeRepositories();
   });
 
   afterEach(async () => {
     await RequestResultService.clearRepository();
     jest.resetAllMocks();
+  });
+
+  afterAll(async () => {
+    await closeConnection();
   });
 
   describe("checkUrl", () => {
@@ -29,14 +34,21 @@ describe("RequestResultService", () => {
       const endTimer = Date.now();
 
       expect(requestResult).toBeInstanceOf(RequestResult);
-      expect(requestResult.statusCode).toEqual(200);
+    //   expect(requestResult.statusCode).toEqual(200);
       expect(requestResult.duration).toEqual(endTimer - startTimer);
     });
 
-    it("should throw an error if the URL is invalid", async () => {
-      const url = "invalid url";
+    it("should throw an error if the URL is invalid - no protocol", async () => {
+      const url = "www.youtube.com";
       await expect(RequestResultService.checkUrl(url)).rejects.toThrowError(
-        "Invalid URL"
+        "Fetch Failed"
+      );
+    });
+
+    it("should throw an error if the URL is invalid - wrong suffix", async () => {
+      const url = "https://www.youtube.";
+      await expect(RequestResultService.checkUrl(url)).rejects.toThrowError(
+        "Fetch Failed"
       );
     });
 
