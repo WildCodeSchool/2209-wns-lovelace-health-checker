@@ -13,16 +13,16 @@ import * as HttpCookies from "../utils/http-cookies";
 
 dotenv.config();
 
-const sendMessageOnAccountCreationEmailQueueSpy = () => {
-  jest
+const sendMessageOnAccountCreationEmailQueue = () => {
+  return jest
     .spyOn(provider, "sendMessageOnAccountCreationEmailQueue")
     .mockImplementation((data: any) => {
       return data;
     });
 };
 
-const sendMessageOnResetPasswordEmailQueueSpy = () => {
-  jest
+const sendMessageOnResetPasswordEmailQueue = () => {
+  return jest
     .spyOn(provider, "sendMessageOnResetPasswordEmailQueue")
     .mockImplementation((data: any) => {
       return data;
@@ -31,15 +31,21 @@ const sendMessageOnResetPasswordEmailQueueSpy = () => {
 
 describe("UserService integration", () => {
   const emailAddress = "unknown@user.com";
+  let sendMessageOnAccountCreationEmailQueueSpy: jest.SpyInstance<
+    Promise<void>
+  >;
+  let sendMessageOnResetPasswordEmailQueueSpy: jest.SpyInstance<Promise<void>>;
 
   beforeAll(async () => {
     await initializeRepositories();
-    sendMessageOnAccountCreationEmailQueueSpy();
-    sendMessageOnResetPasswordEmailQueueSpy();
   });
 
   beforeEach(async () => {
     await truncateAllTables();
+    sendMessageOnAccountCreationEmailQueueSpy =
+      sendMessageOnAccountCreationEmailQueue();
+    sendMessageOnResetPasswordEmailQueueSpy =
+      sendMessageOnResetPasswordEmailQueue();
   });
 
   afterAll(async () => {
@@ -120,11 +126,6 @@ describe("UserService integration", () => {
 
   describe("buildAccountConfirmationMessageToQueue", () => {
     it("should call sendMessageOnAccountCreationEmailQueueSpy once", async () => {
-      const sendMessageOnAccountCreationEmailQueueSpy = jest
-        .spyOn(provider, "sendMessageOnAccountCreationEmailQueue")
-        .mockImplementation((data: any) => {
-          return data;
-        });
       await UserService.createUser("John", "Doe", emailAddress, "password");
       expect(sendMessageOnAccountCreationEmailQueueSpy).toHaveBeenCalledTimes(
         1
@@ -447,7 +448,6 @@ describe("UserService integration", () => {
         expect(getSessionIdInCookieSpy).toHaveBeenCalledTimes(1);
       });
     });
-    // Les deux ci-dessous ne fonctionnent pas...
     describe("when sessionId", () => {
       it("deleteSessionById is called once", async () => {
         const context: any = { cookies: { sessionId: "123" } };
