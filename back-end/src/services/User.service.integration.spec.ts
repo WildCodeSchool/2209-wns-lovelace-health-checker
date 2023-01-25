@@ -1,15 +1,12 @@
-import {
-  closeConnection,
-  initializeRepositories,
-  truncateAllTables,
-} from "../database/utils";
-import { Status } from "../entities/User.entity";
-import * as provider from "../rabbitmq/providers";
-import UserRepository from "../repositories/User.repository";
-import UserService from "./User.service";
-import * as dotenv from "dotenv";
-import SessionService from "./Session.service";
-import * as HttpCookies from "../utils/http-cookies";
+import * as dotenv from 'dotenv';
+
+import { closeConnection, initializeRepositories, truncateAllTables } from '../database/utils';
+import User, { Status } from '../entities/User.entity';
+import * as provider from '../rabbitmq/providers';
+import UserRepository from '../repositories/User.repository';
+import * as HttpCookies from '../utils/http-cookies';
+import SessionService from './Session.service';
+import UserService from './User.service';
 
 dotenv.config();
 
@@ -246,6 +243,57 @@ describe("UserService integration", () => {
         expect(result).toBe(true);
         expect(confirmedUser?.status).toEqual(Status.ACTIVE);
         expect(confirmedUser?.accountConfirmationToken).toEqual("");
+      });
+    });
+  });
+
+  describe("resendAccountConfirmationToken", () => {
+    describe("when user does not exist", () => {
+      it('throw "User not found" error', () => {
+        expect(
+          UserService.resendAccountConfirmationToken("dummy@email.com")
+        ).rejects.toThrowError("User not found");
+      });
+    });
+    describe("when user exists", () => {
+      describe("when user status is already active or inactive", () => {
+        it('should throw "Account already active" error', async () => {
+          const user = await UserService.createUser(
+            "John",
+            "Doe",
+            emailAddress,
+            "password"
+          );
+          user.status = Status.ACTIVE;
+          await UserRepository.repository.save(user);
+          expect(
+            UserService.resendAccountConfirmationToken(emailAddress)
+          ).rejects.toThrowError("Account already active");
+        });
+      });
+      describe("when user status is still pending", () => {
+        it("should call buildAccountConfirmationMessageToQueue once ", async () => {
+          const spy = jest.spyOn(
+            UserService,
+            "buildAccountConfirmationMessageToQueue"
+          );
+          const user = new User("John", "Doe", emailAddress, "password");
+          await UserService.repository.save(user);
+          await UserService.resendAccountConfirmationToken(emailAddress);
+          expect(spy).toHaveBeenCalledTimes(1);
+        });
+        it("should call buildAccountConfirmationMessageToQueue with the good args ", async () => {
+          const user = await UserService.createUser(
+            "John",
+            "Doe",
+            emailAddress,
+            "password"
+          );
+          await UserService.resendAccountConfirmationToken(emailAddress);
+          expect(
+            UserService.buildAccountConfirmationMessageToQueue
+          ).toHaveBeenCalledWith(user, true);
+        });
       });
     });
   });
