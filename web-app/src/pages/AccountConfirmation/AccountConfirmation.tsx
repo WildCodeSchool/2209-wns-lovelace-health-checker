@@ -92,9 +92,8 @@ const AccountConfirmation = () => {
             className={`bi bi-x-circle ${styles.error}`}></i>
           <p>
             Your unique confirmation token is invalid or has already been used.
-            <br />
-            Please click on link in your email again.
           </p>
+          <p>Please click on link in your email again.</p>
         </div>
       </div>
     );
