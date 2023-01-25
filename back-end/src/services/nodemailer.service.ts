@@ -1,5 +1,5 @@
-import * as dotenv from 'dotenv';
-import nodemailer = require('nodemailer');
+import * as dotenv from "dotenv";
+import nodemailer = require("nodemailer");
 
 dotenv.config();
 
@@ -66,7 +66,9 @@ export const sendResetPasswordEmail = (
       html: `<p>Hello ${name},</p>
           <p>A password reset request has been made with your email address..</p>
           <p>If you did not initiate this request, you can ignore this email.</p>
-          <p>The link below allows you to reset your password, but be careful, <strong>it is only valid for 30 minutes</strong>. Once this period has passed, you will have to make a new password reset request.</p>
+          <p>The link below allows you to reset your password, but be careful, <strong>it is only valid for ${
+            parseInt(process.env.RESET_PASSWORD_EXPIRATION_DELAY!!) / 60000
+          } minute(s)</strong>. Once this period has passed, you will have to make a new password reset request.</p>
           <a href=http://localhost:3000/reset-password/${resetPasswordToken}>Change my password</a>
           <p>See you soon !</p>
           </div>`,

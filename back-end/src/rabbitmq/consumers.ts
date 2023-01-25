@@ -1,5 +1,9 @@
-import { resendConfirmationEmail, sendConfirmationEmail, sendResetPasswordEmail } from '../services/nodemailer.service';
-import { channel } from './config';
+import {
+  resendConfirmationEmail,
+  sendConfirmationEmail,
+  sendResetPasswordEmail,
+} from "../services/nodemailer.service";
+import { channel } from "./config";
 
 export const onMessageOnAccountCreationEmailQueue = async () => {
   console.log(
@@ -47,7 +51,7 @@ export const onMessageOnResetPasswordEmailQueue = async () => {
     sendResetPasswordEmail(
       parsedMessage.firstname,
       parsedMessage.email,
-      parsedMessage.token
+      parsedMessage.resetPasswordToken
     );
     channel.ack(message);
   });

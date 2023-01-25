@@ -9,6 +9,13 @@ export default class SessionService extends SessionRepository {
   }
 
   static deleteSessionById(id: string): Promise<void> {
-    return this.deleteSessionById(id);
+    return this.deleteSession(id);
+  }
+
+  static async deleteAllUserSessions(user: User) {
+    const sessions = await this.findByUser(user);
+    if (sessions) {
+      this.deleteSessions(sessions);
+    }
   }
 }

@@ -1,18 +1,18 @@
-import 'reflect-metadata';
+import "reflect-metadata";
 
-import { ApolloServer } from 'apollo-server';
-import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
-import { ExpressContext } from 'apollo-server-express';
-import * as dotenv from 'dotenv';
-import { buildSchema } from 'type-graphql';
+import { ApolloServer } from "apollo-server";
+import { ApolloServerPluginLandingPageLocalDefault } from "apollo-server-core";
+import { ExpressContext } from "apollo-server-express";
+import * as dotenv from "dotenv";
+import { buildSchema } from "type-graphql";
 
-import { getDatabase, initializeRepositories } from './database/utils';
-import User from './entities/User.entity';
-import { getSessionIdInCookie } from './http-utils';
-import { connectionToRabbitMQ } from './rabbitmq/config';
-import RequestResultResolver from './resolvers/RequestResult/RequestResult.resolver';
-import UserResolver from './resolvers/User/User.resolver';
-import UserService from './services/User.service';
+import { getDatabase, initializeRepositories } from "./database/utils";
+import User from "./entities/User.entity";
+import { getSessionIdInCookie } from "./utils/http-cookies";
+import { connectionToRabbitMQ } from "./rabbitmq/config";
+import RequestResultResolver from "./resolvers/RequestResult/RequestResult.resolver";
+import UserResolver from "./resolvers/User/User.resolver";
+import UserService from "./services/User.service";
 
 export type GlobalContext = ExpressContext & {
   user: User | null;
