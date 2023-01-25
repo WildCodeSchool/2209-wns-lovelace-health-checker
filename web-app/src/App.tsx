@@ -8,6 +8,7 @@ import Footer from './components/Footer/Footer';
 import Navbar from './components/Navbar/Navbar';
 import NavLogo from './components/NavLogo/NavLogo';
 import Account from './pages/Account/Account';
+import AccountConfirmation from './pages/AccountConfirmation/AccountConfirmation';
 import Home from './pages/Home/Home';
 import Premium from './pages/Premium/Premium';
 import Requests from './pages/Requests/Requests';
@@ -29,6 +30,10 @@ function App() {
           <Route path="/premium" element={<Premium />} />
           <Route path="/account" element={<Account />} />
           <Route path="/terms" element={<Terms />} />
+          <Route
+            path="/account-confirmation/:confirmationToken"
+            element={<AccountConfirmation />}
+          />
         </Routes>
       </div>
       <div className={styles.footer}>

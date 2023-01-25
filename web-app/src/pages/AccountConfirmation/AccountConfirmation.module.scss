@@ -1,0 +1,21 @@
+@use "../../variables.scss";
+@import "../../components.scss";
+
+.contentContainer {
+  padding: variables.$mobilePadding;
+  @media (min-width: 576px) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .error {
+    font-size: 4rem;
+    color: variables.$errorColor;
+  }
+
+  .success {
+    font-size: 4rem;
+    color: variables.$successColor;
+  }
+}
