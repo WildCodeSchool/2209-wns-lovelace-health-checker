@@ -243,7 +243,7 @@ describe("UserService integration", () => {
         const confirmedUser = await UserRepository.repository.findOne({
           where: { id: user.id },
         });
-        expect(result).toEqual("Your account has been confirmed");
+        expect(result).toBe(true);
         expect(confirmedUser?.status).toEqual(Status.ACTIVE);
         expect(confirmedUser?.accountConfirmationToken).toEqual("");
       });
