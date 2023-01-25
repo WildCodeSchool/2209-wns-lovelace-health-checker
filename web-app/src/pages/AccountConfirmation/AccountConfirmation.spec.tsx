@@ -65,7 +65,7 @@ describe("Account Confirmation", () => {
       expect(screen.getByTestId("errorIcon")).toBeInTheDocument();
       expect(
         screen.getByText(
-          "An error has occured, link is invalid or your account is already confirmed."
+          "Your unique confirmation token is invalid or has already been used."
         )
       ).toBeInTheDocument();
     });

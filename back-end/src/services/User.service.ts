@@ -1,18 +1,14 @@
-import { ExpressContext } from "apollo-server-express";
-import { compareSync, hashSync } from "bcryptjs";
-import { randomBytes } from "crypto";
+import { ExpressContext } from 'apollo-server-express';
+import { compareSync, hashSync } from 'bcryptjs';
+import { randomBytes } from 'crypto';
+import * as dotenv from 'dotenv';
 
-import Session from "../entities/Session.entity";
-import User, { Status } from "../entities/User.entity";
-import { getSessionIdInCookie } from "../utils/http-cookies";
-import {
-  sendMessageOnAccountCreationEmailQueue,
-  sendMessageOnResetPasswordEmailQueue,
-} from "../rabbitmq/providers";
-import UserRepository from "../repositories/User.repository";
-import SessionRepository from "./Session.service";
-import SessionService from "./Session.service";
-import * as dotenv from "dotenv";
+import Session from '../entities/Session.entity';
+import User, { Status } from '../entities/User.entity';
+import { sendMessageOnAccountCreationEmailQueue, sendMessageOnResetPasswordEmailQueue } from '../rabbitmq/providers';
+import UserRepository from '../repositories/User.repository';
+import { getSessionIdInCookie } from '../utils/http-cookies';
+import SessionService from './Session.service';
 
 dotenv.config();
 export default class UserService extends UserRepository {
@@ -72,7 +68,9 @@ export default class UserService extends UserRepository {
     if (!user) throw Error("User not found");
     if (
       (user.status == Status.ACTIVE && user.accountConfirmationToken == null) ||
-      user.accountConfirmationToken == ""
+      (user.status == Status.ACTIVE && user.accountConfirmationToken == "") ||
+      user.status == Status.ACTIVE ||
+      user.status == Status.INACTIVE
     )
       throw new Error("Account already active");
     this.buildAccountConfirmationMessageToQueue(user, true);
@@ -107,7 +105,7 @@ export default class UserService extends UserRepository {
       );
     }
 
-    const session = await SessionRepository.createSession(user);
+    const session = await SessionService.createSession(user);
     return { user, session };
   }
 

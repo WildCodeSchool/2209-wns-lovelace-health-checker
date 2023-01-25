@@ -1,20 +1,21 @@
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
-import { Route, Routes } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
+import { Route, Routes } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 
-import styles from './App.module.scss';
-import Footer from './components/Footer/Footer';
-import Navbar from './components/Navbar/Navbar';
-import NavLogo from './components/NavLogo/NavLogo';
-import Account from './pages/Account/Account';
-import AccountConfirmation from './pages/AccountConfirmation/AccountConfirmation';
-import Home from './pages/Home/Home';
-import Premium from './pages/Premium/Premium';
-import Requests from './pages/Requests/Requests';
-import SignIn from './pages/SignIn/SignIn';
-import SignUp from './pages/SignUp/SignUp';
-import Terms from './pages/Terms/Terms';
+import styles from "./App.module.scss";
+import Footer from "./components/Footer/Footer";
+import Navbar from "./components/Navbar/Navbar";
+import NavLogo from "./components/NavLogo/NavLogo";
+import Account from "./pages/Account/Account";
+import AccountConfirmation from "./pages/AccountConfirmation/AccountConfirmation";
+import Home from "./pages/Home/Home";
+import Premium from "./pages/Premium/Premium";
+import Requests from "./pages/Requests/Requests";
+import SignIn from "./pages/SignIn/SignIn";
+import SignUp from "./pages/SignUp/SignUp";
+import Terms from "./pages/Terms/Terms";
+import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 
 function App() {
   return (
@@ -30,6 +31,11 @@ function App() {
           <Route path="/premium" element={<Premium />} />
           <Route path="/account" element={<Account />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route
+            path="/reset-password/:resetPasswordToken"
+            element={<ForgotPassword />}
+          />
           <Route
             path="/account-confirmation/:confirmationToken"
             element={<AccountConfirmation />}

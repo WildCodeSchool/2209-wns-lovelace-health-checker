@@ -1,14 +1,10 @@
-import {
-  closeConnection,
-  initializeRepositories,
-  truncateAllTables,
-} from "../database/utils";
-import UserService from "./User.service";
-import * as provider from "../rabbitmq/providers";
-import SessionService from "./Session.service";
+import { closeConnection, initializeRepositories, truncateAllTables } from '../database/utils';
+import * as provider from '../rabbitmq/providers';
+import SessionService from './Session.service';
+import UserService from './User.service';
 
 const sendMessageOnAccountCreationEmailQueueSpy = () => {
-  jest
+  return jest
     .spyOn(provider, "sendMessageOnAccountCreationEmailQueue")
     .mockImplementation((data: any) => {
       return data;

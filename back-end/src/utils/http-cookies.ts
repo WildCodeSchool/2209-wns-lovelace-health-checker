@@ -19,6 +19,7 @@ export const getSessionIdInCookie = (
   ctx: ExpressContext
 ): string | undefined => {
   const rawCookies = ctx.req.headers.cookie;
+
   if (!rawCookies) {
     return undefined;
   }
