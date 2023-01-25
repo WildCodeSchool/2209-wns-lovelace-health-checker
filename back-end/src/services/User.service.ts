@@ -11,8 +11,8 @@ import {
 } from "../rabbitmq/providers";
 import UserRepository from "../repositories/User.repository";
 import SessionRepository from "./Session.service";
-import * as dotenv from "dotenv";
 import SessionService from "./Session.service";
+import * as dotenv from "dotenv";
 
 dotenv.config();
 export default class UserService extends UserRepository {
@@ -166,6 +166,6 @@ export default class UserService extends UserRepository {
   static logout = async (context: ExpressContext) => {
     const sessionId = getSessionIdInCookie(context);
     if (!sessionId) throw new Error("You're not signed in");
-    await SessionRepository.deleteSessionById(sessionId);
+    await SessionService.deleteSessionById(sessionId);
   };
 }
