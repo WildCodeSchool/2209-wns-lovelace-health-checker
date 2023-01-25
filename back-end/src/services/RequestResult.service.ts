@@ -22,7 +22,8 @@ export default class RequestResultService extends RequestResultRepository {
 
   public static async checkUrl(
     url: string,
-    timeout: number = 15000
+    // TODO : variabiliser timeout dans un fichier de config
+    timeout: number = 15000 
   ): Promise<RequestResult> {
     const startTimer: number = Date.now();
     const dummyRequestSetting = new RequestSetting(
