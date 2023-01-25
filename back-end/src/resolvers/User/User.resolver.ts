@@ -5,7 +5,7 @@ import User from "../../entities/User.entity";
 import {
   deleteSessionIdInCookie,
   setSessionIdInCookie,
-} from "../../http-utils";
+} from "../../utils/http-cookies";
 import UserService from "../../services/User.service";
 import {
   AskForNewPasswordArgs,

@@ -1,5 +1,5 @@
-import { ExpressContext } from 'apollo-server-express';
-import { parse } from 'cookie';
+import { ExpressContext } from "apollo-server-express";
+import { parse } from "cookie";
 
 const MAX_AGE_DAYS = 365;
 

@@ -4,7 +4,7 @@ import { randomBytes } from "crypto";
 
 import Session from "../entities/Session.entity";
 import User, { Status } from "../entities/User.entity";
-import { getSessionIdInCookie } from "../http-utils";
+import { getSessionIdInCookie } from "../utils/http-cookies";
 import {
   sendMessageOnAccountCreationEmailQueue,
   sendMessageOnResetPasswordEmailQueue,

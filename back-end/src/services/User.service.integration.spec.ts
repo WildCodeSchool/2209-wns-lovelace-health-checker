@@ -9,7 +9,7 @@ import UserRepository from "../repositories/User.repository";
 import UserService from "./User.service";
 import * as dotenv from "dotenv";
 import SessionService from "./Session.service";
-import * as HttpUtils from "../http-utils";
+import * as HttpCookies from "../utils/http-cookies";
 
 dotenv.config();
 
@@ -428,23 +428,23 @@ describe("UserService integration", () => {
   });
 
   describe("logout", () => {
-    const spy = jest
-      .spyOn(HttpUtils, "getSessionIdInCookie")
+    const getSessionIdInCookieSpy = jest
+      .spyOn(HttpCookies, "getSessionIdInCookie")
       .mockImplementation((context: any) => {
         return context.cookies.sessionId;
       });
 
-    /*     const deleteSessionByIdSpy = jest
+    const deleteSessionByIdSpy = jest
       .spyOn(SessionService, "deleteSessionById")
       .mockImplementation((data: any) => {
         return data;
-      }); */
+      });
 
     describe("getSessionIdInCookie", () => {
       it("should be called once", async () => {
         const context: any = { cookies: { sessionId: "123" } };
         await UserService.logout(context);
-        expect(spy).toHaveBeenCalledTimes(1);
+        expect(getSessionIdInCookieSpy).toHaveBeenCalledTimes(1);
       });
     });
     // Les deux ci-dessous ne fonctionnent pas...
@@ -452,16 +452,16 @@ describe("UserService integration", () => {
       it("deleteSessionById is called once", async () => {
         const context: any = { cookies: { sessionId: "123" } };
         await UserService.logout(context);
-        expect(SessionService.deleteSessionById).toHaveBeenCalledTimes(1);
+        expect(deleteSessionByIdSpy).toHaveBeenCalledTimes(1);
       });
       it("deleteSessionById is called with correct sessionId", async () => {
         const context: any = { cookies: { sessionId: "123" } };
         await UserService.logout(context);
-        expect(SessionService.deleteSessionById).toHaveBeenCalledWith("123");
+        expect(deleteSessionByIdSpy).toHaveBeenCalledWith("123");
       });
     });
     describe("when no sessionId", () => {
-      it.only("throws 'You're not signed in' error message", async () => {
+      it("throws 'You're not signed in' error message", async () => {
         const context: any = { cookies: { sessionId: "" } };
         await expect(UserService.logout(context)).rejects.toThrowError(
           "You're not signed in"
