@@ -9,6 +9,7 @@ import { CheckUrlMutation } from "../../gql/graphql";
 import Home, { URL } from "./Home";
 import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
 
+
 jest.mock("react-toastify");
 
 const renderHome = (mock?: any) => {
