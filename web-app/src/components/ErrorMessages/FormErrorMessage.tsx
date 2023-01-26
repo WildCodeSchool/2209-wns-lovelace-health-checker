@@ -10,7 +10,7 @@ const FormErrorMessage = ({ errors, name }: { errors: any; name: string }) => {
         Object.entries(messages).map(([type, message]) => (
           <div key={type} className="d-flex">
             <i className="bi bi-exclamation-circle me-2"></i>
-            <p>{message}</p>
+            <div>{message}</div>
           </div>
         ))
       }

@@ -7,6 +7,8 @@ import * as toastify from "react-toastify";
 
 import { CheckUrlMutation } from "../../gql/graphql";
 import Home, { URL } from "./Home";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+
 
 jest.mock("react-toastify");
 
@@ -289,7 +291,7 @@ describe("Home", () => {
           expect(toastify.toast.error).toHaveBeenCalledTimes(1);
         });
         expect(toastify.toast.error).toHaveBeenCalledWith(
-          "Oops, it seems that something went wrong... Please try again",
+          SERVER_IS_KO_ERROR_MESSAGE,
           { position: toastify.toast.POSITION.BOTTOM_RIGHT, toastId: 1 }
         );
       });

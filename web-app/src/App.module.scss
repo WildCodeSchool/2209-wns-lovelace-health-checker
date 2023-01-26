@@ -2,11 +2,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap");
 
 html {
-  min-width: variables.$appMinWidth;
+  min-width: variables.$app-min-width;
 }
 
 body {
-  background-image: variables.$appBackgroundImage;
+  background-image: variables.$app-background-image;
   margin: 0;
   font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
@@ -16,12 +16,13 @@ body {
 }
 
 .main {
-  max-width: variables.$desktopContainerSize;
+  max-width: variables.$desktop-container-size;
   background-color: white;
   .content {
-    min-height: calc(100vh - variables.$mobileNavbarHeight);
-    @media (min-width: 576px) {
-      min-height: calc(100vh - variables.$desktopNavbarHeight);
+    position: relative;
+    min-height: calc(100vh - variables.$height-lg);
+    @media (min-width: variables.$mobile-breakpoint) {
+      min-height: calc(100vh - variables.$height-xl);
     }
   }
   .footer {
@@ -29,10 +30,15 @@ body {
     left: 0;
     bottom: 0;
   }
+  .toastContainer {
+    @media screen and (min-width: variables.$mobile-breakpoint) {
+      right: calc((100% - (variables.$desktop-container-size)) / 2);
+    }
+  }
 }
 
 p {
-  font-size: 16px;
+  color: variables.$neutral-1000;
 }
 
 a {
@@ -40,8 +46,8 @@ a {
 }
 
 h2 {
-  color: variables.$darkestColor;
-  font-size: variables.$desktopTitleSize;
+  color: variables.$primary-1000;
+  font-size: variables.$font-lg;
 }
 
 ul {

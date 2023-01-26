@@ -1,11 +1,13 @@
 import { gql, useMutation } from "@apollo/client";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
+import FormErrorMessage from "../../components/ErrorMessages/FormErrorMessage";
+
 import {
   AskForNewPasswordMutation,
   AskForNewPasswordMutationVariables,
 } from "../../gql/graphql";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
 import styles from "./ForgotPassword.module.scss";
 
 export const ASK_FOR_NEW_PASSWORD = gql`
@@ -23,17 +25,14 @@ const ForgotPassword = () => {
       reset();
       toast.success(data.askForNewPassword, {
         position: toast.POSITION.BOTTOM_RIGHT,
-        toastId: 3,
+        toastId: 1,
       });
     },
     onError: () => {
-      toast.error(
-        "Oops... It seems that something went wront, please try again.",
-        {
-          position: toast.POSITION.BOTTOM_RIGHT,
-          toastId: 3,
-        }
-      );
+      toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        toastId: 2,
+      });
     },
   });
 
@@ -95,7 +94,7 @@ const ForgotPassword = () => {
 
           <button
             type="submit"
-            className={`${styles.button} ${styles.primaryButton} mt-4`}
+            className={`${styles.btn} ${styles.btnPrimary} mt-4`}
           >
             Confirm
           </button>

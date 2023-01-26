@@ -2,8 +2,8 @@
 @import "../../components.scss";
 
 .contentContainer {
-  padding: variables.$mobilePadding;
-  @media (min-width: 576px) {
+  padding: variables.$padding-xl;
+  @media (min-width: variables.$mobile-breakpoint) {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -11,13 +11,20 @@
 
   .error {
     font-size: 4rem;
-    color: variables.$errorColor;
+    color: variables.$red-1000;
   }
 
   .success {
     font-size: 4rem;
-    color: variables.$successColor;
+    color: variables.$green-1000;
   }
+}
+
+.link {
+  margin: "0";
+  color: "#195078";
+  text-decoration: "underline";
+  font-weight: 600;
 }
 
 .loader {
