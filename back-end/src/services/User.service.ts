@@ -129,7 +129,7 @@ export default class UserService extends UserRepository {
     resetPasswordToken: string
   ) => {
     const user = await this.getUserByResetPasswordToken(resetPasswordToken);
-    if (!user) throw Error("Token is no longer valid");
+    if (!user) throw Error("Your reset password token is no longer valid");
 
     const resetPasswordTokenIsValid =
       this.checkIfResetPasswordTokenIsValid(user);

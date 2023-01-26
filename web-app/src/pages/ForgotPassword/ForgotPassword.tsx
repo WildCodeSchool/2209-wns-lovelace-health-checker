@@ -1,13 +1,17 @@
 import { gql, useMutation } from "@apollo/client";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import FormErrorMessage from "../../components/ErrorMessages/FormErrorMessage";
+import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
 
 import {
   AskForNewPasswordMutation,
   AskForNewPasswordMutationVariables,
 } from "../../gql/graphql";
 import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import {
+  EMAIL_IS_REQUIRED_ERROR_MESSAGE,
+  EMAIL_PLACEHOLDER,
+} from "../../utils/form-validations";
 import styles from "./ForgotPassword.module.scss";
 
 export const ASK_FOR_NEW_PASSWORD = gql`
@@ -15,6 +19,10 @@ export const ASK_FOR_NEW_PASSWORD = gql`
     askForNewPassword(email: $email)
   }
 `;
+
+type AskForNewPasswordInput = {
+  email: string;
+};
 
 const ForgotPassword = () => {
   const [askForNewPassword, { loading }] = useMutation<
@@ -41,7 +49,7 @@ const ForgotPassword = () => {
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<any>({
+  } = useForm<AskForNewPasswordInput>({
     criteriaMode: "all",
   });
 
@@ -81,10 +89,10 @@ const ForgotPassword = () => {
               defaultValue={""}
               className="form-control"
               {...register("email", {
-                required: "Email is required",
+                required: EMAIL_IS_REQUIRED_ERROR_MESSAGE,
               })}
               id="email"
-              placeholder="name@example.com"
+              placeholder={EMAIL_PLACEHOLDER}
             />
             <label htmlFor="email">Email</label>
           </div>

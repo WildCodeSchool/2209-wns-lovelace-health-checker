@@ -4,10 +4,40 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import FormErrorMessage from "../../components/ErrorMessages/FormErrorMessage";
+import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
 
 import { SignUpMutation, SignUpMutationVariables } from "../../gql/graphql";
 import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import {
+  EMAIL_IS_REQUIRED_ERROR_MESSAGE,
+  EMAIL_MAX_LENGTH,
+  EMAIL_MAX_LENGTH_ERROR_MESSAGE,
+  EMAIL_PLACEHOLDER,
+  FIRSTNAME_IS_REQUIRED_ERROR_MESSAGE,
+  FIRSTNAME_MAX_LENGTH,
+  FIRSTNAME_MAX_LENGTH_ERROR_MESSAGE,
+  FIRSTNAME_MIN_LENGTH,
+  FIRSTNAME_MIN_LENGTH_ERROR_MESSAGE,
+  FIRSTNAME_PATTERN_ERROR_MESSAGE,
+  FIRSTNAME_PLACEHOLDER,
+  LASTNAME_IS_REQUIRED_ERROR_MESSAGE,
+  LASTNAME_MAX_LENGTH,
+  LASTNAME_MAX_LENGTH_ERROR_MESSAGE,
+  LASTNAME_MIN_LENGTH,
+  LASTNAME_MIN_LENGTH_ERROR_MESSAGE,
+  LASTNAME_PATTERN_ERROR_MESSAGE,
+  LASTNAME_PLACEHOLDER,
+  PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE,
+  PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE,
+  PASSWORD_CONFIRMATION_PLACEHOLDER,
+  PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
+  PASSWORD_PATTERN_ERROR_MESSAGE,
+  PASSWORD_PLACEHOLDER,
+} from "../../utils/form-validations";
+import {
+  firstNameAndLastNameRegExp,
+  passwordRegExp,
+} from "../../utils/regular-expressions";
 import styles from "./SignUp.module.scss";
 
 export const SIGN_UP = gql`
@@ -40,12 +70,6 @@ type SignUpInputs = {
   passwordConfirmation: string;
   agreedTerms: boolean;
 };
-
-const firstNameAndLastNameRegExp = new RegExp(
-  /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
-);
-
-const passwordRegExp = new RegExp("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$");
 
 const SignUp = () => {
   const [signUp, { data, loading }] = useMutation<
@@ -140,14 +164,14 @@ const SignUp = () => {
                 defaultValue={""}
                 className="form-control"
                 {...register("email", {
-                  required: "Email is required",
+                  required: EMAIL_IS_REQUIRED_ERROR_MESSAGE,
                   maxLength: {
-                    value: 320,
-                    message: "Email must have maximum 320 character",
+                    value: EMAIL_MAX_LENGTH,
+                    message: EMAIL_MAX_LENGTH_ERROR_MESSAGE,
                   },
                 })}
                 id="email"
-                placeholder="name@example.com"
+                placeholder={EMAIL_PLACEHOLDER}
               />
               <label htmlFor="email">Email</label>
             </div>
@@ -161,23 +185,22 @@ const SignUp = () => {
                 defaultValue={""}
                 className="form-control"
                 {...register("firstname", {
-                  required: "First name is required",
+                  required: FIRSTNAME_IS_REQUIRED_ERROR_MESSAGE,
                   minLength: {
-                    value: 2,
-                    message: "First name must have at least 2 characters",
+                    value: FIRSTNAME_MIN_LENGTH,
+                    message: FIRSTNAME_MIN_LENGTH_ERROR_MESSAGE,
                   },
                   maxLength: {
-                    value: 100,
-                    message: "First name must have maximum 100 characters",
+                    value: FIRSTNAME_MAX_LENGTH,
+                    message: FIRSTNAME_MAX_LENGTH_ERROR_MESSAGE,
                   },
                   pattern: {
                     value: firstNameAndLastNameRegExp,
-                    message:
-                      "First name must not contain numbers or special characters",
+                    message: FIRSTNAME_PATTERN_ERROR_MESSAGE,
                   },
                 })}
                 id="firstname"
-                placeholder="John"
+                placeholder={FIRSTNAME_PLACEHOLDER}
               />
               <label htmlFor="firstname">Firstname</label>
             </div>
@@ -191,23 +214,22 @@ const SignUp = () => {
                 defaultValue={""}
                 className="form-control"
                 {...register("lastname", {
-                  required: "Last name is required",
+                  required: LASTNAME_IS_REQUIRED_ERROR_MESSAGE,
                   minLength: {
-                    value: 2,
-                    message: "Last name must have at least 2 characters",
+                    value: LASTNAME_MIN_LENGTH,
+                    message: LASTNAME_MIN_LENGTH_ERROR_MESSAGE,
                   },
                   maxLength: {
-                    value: 100,
-                    message: "Last name must have maximum 100 characters",
+                    value: LASTNAME_MAX_LENGTH,
+                    message: LASTNAME_MAX_LENGTH_ERROR_MESSAGE,
                   },
                   pattern: {
                     value: firstNameAndLastNameRegExp,
-                    message:
-                      "Last name must not contain numbers or special characters",
+                    message: LASTNAME_PATTERN_ERROR_MESSAGE,
                   },
                 })}
                 id="lastname"
-                placeholder="Doe"
+                placeholder={LASTNAME_PLACEHOLDER}
               />
               <label htmlFor="lastname">Lastname</label>
             </div>
@@ -222,15 +244,14 @@ const SignUp = () => {
                 defaultValue={""}
                 className={`form-control ${styles.passwordInput}`}
                 {...register("password", {
-                  required: "Password is required",
+                  required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                   pattern: {
                     value: passwordRegExp,
-                    message:
-                      "Password must have at least 8 characters, one upper case, one lower case, and one number",
+                    message: PASSWORD_PATTERN_ERROR_MESSAGE,
                   },
                 })}
                 id="password"
-                placeholder="Your password"
+                placeholder={PASSWORD_PLACEHOLDER}
               />
               <div className={`input-group-text ${styles.showHidePassword}`}>
                 {passwordInputType === "password" ? (
@@ -260,12 +281,13 @@ const SignUp = () => {
                 defaultValue={""}
                 className={`form-control ${styles.passwordInput}`}
                 {...register("passwordConfirmation", {
-                  required: "Password confirmation is required",
+                  required: PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE,
                   validate: (value) =>
-                    value === password.current || "Passwords don't match",
+                    value === password.current ||
+                    PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE,
                 })}
                 id="passwordConfirmation"
-                placeholder="Your password confirmation"
+                placeholder={PASSWORD_CONFIRMATION_PLACEHOLDER}
               />
               <div className={`input-group-text ${styles.showHidePassword}`}>
                 {passwordConfirmationInputType === "password" ? (
