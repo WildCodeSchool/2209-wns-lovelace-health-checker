@@ -42,8 +42,7 @@ export default class UserResolver {
   async askForNewPassword(
     @Args() { email }: AskForNewPasswordArgs
   ): Promise<string> {
-    await UserService.askForNewPassword(email);
-    return "Your request has been processed successfully";
+    return await UserService.askForNewPassword(email);
   }
 
   @Mutation(() => String)

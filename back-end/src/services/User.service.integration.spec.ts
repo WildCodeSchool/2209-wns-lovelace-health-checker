@@ -1,12 +1,16 @@
-import * as dotenv from 'dotenv';
+import * as dotenv from "dotenv";
 
-import { closeConnection, initializeRepositories, truncateAllTables } from '../database/utils';
-import User, { Status } from '../entities/User.entity';
-import * as provider from '../rabbitmq/providers';
-import UserRepository from '../repositories/User.repository';
-import * as HttpCookies from '../utils/http-cookies';
-import SessionService from './Session.service';
-import UserService from './User.service';
+import {
+  closeConnection,
+  initializeRepositories,
+  truncateAllTables,
+} from "../database/utils";
+import User, { Status } from "../entities/User.entity";
+import * as provider from "../rabbitmq/providers";
+import UserRepository from "../repositories/User.repository";
+import * as HttpCookies from "../utils/http-cookies";
+import SessionService from "./Session.service";
+import UserService from "./User.service";
 
 dotenv.config();
 
@@ -301,10 +305,11 @@ describe("UserService integration", () => {
 
   describe("askForNewPassword", () => {
     describe("when email doesn't exist", () => {
-      it("throws 'Email not found' error message", () => {
-        expect(
-          UserService.askForNewPassword("dummy@email.com")
-        ).rejects.toThrowError("Email not found");
+      it("returns informative message", async () => {
+        const message = await UserService.askForNewPassword("dummy@email.com");
+        expect(message).toBe(
+          "If this email address exists, you'll receive an email to regenerate your password. Check your inbox."
+        );
       });
     });
     describe("when email exists", () => {
@@ -332,6 +337,18 @@ describe("UserService integration", () => {
         );
         await UserService.askForNewPassword(user.email);
         expect(spy).toHaveBeenCalledTimes(1);
+      });
+      it("returns informative message", async () => {
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          "password"
+        );
+        const message = await UserService.askForNewPassword(user.email);
+        expect(message).toBe(
+          "If this email address exists, you'll receive an email to regenerate your password. Check your inbox."
+        );
       });
     });
   });

@@ -64,7 +64,7 @@ export const sendResetPasswordEmail = (
       to: email,
       subject: "[Health Check] Reset your password",
       html: `<p>Hello ${name},</p>
-          <p>A password reset request has been made with your email address..</p>
+          <p>A password reset request has been made with your email address.</p>
           <p>If you did not initiate this request, you can ignore this email.</p>
           <p>The link below allows you to reset your password, but be careful, <strong>it is only valid for ${
             parseInt(process.env.RESET_PASSWORD_EXPIRATION_DELAY!!) / 60000

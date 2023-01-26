@@ -16,6 +16,7 @@ import SignIn from "./pages/SignIn/SignIn";
 import SignUp from "./pages/SignUp/SignUp";
 import Terms from "./pages/Terms/Terms";
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword/ResetPassword";
 
 function App() {
   return (
@@ -34,7 +35,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route
             path="/reset-password/:resetPasswordToken"
-            element={<ForgotPassword />}
+            element={<ResetPassword />}
           />
           <Route
             path="/account-confirmation/:confirmationToken"
