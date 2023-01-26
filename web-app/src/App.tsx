@@ -1,22 +1,22 @@
-import "react-toastify/dist/ReactToastify.css";
+import 'react-toastify/dist/ReactToastify.css';
 
-import { Route, Routes } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
+import { Route, Routes } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 
-import styles from "./App.module.scss";
-import Footer from "./components/Footer/Footer";
-import Navbar from "./components/Navbar/Navbar";
-import NavLogo from "./components/NavLogo/NavLogo";
-import Account from "./pages/Account/Account";
-import AccountConfirmation from "./pages/AccountConfirmation/AccountConfirmation";
-import Home from "./pages/Home/Home";
-import Premium from "./pages/Premium/Premium";
-import Requests from "./pages/Requests/Requests";
-import SignIn from "./pages/SignIn/SignIn";
-import SignUp from "./pages/SignUp/SignUp";
-import Terms from "./pages/Terms/Terms";
-import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword/ResetPassword";
+import styles from './App.module.scss';
+import Footer from './components/Footer/Footer';
+import Navbar from './components/Navbar/Navbar';
+import NavLogo from './components/NavLogo/NavLogo';
+import Account from './pages/Account/Account';
+import AccountConfirmation from './pages/AccountConfirmation/AccountConfirmation';
+import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
+import Home from './pages/Home/Home';
+import Premium from './pages/Premium/Premium';
+import Requests from './pages/Requests/Requests';
+import ResetPassword from './pages/ResetPassword/ResetPassword';
+import SignIn from './pages/SignIn/SignIn';
+import SignUp from './pages/SignUp/SignUp';
+import Terms from './pages/Terms/Terms';
 
 function App() {
   return (
@@ -46,7 +46,8 @@ function App() {
       <div className={styles.footer}>
         <Footer />
       </div>
-      <ToastContainer />
+      <ToastContainer className={styles.toastContainerDesktop} />
+      <ToastContainer className={styles.toastContainerMobile} />
     </main>
   );
 }

@@ -1,17 +1,18 @@
-import { gql, useMutation } from "@apollo/client";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import FormErrorMessage from "../../components/ErrorMessages/FormErrorMessage";
+import { gql, useMutation } from '@apollo/client';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
+import FormErrorMessage from '../../components/ErrorMessages/FormErrorMessage';
 import {
   ResendAccountConfirmationTokenMutation,
   ResendAccountConfirmationTokenMutationVariables,
   SignInMutation,
   SignInMutationVariables,
-} from "../../gql/graphql";
-import styles from "./SignIn.module.scss";
+} from '../../gql/graphql';
+import { SERVER_IS_KO_ERROR_MESSAGE } from '../../utils/error-messages';
+import styles from './SignIn.module.scss';
 
 export const SIGN_IN = gql`
   mutation SignIn($email: String!, $password: String!) {
@@ -40,7 +41,7 @@ const SignIn = () => {
     SignInMutationVariables
   >(SIGN_IN, {
     onCompleted: (data) => {
-      toast.success("Welcome " + data.signIn.firstname, {
+      toast.success("Welcome " + data.signIn.firstname + " !", {
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: 1,
       });
@@ -49,8 +50,21 @@ const SignIn = () => {
     onError: (error) => {
       if (error.message.includes("Your account is not active")) {
         setIsPending(true);
-      } else {
+        toast.info("Please check your email to confirm your account", {
+          position: toast.POSITION.BOTTOM_RIGHT,
+          toastId: 4,
+        });
+      } else if (error.message.includes("Incorrect credentials")) {
         setIsPending(false);
+        toast.error("Incorrect credentials", {
+          position: toast.POSITION.BOTTOM_RIGHT,
+          toastId: 3,
+        });
+      } else {
+        toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
+          position: toast.POSITION.BOTTOM_RIGHT,
+          toastId: 5,
+        });
       }
     },
   });
@@ -95,8 +109,7 @@ const SignIn = () => {
         <form className={styles.signUpForm} onSubmit={handleSubmit(onSubmit)}>
           {loading ? (
             <div
-              className={`${styles.loaderContainer} d-flex justify-content-center align-items-center`}
-            >
+              className={`${styles.loaderContainer} d-flex justify-content-center align-items-center`}>
               <div className={styles.loader} role="status"></div>
             </div>
           ) : (
@@ -139,14 +152,12 @@ const SignIn = () => {
                 <i
                   data-testid="passwordEye"
                   onClick={() => setPasswordInputType("text")}
-                  className={`bi bi-eye ${styles.eye}`}
-                ></i>
+                  className={`bi bi-eye ${styles.eye}`}></i>
               ) : (
                 <i
                   data-testid="passwordEyeSlash"
                   onClick={() => setPasswordInputType("password")}
-                  className={`bi bi-eye-slash ${styles.eye}`}
-                ></i>
+                  className={`bi bi-eye-slash ${styles.eye}`}></i>
               )}
             </div>
             <label htmlFor="password">Password</label>
@@ -156,15 +167,14 @@ const SignIn = () => {
           </div>
           {isPending && (
             <>
-              <div className="mt-3 mb-2">
+              <div className={`${styles.pendingAccount}`}>
                 <p>
-                  <b>Your account isn't active yet !</b> Verify your inbox to
-                  confirm your account.{" "}
+                  Your account isn't active yet ! Verify your inbox to confirm
+                  your account.{" "}
                   <span
                     className={`${styles.navlink}`}
                     style={{ cursor: "pointer" }}
-                    onClick={sendConfirmationEmail}
-                  >
+                    onClick={sendConfirmationEmail}>
                     Send confirmation email again
                   </span>
                 </p>
@@ -180,8 +190,7 @@ const SignIn = () => {
           </div>
           <button
             type="submit"
-            className={`${styles.btn} ${styles.btnPrimary} mt-4`}
-          >
+            className={`${styles.btn} ${styles.btnPrimary} mt-4`}>
             Sign in
           </button>
         </form>
