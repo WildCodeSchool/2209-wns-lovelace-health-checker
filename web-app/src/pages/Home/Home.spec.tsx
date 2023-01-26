@@ -101,14 +101,14 @@ const CHECK_URL_TIMEOUT_MOCK: MockedResponse<CheckUrlMutation> = {
   error: new Error("Request Timeout"),
 };
 
-const CHECK_URL_UNKNOW_ERROR_MOCK: MockedResponse<CheckUrlMutation> = {
+const CHECK_URL_UNKNOWN_ERROR_MOCK: MockedResponse<CheckUrlMutation> = {
   request: {
     query: URL,
     variables: {
       url: "https://youtube.com",
     },
   },
-  error: new Error("Unknow Error"),
+  error: new Error(),
 };
 
 describe("Home", () => {
@@ -262,7 +262,6 @@ describe("Home", () => {
 
       it("throws a no response error message when the url doesn't give a response", async () => {
         const url = "https://www.wrongurlthatreturnserror.com";
-        // TODO : variabiliser
         renderHome([CHECK_URL_NO_RESPONSE_MOCK]);
         submitForm(url);
         await waitFor(() => {
@@ -277,9 +276,9 @@ describe("Home", () => {
         });
       });
 
-      it("renders a toaster when an unknow error is throw from the back and don't show result", async () => {
+      it("renders a toaster when an unknown error is throw from the back and don't show result", async () => {
         const url = "https://youtube.com";
-        renderHome([CHECK_URL_UNKNOW_ERROR_MOCK]);
+        renderHome([CHECK_URL_UNKNOWN_ERROR_MOCK]);
         submitForm(url);
         await waitFor(() => {
           expect(
