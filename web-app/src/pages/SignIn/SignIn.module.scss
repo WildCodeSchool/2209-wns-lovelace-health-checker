@@ -25,6 +25,10 @@
       margin-bottom: variables.$margin-xl;
     }
   }
+  .pendingAccount {
+    text-align: center;
+    margin: variables.$margin-xxl 0;
+  }
   .navlink {
     @include clickableText;
     @media (min-width: variables.$mobile-breakpoint) {
