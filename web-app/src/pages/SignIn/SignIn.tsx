@@ -203,7 +203,7 @@ const SignIn = () => {
           )}
           <div data-testid="alreadyRegistered" className="mt-3">
             <p className={styles.alreadyRegistered}>
-              <Link className={styles.navlink} to="/ask-new-password">
+              <Link className={styles.navlink} to="/forgot-password">
                 Forgot your password ?
               </Link>
             </p>
