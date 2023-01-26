@@ -433,7 +433,7 @@ describe("UserService integration", () => {
           "23df6ed6c9c4c11fd6e6f1a599df55726a976876a66cb694bb2091f088eb61d9";
         await expect(
           UserService.resetPassword("password", "badResetPasswordToken")
-        ).rejects.toThrowError("Token is no longer valid");
+        ).rejects.toThrowError("Your reset password token is no longer valid");
       });
     });
     describe("user have a valid token but token's expiry time has been reached", () => {

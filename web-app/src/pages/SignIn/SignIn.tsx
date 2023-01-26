@@ -1,18 +1,27 @@
-import { gql, useMutation } from '@apollo/client';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { gql, useMutation } from "@apollo/client";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
 
-import FormErrorMessage from '../../components/ErrorMessages/FormErrorMessage';
 import {
   ResendAccountConfirmationTokenMutation,
   ResendAccountConfirmationTokenMutationVariables,
   SignInMutation,
   SignInMutationVariables,
-} from '../../gql/graphql';
-import { SERVER_IS_KO_ERROR_MESSAGE } from '../../utils/error-messages';
-import styles from './SignIn.module.scss';
+} from "../../gql/graphql";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import styles from "./SignIn.module.scss";
+
+import {
+  EMAIL_IS_REQUIRED_ERROR_MESSAGE,
+  EMAIL_MAX_LENGTH,
+  EMAIL_MAX_LENGTH_ERROR_MESSAGE,
+  EMAIL_PLACEHOLDER,
+  PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
+  PASSWORD_PLACEHOLDER,
+} from "../../utils/form-validations";
 
 export const SIGN_IN = gql`
   mutation SignIn($email: String!, $password: String!) {
@@ -112,7 +121,8 @@ const SignIn = () => {
         <form className={styles.signUpForm} onSubmit={handleSubmit(onSubmit)}>
           {loading ? (
             <div
-              className={`${styles.loaderContainer} d-flex justify-content-center align-items-center`}>
+              className={`${styles.loaderContainer} d-flex justify-content-center align-items-center`}
+            >
               <div className={styles.loader} role="status"></div>
             </div>
           ) : (
@@ -124,14 +134,14 @@ const SignIn = () => {
               defaultValue={""}
               className="form-control"
               {...register("email", {
-                required: "Email is required",
+                required: EMAIL_IS_REQUIRED_ERROR_MESSAGE,
                 maxLength: {
-                  value: 320,
-                  message: "Email must have maximum 320 character",
+                  value: EMAIL_MAX_LENGTH,
+                  message: EMAIL_MAX_LENGTH_ERROR_MESSAGE,
                 },
               })}
               id="email"
-              placeholder="name@example.com"
+              placeholder={EMAIL_PLACEHOLDER}
             />
             <label htmlFor="email">Email</label>
           </div>
@@ -145,22 +155,24 @@ const SignIn = () => {
               defaultValue={""}
               className={`form-control ${styles.passwordInput}`}
               {...register("password", {
-                required: "Password is required",
+                required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
               })}
               id="password"
-              placeholder="Your password"
+              placeholder={PASSWORD_PLACEHOLDER}
             />
             <div className={`input-group-text ${styles.showHidePassword}`}>
               {passwordInputType === "password" ? (
                 <i
                   data-testid="passwordEye"
                   onClick={() => setPasswordInputType("text")}
-                  className={`bi bi-eye ${styles.eye}`}></i>
+                  className={`bi bi-eye ${styles.eye}`}
+                ></i>
               ) : (
                 <i
                   data-testid="passwordEyeSlash"
                   onClick={() => setPasswordInputType("password")}
-                  className={`bi bi-eye-slash ${styles.eye}`}></i>
+                  className={`bi bi-eye-slash ${styles.eye}`}
+                ></i>
               )}
             </div>
             <label htmlFor="password">Password</label>
@@ -172,7 +184,8 @@ const SignIn = () => {
             <>
               <div
                 className={`${styles.pendingAccount}`}
-                data-testid="errorMessage">
+                data-testid="errorMessage"
+              >
                 <p>
                   Your account isn't active yet ! Verify your inbox to confirm
                   your account.{" "}
@@ -180,7 +193,8 @@ const SignIn = () => {
                     className={`${styles.navlink}`}
                     style={{ cursor: "pointer" }}
                     onClick={sendConfirmationEmail}
-                    data-testid="resendConfirmationEmail">
+                    data-testid="resendConfirmationEmail"
+                  >
                     Send confirmation email again
                   </span>
                 </p>
@@ -196,7 +210,8 @@ const SignIn = () => {
           </div>
           <button
             type="submit"
-            className={`${styles.btn} ${styles.btnPrimary} mt-4`}>
+            className={`${styles.btn} ${styles.btnPrimary} mt-4`}
+          >
             Sign in
           </button>
         </form>
