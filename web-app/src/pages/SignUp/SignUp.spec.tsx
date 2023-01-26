@@ -1,13 +1,14 @@
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
 
-import { MockedProvider, MockedResponse } from '@apollo/client/testing';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { createMemoryHistory, MemoryHistory } from 'history';
-import { MemoryRouter, Router } from 'react-router-dom';
-import * as toastify from 'react-toastify';
+import { MockedProvider, MockedResponse } from "@apollo/client/testing";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { createMemoryHistory, MemoryHistory } from "history";
+import { MemoryRouter, Router } from "react-router-dom";
+import * as toastify from "react-toastify";
 
-import { SignUpMutation } from '../../gql/graphql';
-import SignUp, { SIGN_UP } from './SignUp';
+import { SignUpMutation } from "../../gql/graphql";
+import SignUp, { SIGN_UP } from "./SignUp";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
 
 jest.mock("react-toastify");
 
@@ -95,6 +96,20 @@ const SIGN_UP_EMAIL_ALREADY_USED_MOCK: MockedResponse<SignUpMutation> = {
     },
   },
   error: new Error("This email is already used"),
+};
+
+const SERVER_IS_KO: MockedResponse<SignUpMutation> = {
+  request: {
+    query: SIGN_UP,
+    variables: {
+      firstname: "Vianney",
+      lastname: "Accart",
+      email: "vianneyaccart@gmail.com",
+      password: "Vianney69",
+      passwordConfirmation: "Vianney69",
+    },
+  },
+  error: new Error(),
 };
 
 describe("SignUp", () => {
@@ -223,6 +238,24 @@ describe("SignUp", () => {
             expect(
               screen.getByText(/Your account has been created successfully/i)
             ).toBeInTheDocument();
+          });
+        });
+      });
+      describe("server is KO", () => {
+        it("renders an error toast", async () => {
+          renderSignUp([SERVER_IS_KO]);
+          submitForm(
+            "vianneyaccart@gmail.com",
+            "Vianney",
+            "Accart",
+            "Vianney69",
+            "Vianney69"
+          );
+          await waitFor(() => {
+            expect(toastify.toast.error).toHaveBeenCalledWith(
+              SERVER_IS_KO_ERROR_MESSAGE,
+              { position: toastify.toast.POSITION.BOTTOM_RIGHT, toastId: 3 }
+            );
           });
         });
       });

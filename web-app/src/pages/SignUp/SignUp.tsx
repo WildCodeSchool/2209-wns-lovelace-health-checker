@@ -1,12 +1,14 @@
-import { gql, useMutation } from '@apollo/client';
-import { useRef, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { gql, useMutation } from "@apollo/client";
+import { useRef, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
-import FormErrorMessage from '../../components/ErrorMessage/FormErrorMessage';
-import { SignUpMutation, SignUpMutationVariables } from '../../gql/graphql';
-import styles from './SignUp.module.scss';
+import FormErrorMessage from "../../components/ErrorMessages/FormErrorMessage";
+
+import { SignUpMutation, SignUpMutationVariables } from "../../gql/graphql";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import styles from "./SignUp.module.scss";
 
 export const SIGN_UP = gql`
   mutation SignUp(
@@ -68,13 +70,10 @@ const SignUp = () => {
           });
           break;
         default:
-          toast.error(
-            "Oops... It seems that something went wront, please try again.",
-            {
-              position: toast.POSITION.BOTTOM_RIGHT,
-              toastId: 3,
-            }
-          );
+          toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 3,
+          });
       }
     },
   });

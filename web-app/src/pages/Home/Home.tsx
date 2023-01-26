@@ -3,12 +3,15 @@ import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import FormErrorMessage from "../../components/ErrorMessages/FormErrorMessage";
 
-import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
 import HomepageRequestTable from "../../components/HomepageRequestTable/HomepageRequestTable";
 import { CheckUrlMutation, CheckUrlMutationVariables } from "../../gql/graphql";
+import {
+  getErrorMessage,
+  SERVER_IS_KO_ERROR_MESSAGE,
+} from "../../utils/error-messages";
 import styles from "./Home.module.scss";
-import { getErrorMessage } from "../../utils";
 
 export const URL = gql`
   mutation CheckUrl($url: String!) {
@@ -22,10 +25,6 @@ export const URL = gql`
 
 // Default duration if there is no environment variable
 const defaultRequestTimeoutDuration: number = 15000;
-
-// TODO : variabiliser ce toast
-const defaultErrorToast: string =
-  "Oops, it seems that something went wrong... Please try again";
 
 // TODO : variabiliser ces messages d'erreur en config, puis appelé ces variables directement dans le tableau errorMessageArray
 const requestTimeoutErrorMessage = "Request Timeout";
@@ -82,7 +81,7 @@ const Home = () => {
           // Do nothing and break so no toast is generated
           break;
         default:
-          toast.error(defaultErrorToast, {
+          toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 1,
           });
