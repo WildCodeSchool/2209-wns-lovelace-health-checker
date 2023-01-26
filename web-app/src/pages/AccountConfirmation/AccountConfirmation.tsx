@@ -69,11 +69,11 @@ const AccountConfirmation = () => {
           <p>
             Your account has been confirmed successfully. You can now{" "}
             <Link
-              to={"/sign-up"}
+              to={"/sign-in"}
+              className={`${styles.link}`}
               style={{
                 margin: "0",
-                color: "#212529",
-                textDecoration: "underline",
+                color: "#195078",
               }}>
               log in
             </Link>{" "}

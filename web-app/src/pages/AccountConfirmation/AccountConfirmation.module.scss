@@ -20,6 +20,13 @@
   }
 }
 
+.link {
+  margin: "0";
+  color: "#195078";
+  text-decoration: "underline";
+  font-weight: 600;
+}
+
 .loader {
   @include loader;
 }
