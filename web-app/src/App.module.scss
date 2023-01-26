@@ -30,6 +30,11 @@ body {
     left: 0;
     bottom: 0;
   }
+  .toastContainer {
+    @media screen and (min-width: variables.$mobile-breakpoint) {
+      right: calc((100% - (variables.$desktop-container-size)) / 2);
+    }
+  }
 }
 
 p {
@@ -47,17 +52,4 @@ h2 {
 
 ul {
   list-style-type: none;
-}
-
-.toastContainerDesktop {
-  right: calc((100% - (variables.$desktop-container-size)) / 2);
-  @media screen and (max-width: variables.$mobile-breakpoint) {
-    display: none;
-  }
-}
-
-.toastContainerMobile {
-  @media screen and (min-width: variables.$mobile-breakpoint) {
-    display: none;
-  }
 }

@@ -46,8 +46,7 @@ function App() {
       <div className={styles.footer}>
         <Footer />
       </div>
-      <ToastContainer className={styles.toastContainerDesktop} />
-      <ToastContainer className={styles.toastContainerMobile} />
+      <ToastContainer className={styles.toastContainer} />
     </main>
   );
 }
