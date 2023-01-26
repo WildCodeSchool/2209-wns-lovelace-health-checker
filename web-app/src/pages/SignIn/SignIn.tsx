@@ -48,13 +48,16 @@ const SignIn = () => {
       navigate("/");
     },
     onError: (error) => {
-      if (error.message.includes("Your account is not active")) {
+      if (
+        error.message ===
+        "Your account is not active, click on the link in your email to activate it"
+      ) {
         setIsPending(true);
         toast.info("Please check your email to confirm your account", {
           position: toast.POSITION.BOTTOM_RIGHT,
           toastId: 4,
         });
-      } else if (error.message.includes("Incorrect credentials")) {
+      } else if (error.message === "Incorrect credentials") {
         setIsPending(false);
         toast.error("Incorrect credentials", {
           position: toast.POSITION.BOTTOM_RIGHT,
@@ -167,14 +170,17 @@ const SignIn = () => {
           </div>
           {isPending && (
             <>
-              <div className={`${styles.pendingAccount}`}>
+              <div
+                className={`${styles.pendingAccount}`}
+                data-testid="errorMessage">
                 <p>
                   Your account isn't active yet ! Verify your inbox to confirm
                   your account.{" "}
                   <span
                     className={`${styles.navlink}`}
                     style={{ cursor: "pointer" }}
-                    onClick={sendConfirmationEmail}>
+                    onClick={sendConfirmationEmail}
+                    data-testid="resendConfirmationEmail">
                     Send confirmation email again
                   </span>
                 </p>
