@@ -1,12 +1,12 @@
 @use "../../variables.scss";
 
 .footer {
-  background-color: variables.$mainColor;
+  background-color: variables.$primary-800;
   height: 120px;
-  padding: 0px variables.$mobilePadding;
-  margin-bottom: variables.$mobileNavbarHeight;
-  @media (min-width: 576px) {
-    padding: 0px variables.$desktopPadding;
+  padding: 0px variables.$padding-xl;
+  margin-bottom: variables.$height-lg;
+  @media (min-width: variables.$mobile-breakpoint) {
+    padding: 0px variables.$padding-xxl;
     margin-bottom: 0;
   }
   @media (min-width: 676px) {
@@ -41,5 +41,5 @@ a {
 }
 
 a:hover {
-  color: variables.$lightestColor;
+  color: variables.$primary-100;
 }

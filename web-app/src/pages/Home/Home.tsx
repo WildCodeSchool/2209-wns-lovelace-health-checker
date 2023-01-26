@@ -193,7 +193,7 @@ const Home = () => {
             className="m-0 col-12 col-md-6 d-flex justify-content-center"
             to="/sign-up"
           >
-            <button className={`${styles.button} ${styles.primaryButton}`}>
+            <button className={`${styles.btn} ${styles.btnPrimary}`}>
               Create your free account
             </button>
           </Link>
@@ -212,7 +212,7 @@ const Home = () => {
             className="m-0 col-12 col-md-6 d-flex justify-content-center"
             to="/premium"
           >
-            <button className={`${styles.button} ${styles.secondaryButton}`}>
+            <button className={`${styles.btn} ${styles.btnSecondary}`}>
               Discover Premium
             </button>
           </Link>

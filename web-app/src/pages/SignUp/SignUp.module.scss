@@ -2,58 +2,45 @@
 @import "../../components.scss";
 
 .contentContainer {
-  padding: variables.$mobilePadding;
-  @media (min-width: 576px) {
+  @include contentContainer;
+  @media (min-width: variables.$mobile-breakpoint) {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
   .desktopContainer {
-    @media (min-width: 576px) {
-      padding: variables.$desktopPadding;
-      width: 550px;
-      border-radius: 20px;
-      margin-bottom: 24px;
-      background-color: variables.$lightestColor;
-    }
+    @include desktopContainer;
   }
   .separator {
+    @include separator;
     margin-top: 36px;
-    margin-bottom: 24px;
-    @media (min-width: 576px) {
+    @media (min-width: variables.$mobile-breakpoint) {
       display: none;
     }
   }
   .alreadyRegistered {
     margin: 0;
     text-align: center;
-    @media (min-width: 576px) {
-      margin-bottom: 24px;
+    @media (min-width: variables.$mobile-breakpoint) {
+      margin-bottom: variables.$margin-xl;
     }
   }
   .navlink {
-    margin: 0;
-    color: variables.$mainColor;
-    font-weight: 600;
-    @media (min-width: 576px) {
-      margin-bottom: 48px;
+    @include clickableText;
+    @media (min-width: variables.$mobile-breakpoint) {
+      margin-bottom: variables.$margin-xxl;
     }
   }
-  .button {
-    @include button;
-    height: 60px;
-    margin-top: 16px;
-    @media (min-width: 576px) {
-      min-width: auto;
+  .btn {
+    @include btn-mobile;
+    margin-top: variables.$margin-md;
+    @media (min-width: variables.$mobile-breakpoint) {
+      @include btn;
       width: 100%;
-      height: 60px;
     }
   }
-  .primaryButton {
-    @include primaryButton;
-    &:hover {
-      @include primaryButtonHover;
-    }
+  .btnPrimary {
+    @include btnPrimary;
   }
 
   .errorMessage {
@@ -61,36 +48,36 @@
   }
 
   .passwordInput {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
+    border-top-right-radius: variables.$border-radius-none;
+    border-bottom-right-radius: variables.$border-radius-none;
   }
 
   .showHidePassword {
-    border-radius: 0;
-    border-left: 0;
+    border-radius: variables.$border-radius-none;
+    border-left: variables.$border-radius-none;
     border-top-right-radius: 0.375rem;
     border-bottom-right-radius: 0.375rem;
   }
 
   .eye {
-    cursor: pointer;
+    @include clickable;
   }
 
   .success {
-    font-size: 4rem;
-    color: variables.$successColor;
+    font-size: 64px;
+    color: variables.$green-1000;
   }
 
   .signUpForm {
     position: relative;
     .loaderContainer {
-      background-color: rgba(255, 255, 255, 0.667);
+      background-color: variables.$loader-transparent-bg;
       width: 100%;
       height: 100%;
       position: absolute;
       z-index: 2;
-      @media (min-width: 576px) {
-        background-color: #ebf5ff9e;
+      @media (min-width: variables.$mobile-breakpoint) {
+        background-color: variables.$primary-50;
       }
       .loader {
         @include loader;

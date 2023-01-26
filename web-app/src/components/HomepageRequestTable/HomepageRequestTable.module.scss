@@ -7,19 +7,19 @@ tr {
 td,
 th {
   width: 33%;
-  color: variables.$darkestColor;
+  color: variables.$primary-1000;
   font-size: 12px;
-  @media (min-width: 576px) {
+  @media (min-width: variables.$mobile-breakpoint) {
     font-size: initial;
   }
 }
 
 th {
-  font-weight: variables.$tableHeadFontWeight;
+  font-weight: variables.$font-weight-600;
 }
 
 thead {
-  background-color: variables.$lightestColor;
+  background-color: variables.$primary-100;
 }
 
 table {
@@ -30,9 +30,9 @@ table {
 }
 
 .available {
-  color: variables.$successColor;
+  color: variables.$green-1000;
 }
 
 .notAvailable {
-  color: variables.$errorColor;
+  color: variables.$red-1000;
 }

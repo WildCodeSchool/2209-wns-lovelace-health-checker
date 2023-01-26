@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
-import logo from '../../assets/images/logo.png';
-import styles from './Navbar.module.scss';
+import logo from "../../assets/images/logo.png";
+import styles from "./Navbar.module.scss";
 
 const Navbar = () => {
   let isLogged: boolean = false;
@@ -125,7 +125,9 @@ const Navbar = () => {
 
           {!isLogged ? (
             <Link className="m-0" to="/sign-up">
-              <button className={styles.primaryButton}>Sign up</button>
+              <button className={`${styles.btn} ${styles.btnPrimary}`}>
+                Sign up
+              </button>
             </Link>
           ) : (
             <></>
@@ -133,7 +135,9 @@ const Navbar = () => {
 
           {!isLogged ? (
             <Link className="m-0" to="/sign-in">
-              <button className={styles.secondaryButton}>Sign in</button>
+              <button className={`${styles.btn} ${styles.btnSecondary}`}>
+                Sign in
+              </button>
             </Link>
           ) : (
             <></>
