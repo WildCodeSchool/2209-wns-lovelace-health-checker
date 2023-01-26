@@ -1,14 +1,17 @@
-import { ExpressContext } from 'apollo-server-express';
-import { compareSync, hashSync } from 'bcryptjs';
-import { randomBytes } from 'crypto';
-import * as dotenv from 'dotenv';
+import { ExpressContext } from "apollo-server-express";
+import { compareSync, hashSync } from "bcryptjs";
+import { randomBytes } from "crypto";
+import * as dotenv from "dotenv";
 
-import Session from '../entities/Session.entity';
-import User, { Status } from '../entities/User.entity';
-import { sendMessageOnAccountCreationEmailQueue, sendMessageOnResetPasswordEmailQueue } from '../rabbitmq/providers';
-import UserRepository from '../repositories/User.repository';
-import { getSessionIdInCookie } from '../utils/http-cookies';
-import SessionService from './Session.service';
+import Session from "../entities/Session.entity";
+import User, { Status } from "../entities/User.entity";
+import {
+  sendMessageOnAccountCreationEmailQueue,
+  sendMessageOnResetPasswordEmailQueue,
+} from "../rabbitmq/providers";
+import UserRepository from "../repositories/User.repository";
+import { getSessionIdInCookie } from "../utils/http-cookies";
+import SessionService from "./Session.service";
 
 dotenv.config();
 export default class UserService extends UserRepository {
@@ -94,7 +97,6 @@ export default class UserService extends UserRepository {
     password: string
   ): Promise<{ user: User; session: Session }> {
     const user = await this.findByEmail(email);
-    console.log("user", user);
 
     if (!user || !compareSync(password, user.password)) {
       throw new Error("Incorrect credentials");
