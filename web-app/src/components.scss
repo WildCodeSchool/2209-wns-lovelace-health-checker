@@ -92,5 +92,4 @@
 
 @mixin errorMessage {
   color: variables.$red-1000;
-  @include bold();
 }
