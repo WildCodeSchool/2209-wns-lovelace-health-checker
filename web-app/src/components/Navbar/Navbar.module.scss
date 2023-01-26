@@ -1,54 +1,55 @@
 @use "../../variables.scss";
 
 .navbar {
-  height: variables.$mobileNavbarHeight;
+  height: variables.$height-lg;
   width: 100%;
   border-top: 1px solid #ebf5ff31;
   position: fixed;
   bottom: 0;
-  background-color: variables.$mainColor;
+  background-color: variables.$primary-800;
   z-index: 2;
-  @media (min-width: 576px) {
-    height: variables.$desktopNavbarHeight;
+  @media (min-width: variables.$mobile-breakpoint) {
+    height: variables.$height-xl;
     position: sticky;
     top: 0;
     border-top: none;
     border-bottom: 1px solid #ebf5ff31;
   }
   .mobileNavbar {
-    @media (min-width: 576px) {
+    @media (min-width: variables.$mobile-breakpoint) {
       display: none !important;
     }
   }
   .desktopNavbar {
-    padding: 0px variables.$desktopPadding;
+    padding: 0px variables.$padding-xxl;
     display: flex !important;
     font-size: 14px;
     display: none !important;
-    @media (min-width: 576px) {
+    @media (min-width: variables.$mobile-breakpoint) {
       display: flex !important;
     }
-    .primaryButton {
+    .btnPrimary {
       width: 80px;
       height: 32px;
       border-radius: 3px;
       border: none;
-      color: variables.$darkestColor;
+      color: variables.$primary-1000;
+      &:hover {
+        background-color: variables.$primary-100;
+      }
     }
-    .primaryButton:hover {
-      background-color: variables.$lightestColor;
-    }
-    .secondaryButton {
+
+    .btnSecondary {
       width: 80px;
       height: 32px;
       border-radius: 3px;
       border: 1px solid white;
       background-color: transparent;
       color: white;
-    }
-    .secondaryButton:hover {
-      border: 1px solid variables.$lightestColor;
-      color: variables.$lightestColor;
+      &:hover {
+        border: 1px solid variables.$primary-100;
+        color: variables.$primary-100;
+      }
     }
   }
 }
@@ -66,13 +67,13 @@
 
 .biBookmarkCheck {
   cursor: pointer;
-  color: variables.$premiumColor;
+  color: variables.$yellow-1000;
 }
 
 .navlink {
   font-size: 10px;
   margin: 0;
-  @media (min-width: 576px) {
+  @media (min-width: variables.$mobile-breakpoint) {
     font-size: 14px;
   }
 }

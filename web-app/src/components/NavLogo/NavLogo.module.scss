@@ -7,14 +7,14 @@
 }
 
 .navLogo {
-  background-color: variables.$mainColor;
-  padding: 0px variables.$mobilePadding;
-  height: variables.$desktopNavbarHeight;
+  background-color: variables.$primary-800;
+  padding: 0px variables.$padding-xl;
+  height: variables.$height-xl;
   position: sticky;
   top: 0;
   border-bottom: 1px solid #ebf5ff31;
   z-index: 2;
-  @media (min-width: 576px) {
+  @media (min-width: variables.$mobile-breakpoint) {
     display: none !important;
   }
 }

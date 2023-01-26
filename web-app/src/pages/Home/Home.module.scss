@@ -2,89 +2,73 @@
 @import "../../components.scss";
 
 .searchBarContainer {
-  background-color: variables.$mainColor;
+  background-color: variables.$primary-800;
   height: 320px;
-  padding: 0px variables.$mobilePadding;
-  @media (min-width: 576px) {
+  padding: 0px variables.$padding-xl;
+  @media (min-width: variables.$mobile-breakpoint) {
     flex-direction: row !important;
     align-items: center;
     justify-content: space-between;
-    padding: 0px variables.$desktopPadding;
+    padding: 0px variables.$padding-xxl;
   }
   h1 {
     color: #ffffff;
-    font-size: variables.$mobileHomepageTitleSize;
-    @media (min-width: 576px) {
-      font-size: variables.$desktopHomepageTitleSize;
-    }
   }
   .searchBar {
-    height: 48px;
+    height: variables.$height-lg;
     width: 100%;
-    padding-left: 16px;
-    color: variables.$secondTextColor;
+    padding-left: variables.$height-md;
+    color: variables.$neutral-800;
     border: none;
-    border-top-left-radius: 3px;
-    border-bottom-left-radius: 3px;
-    @media (min-width: 576px) {
+    border-top-left-radius: variables.$border-radius-xs;
+    border-bottom-left-radius: variables.$border-radius-xs;
+    @media (min-width: variables.$mobile-breakpoint) {
       margin-top: 0;
     }
   }
   .searchButton {
-    min-width: 48px;
-    max-width: 48px;
-    min-height: 48px;
-    max-height: 48px;
-    background-color: variables.$secondColor;
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px;
+    min-width: variables.$width-sm;
+    max-width: variables.$width-sm;
+    min-height: variables.$width-sm;
+    max-height: variables.$width-sm;
+    background-color: variables.$primary-200;
+    border-top-right-radius: variables.$border-radius-xs;
+    border-bottom-right-radius: variables.$border-radius-xs;
     border: none;
-    cursor: pointer;
-    @media (min-width: 576px) {
+    @include clickable;
+    @media (min-width: variables.$mobile-breakpoint) {
       margin-top: 0;
     }
   }
   .errorMessage {
-    padding-top: 10px;
+    padding-top: variables.$padding-sm;
     color: white !important;
   }
 }
 
 .contentContainer {
-  padding: variables.$mobilePadding;
-  @media (min-width: 576px) {
-    padding: variables.$desktopPadding;
-  }
+  @include contentContainer;
   .requestContainer {
     width: 100%;
-    height: 120px;
+    height: variables.$height-xxl;
     .loader {
       @include loader;
     }
   }
   h2 {
-    margin-top: 16px;
+    margin-top: variables.$margin-md;
   }
-  .button {
-    @include button;
-    height: 60px;
-    margin-top: 16px;
-    @media (min-width: 576px) {
-      min-width: auto;
-      width: 300px;
-      height: 60px;
+  .btn {
+    @include btn-mobile;
+    margin-top: variables.$margin-md;
+    @media (min-width: variables.$mobile-breakpoint) {
+      @include btn;
     }
   }
-  .primaryButton {
-    @include primaryButton;
-    &:hover {
-      @include primaryButtonHover;
-    }
+  .btnPrimary {
+    @include btnPrimary;
   }
-  .secondaryButton {
-    @include secondaryButton;
-    &:hover {
-      @include secondaryButtonHover;
-    }
+  .btnSecondary {
+    @include btnSecondary;
   }
 }

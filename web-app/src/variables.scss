@@ -1,34 +1,86 @@
-$desktopContainerMarginColor: rgba(89, 89, 89, 0.1); // rgb(235, 245, 255, 0.33)
-$backgroundBlue: rgb(235, 245, 255, 0.65);
-$appBackgroundImage: url("./assets/images/background_image.png");
-$appMinWidth: 360px;
+$app-background-image: url("./assets/images/background_image.png");
 
-$desktopContainerSize: 992px;
-$desktopPadding: 48px;
-$mobilePadding: 24px;
+$app-min-width: 360px;
+$desktop-container-size: 992px;
 
-$mobileNavbarHeight: 48px;
-$desktopNavbarHeight: 60px;
+$mobile-breakpoint: 576px;
 
-$mobileHomepageTitleSize: 32px;
-$desktopHomepageTitleSize: 40px;
-$mobileTitleSize: 16px;
-$desktopTitleSize: 24px;
-$mainSize: 12px;
+$height-xxs: 8px;
+$height-xs: 16px;
+$height-sm: 24px;
+$height-md: 32px;
+$height-lg: 48px;
+$height-xl: 60px;
+$height-xxl: 120px;
 
-$tableHeadFontWeight: 600;
+$width-xxs: 16px;
+$width-xs: 32px;
+$width-sm: 48px;
+$width-md: 64px;
+$width-lg: 80px;
+$width-xl: 128px;
+$width-xxl: 256px;
+$width-xxxl: 320px;
 
-$darkestColor: #0f2837;
-$mainColor: #195078;
-$secondColor: #dcebfb;
-$lightestColor: #ebf5ff;
-$secondTextColor: #595959;
-$premiumColor: #e5ae21;
-$errorColor: #a42e0a;
-$successColor: #196713;
-$informationColor: #168ce9;
-$dangerZoneBackgroundColor: rgb(164, 46, 10, 0.08);
+$padding-xxs: 4px;
+$padding-xs: 8px;
+$padding-sm: 12px;
+$padding-md: 16px;
+$padding-lg: 20px;
+$padding-xl: 24px;
+$padding-xxl: 48px;
 
-$disabledButtonBackgroundColor: rgba(89, 89, 89, 0.1);
-$disabledButtonBorderColor: rgba(89, 89, 89, 0.4);
-$disabledButtonTextColor: rgba(89, 89, 89, 0.65);
+$margin-xxs: 4px;
+$margin-xs: 8px;
+$margin-sm: 12px;
+$margin-md: 16px;
+$margin-lg: 20px;
+$margin-xl: 24px;
+$margin-xxl: 48px;
+
+$border-radius-none: 0;
+$border-radius-xs: 3px;
+$border-radius-sm: 5px;
+$border-radius-md: 10px;
+$border-radius-lg: 20px;
+$border-radius-round: 50%;
+
+$font-xxs: 8px;
+$font-xs: 12px;
+$font-sm: 16px;
+$font-md: 20px;
+$font-lg: 24px;
+$font-xl: 32px;
+$font-xxl: 40px;
+
+$font-weight-400: 400;
+$font-weight-600: 600;
+
+$primary-1000: #0f2837; // Used for texts and titles
+$primary-900: #143c5f;
+$primary-800: #195078; // Used for links and buttons
+$primary-700: #1e5f9b;
+$primary-600: #2378b9;
+$primary-500: #4191d7;
+$primary-400: #6eafe1;
+$primary-300: #a5d2f0;
+$primary-200: #dcebfb; // Used for button hovers
+$primary-100: #ebf5ff; // Used for desktop containers background
+$primary-50: #ebf5ff9e; // Used for loader background when element background is primary 100
+
+$neutral-1000: #212529;
+$neutral-800: #595959;
+
+$yellow-1000: #e5ae21;
+
+$red-1000: #a42e0a;
+$red-200: rgb(164, 46, 10, 0.08);
+
+$green-1000: #196713;
+$blue-1000: #168ce9;
+
+$loader-transparent-bg: rgba(255, 255, 255, 0.667);
+
+$btn-disabled-bg: rgba(89, 89, 89, 0.1);
+$btn-disabled-border-color: rgba(89, 89, 89, 0.4);
+$btn-disabled-color: rgba(89, 89, 89, 0.65);
