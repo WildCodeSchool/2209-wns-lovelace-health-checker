@@ -1,16 +1,19 @@
-import { gql, useMutation } from "@apollo/client";
+import { ApolloError, gql, useMutation } from "@apollo/client";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import FormErrorMessage from "../../components/ErrorMessages/FormErrorMessage";
 
-import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
 import HomepageRequestTable from "../../components/HomepageRequestTable/HomepageRequestTable";
 import { CheckUrlMutation, CheckUrlMutationVariables } from "../../gql/graphql";
+import {
+  getErrorMessage,
+  SERVER_IS_KO_ERROR_MESSAGE,
+} from "../../utils/error-messages";
 import styles from "./Home.module.scss";
-import { getErrorMessage } from "../../utils";
 
-const URL = gql`
+export const URL = gql`
   mutation CheckUrl($url: String!) {
     checkUrl(url: $url) {
       getIsAvailable
@@ -20,6 +23,19 @@ const URL = gql`
   }
 `;
 
+// Default duration if there is no environment variable
+const defaultRequestTimeoutDuration: number = 15000;
+
+// TODO : variabiliser ces messages d'erreur en config, puis appelé ces variables directement dans le tableau errorMessageArray
+const requestTimeoutErrorMessage = "Request Timeout";
+const fetchFailedErrorMessage = "Fetch Failed";
+const invalidUrlErrorMessage = "Invalid URL";
+const errorMessageArray = [
+  requestTimeoutErrorMessage,
+  fetchFailedErrorMessage,
+  invalidUrlErrorMessage,
+];
+
 type SearchInput = {
   url: string;
 };
@@ -28,50 +44,47 @@ const expression =
   /^(http|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/;
 const urlRegExp = new RegExp(expression);
 
+const renderErrorSwitch = (error: ApolloError | undefined) => {
+  switch (getErrorMessage(error)) {
+    case requestTimeoutErrorMessage:
+      return (
+        <div>
+          Maximum duration for request exceeded (
+          {defaultRequestTimeoutDuration / 1000} seconds)
+        </div>
+      );
+    case fetchFailedErrorMessage:
+      return <div>No response from this URL, try another URL</div>;
+    case invalidUrlErrorMessage:
+      return <div>This URL's format is invalid</div>;
+    // It should never reach the default case, put here just in case
+    default:
+      return <></>;
+  }
+};
+
 const Home = () => {
   const [url, setUrl] = useState("");
-  const [search, { data, loading }] = useMutation<
+  const [search, { data, loading, error }] = useMutation<
     CheckUrlMutation,
     CheckUrlMutationVariables
   >(URL, {
     onError: (error) => {
       switch (getErrorMessage(error)) {
-        // TODO : variabiliser ce message d'erreur
-        case "Request Timeout":
-          // TODO : variabiliser la durée dans un fichier de config
-          toast.error(
-            "Maximum duration for premium request exceed (15 seconds)",
-            {
-              position: toast.POSITION.BOTTOM_RIGHT,
-              toastId: 2,
-              autoClose: false,
-            }
-          );
+        case requestTimeoutErrorMessage:
+          // Do nothing and break so no toast is generated
           break;
-        // TODO : variabiliser ce message d'erreur
-        case "Fetch Failed":
-          toast.error("No response from this URL, try another URL", {
-            position: toast.POSITION.BOTTOM_RIGHT,
-            toastId: 3,
-            autoClose: false,
-          });
+        case fetchFailedErrorMessage:
+          // Do nothing and break so no toast is generated
           break;
-        // TODO : variabiliser ce message d'erreur
-        case "Invalid URL":
-          toast.error("This URL's format is invalid", {
-            position: toast.POSITION.BOTTOM_RIGHT,
-            toastId: 4,
-            autoClose: false,
-          });
+        case invalidUrlErrorMessage:
+          // Do nothing and break so no toast is generated
           break;
         default:
-          toast.error(
-            "Oops, it seems that something went wrong... Please try again",
-            {
-              position: toast.POSITION.BOTTOM_RIGHT,
-              toastId: 1,
-            }
-          );
+          toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 1,
+          });
       }
     },
   });
@@ -94,9 +107,10 @@ const Home = () => {
         <h1 className="col-sm-5 col-10 my-5">
           Enter a website URL and check its availability
         </h1>
-        <div className="col-sm-6 col-12">
+        <div className="col-sm-6 col-12 position-relative">
           <form onSubmit={handleSubmit(onSubmit)} className="d-flex">
             <input
+              data-testid="url-input"
               className={`is-invalid ${styles.searchBar}`}
               type="text"
               defaultValue={""}
@@ -107,6 +121,7 @@ const Home = () => {
               })}
             />
             <button
+              data-testid="url-button"
               disabled={loading}
               type="submit"
               className={`d-flex justify-content-center align-items-center ${styles.searchButton}`}
@@ -114,19 +129,21 @@ const Home = () => {
               <i className="bi bi-search"></i>
             </button>
           </form>
-          <div className={styles.errorMessage}>
+          <div className={`position-absolute ${styles.errorMessage}`}>
             <FormErrorMessage errors={errors} name={"url"} />
           </div>
         </div>
       </div>
 
       <div className={styles.contentContainer}>
-        {loading || data ? (
+        {loading ||
+        data ||
+        (error && errorMessageArray.includes(getErrorMessage(error))) ? (
           <div className="mb-5">
             <p className="m-0">
               {loading ? (
                 `We are testing ${url}`
-              ) : data ? (
+              ) : data || error ? (
                 `Result for ${url} :`
               ) : (
                 <></>
@@ -143,6 +160,8 @@ const Home = () => {
                   statusCode={data.checkUrl.statusCode}
                   duration={data.checkUrl.duration}
                 />
+              ) : error ? (
+                renderErrorSwitch(error)
               ) : (
                 <></>
               )}
