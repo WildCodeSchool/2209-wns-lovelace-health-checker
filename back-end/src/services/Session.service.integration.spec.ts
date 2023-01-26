@@ -1,4 +1,4 @@
-import { closeConnection, initializeRepositories, truncateAllTables } from '../database/utils';
+import { closeConnection, getDatabase, initializeRepositories, truncateAllTables } from '../database/utils';
 import * as provider from '../rabbitmq/providers';
 import SessionService from './Session.service';
 import UserService from './User.service';
@@ -15,8 +15,9 @@ describe("SessionService integration", () => {
   const emailAddress = "unknown@user.com";
 
   beforeAll(async () => {
+    await getDatabase();
     await initializeRepositories();
-    sendMessageOnAccountCreationEmailQueueSpy();
+    await sendMessageOnAccountCreationEmailQueueSpy();
   });
 
   beforeEach(async () => {

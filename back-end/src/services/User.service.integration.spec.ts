@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 
 import {
   closeConnection,
+  getDatabase,
   initializeRepositories,
   truncateAllTables,
 } from "../database/utils";
@@ -38,6 +39,7 @@ describe("UserService integration", () => {
   let sendMessageOnResetPasswordEmailQueueSpy: jest.SpyInstance<Promise<void>>;
 
   beforeAll(async () => {
+    await getDatabase();
     await initializeRepositories();
   });
 

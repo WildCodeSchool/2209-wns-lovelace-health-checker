@@ -23,7 +23,7 @@ export default class RequestResultService extends RequestResultRepository {
   public static async checkUrl(
     url: string,
     // TODO : variabiliser timeout dans un fichier de config
-    timeout: number = 15000 
+    timeout: number = 15000
   ): Promise<RequestResult> {
     const startTimer: number = Date.now();
     const dummyRequestSetting = new RequestSetting(
@@ -47,18 +47,18 @@ export default class RequestResultService extends RequestResultRepository {
             // TODO : variabiliser ce message d'erreur
             throw Error("Request Timeout");
         }
-      }
-      if (error instanceof TypeError && error.message) {
+      } else if (error instanceof TypeError && error.message) {
         switch (error.message) {
           case "fetch failed":
             // TODO : variabiliser ce message d'erreur
             throw Error("Fetch Failed");
+          // It sould never reach this case since url is valided beforehand  
           case "Invalid URL":
             // TODO : variabiliser ce message d'erreur
             throw Error("Invalid URL");
         }
       }
-      throw Error("Unkwown Error");
+      throw error;
     }
   }
 }
