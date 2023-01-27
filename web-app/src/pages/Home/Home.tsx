@@ -23,39 +23,35 @@ export const URL = gql`
   }
 `;
 
-// Default duration if there is no environment variable
-const defaultRequestTimeoutDuration: number = 15000;
-
-// TODO : variabiliser ces messages d'erreur en config, puis appelé ces variables directement dans le tableau errorMessageArray
-const requestTimeoutErrorMessage = "Request Timeout";
-const fetchFailedErrorMessage = "Fetch Failed";
-const invalidUrlErrorMessage = "Invalid URL";
-const errorMessageArray = [
-  requestTimeoutErrorMessage,
-  fetchFailedErrorMessage,
-  invalidUrlErrorMessage,
+const REQUEST_TIMEOUT_ERROR_MESSAGE = "Request Timeout";
+const FETCH_FAILED_ERROR_MESSAGE = "Fetch Failed";
+const INVALID_URL_ERROR_MESSAGE = "Invalid URL";
+const ERROR_MESSAGE_ARRAY = [
+  REQUEST_TIMEOUT_ERROR_MESSAGE,
+  FETCH_FAILED_ERROR_MESSAGE,
+  INVALID_URL_ERROR_MESSAGE,
 ];
 
 type SearchInput = {
   url: string;
 };
-// TODO : variabiliser dans un fichier de config
-const expression =
-  /^(http|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/;
-const urlRegExp = new RegExp(expression);
+
+const URL_REG_EXP = new RegExp(
+  /^(http|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/
+);
 
 const renderErrorSwitch = (error: ApolloError | undefined) => {
   switch (getErrorMessage(error)) {
-    case requestTimeoutErrorMessage:
+    case REQUEST_TIMEOUT_ERROR_MESSAGE:
       return (
         <div>
           Maximum duration for request exceeded (
-          {defaultRequestTimeoutDuration / 1000} seconds)
+          {parseInt(process.env.REQUEST_TIMEOUT!) / 1000} seconds)
         </div>
       );
-    case fetchFailedErrorMessage:
+    case FETCH_FAILED_ERROR_MESSAGE:
       return <div>No response from this URL, try another URL</div>;
-    case invalidUrlErrorMessage:
+    case INVALID_URL_ERROR_MESSAGE:
       return <div>This URL's format is invalid</div>;
     // It should never reach the default case, put here just in case
     default:
@@ -71,14 +67,11 @@ const Home = () => {
   >(URL, {
     onError: (error) => {
       switch (getErrorMessage(error)) {
-        case requestTimeoutErrorMessage:
-          // Do nothing and break so no toast is generated
+        case REQUEST_TIMEOUT_ERROR_MESSAGE:
           break;
-        case fetchFailedErrorMessage:
-          // Do nothing and break so no toast is generated
+        case FETCH_FAILED_ERROR_MESSAGE:
           break;
-        case invalidUrlErrorMessage:
-          // Do nothing and break so no toast is generated
+        case INVALID_URL_ERROR_MESSAGE:
           break;
         default:
           toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
@@ -117,7 +110,10 @@ const Home = () => {
               placeholder="https://example.com"
               {...register("url", {
                 required: "URL is required",
-                pattern: { value: urlRegExp, message: "URL format is invalid" },
+                pattern: {
+                  value: URL_REG_EXP,
+                  message: "URL format is invalid",
+                },
               })}
             />
             <button
@@ -138,7 +134,7 @@ const Home = () => {
       <div className={styles.contentContainer}>
         {loading ||
         data ||
-        (error && errorMessageArray.includes(getErrorMessage(error))) ? (
+        (error && ERROR_MESSAGE_ARRAY.includes(getErrorMessage(error))) ? (
           <div className="mb-5">
             <p className="m-0">
               {loading ? (
