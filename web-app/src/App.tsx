@@ -1,6 +1,7 @@
 import 'react-toastify/dist/ReactToastify.css';
 
-import { gql, useQuery } from '@apollo/client';
+import { gql, NetworkStatus, useQuery } from '@apollo/client';
+import { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
@@ -33,21 +34,55 @@ function App() {
       }
     }
   `;
+  const [isLogged, setIsLogged] = useState(false);
 
-  const { loading, data, refetch } = useQuery<MyProfileQuery>(MY_PROFILE);
+  const { loading, data, refetch, networkStatus } = useQuery<MyProfileQuery>(
+    MY_PROFILE,
+    {
+      variables: {},
+      notifyOnNetworkStatusChange: true,
+      fetchPolicy: "network-only",
+      onCompleted: (data) => {
+        if (data.myProfile) {
+          console.log("onCompleted", data.myProfile);
+          setIsLogged(true);
+        }
+      },
+      onError: () => {
+        setIsLogged(false);
+      },
+    }
+  );
+
+  // const [getMyProfile, { loading, data, refetch, networkStatus }] =
+  //   useLazyQuery<MyProfileQuery>(MY_PROFILE, {
+  //     variables: {},
+  //     fetchPolicy: "network-only",
+  //     onCompleted: (data) => {
+  //       if (data.myProfile) {
+  //         setIsLogged(true);
+  //       }
+  //     },
+  //     onError: (error) => {
+  //       console.log(error);
+  //       setIsLogged(false);
+  //     }
+  //   });
+
   console.log(data?.myProfile);
+  console.log(networkStatus === NetworkStatus.refetch);
 
   return (
     <main className={`container p-0 ${styles.main}`}>
       <div className={styles.content}>
         <NavLogo />
-        <Navbar logged={Boolean(data?.myProfile)} />
+        <Navbar logged={isLogged} />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route
             path="/sign-up"
             element={
-              <AlreadyLoggedIn isLoggedIn={Boolean(data?.myProfile)}>
+              <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <SignUp />
               </AlreadyLoggedIn>
             }
@@ -55,7 +90,7 @@ function App() {
           <Route
             path="/sign-in"
             element={
-              <AlreadyLoggedIn isLoggedIn={Boolean(data?.myProfile)}>
+              <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <SignIn onSuccess={refetch} />
               </AlreadyLoggedIn>
             }
@@ -63,9 +98,7 @@ function App() {
           <Route
             path="/requests"
             element={
-              <Protected
-                isLoggedIn={Boolean(data?.myProfile)}
-                loading={loading}>
+              <Protected isLoggedIn={isLogged} loading={loading}>
                 <Requests />
               </Protected>
             }
@@ -73,9 +106,7 @@ function App() {
           <Route
             path="/premium"
             element={
-              <Protected
-                isLoggedIn={Boolean(data?.myProfile)}
-                loading={loading}>
+              <Protected isLoggedIn={isLogged} loading={loading}>
                 <Premium />
               </Protected>
             }
@@ -84,9 +115,7 @@ function App() {
           <Route
             path="/account"
             element={
-              <Protected
-                isLoggedIn={Boolean(data?.myProfile)}
-                loading={loading}>
+              <Protected isLoggedIn={isLogged} loading={loading}>
                 <Account onLogoutSuccess={refetch} />
               </Protected>
             }
@@ -95,7 +124,7 @@ function App() {
           <Route
             path="/forgot-password"
             element={
-              <AlreadyLoggedIn isLoggedIn={Boolean(data?.myProfile)}>
+              <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <ForgotPassword />
               </AlreadyLoggedIn>
             }
@@ -103,7 +132,7 @@ function App() {
           <Route
             path="/reset-password/:resetPasswordToken"
             element={
-              <AlreadyLoggedIn isLoggedIn={Boolean(data?.myProfile)}>
+              <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <ResetPassword />
               </AlreadyLoggedIn>
             }
@@ -111,7 +140,7 @@ function App() {
           <Route
             path="/account-confirmation/:confirmationToken"
             element={
-              <AlreadyLoggedIn isLoggedIn={Boolean(data?.myProfile)}>
+              <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <AccountConfirmation />
               </AlreadyLoggedIn>
             }

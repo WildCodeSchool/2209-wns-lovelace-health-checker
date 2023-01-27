@@ -1,10 +1,11 @@
 import { gql, useMutation } from '@apollo/client';
+import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import { SignOutMutation } from '../../gql/graphql';
 
-const Account = ({ onLogoutSuccess }: { onLogoutSuccess: () => void }) => {
+const Account = ({ onLogoutSuccess }: { onLogoutSuccess: () => {} }) => {
   const navigate = useNavigate();
 
   const SIGN_OUT = gql`
@@ -14,25 +15,34 @@ const Account = ({ onLogoutSuccess }: { onLogoutSuccess: () => void }) => {
   `;
 
   const [signOut] = useMutation<SignOutMutation>(SIGN_OUT, {
-    onCompleted: (data) => {
+    onCompleted: async (data) => {
       onLogoutSuccess();
       toast.success(data.signOut, {
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: "logout-success",
       });
+      navigate("/");
     },
   });
+
+  const { handleSubmit } = useForm();
+
+  const onSubmit = async () => {
+    console.log("logout");
+    signOut();
+  };
 
   return (
     <>
       <p>Account works !</p>
-      <button
-        onClick={async () => {
-          await signOut();
-          navigate("/");
-        }}>
-        Logout
-      </button>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <button
+          onClick={async () => {
+            await signOut();
+          }}>
+          Logout
+        </button>
+      </form>
     </>
   );
 };
