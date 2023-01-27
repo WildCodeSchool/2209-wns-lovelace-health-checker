@@ -58,6 +58,8 @@ const SignIn = () => {
         firstname: data.signIn.firstname,
         role: data.signIn.role,
       };
+      // set in local storage
+      localStorage.setItem("user", JSON.stringify(loggedUser));
       setUser(loggedUser);
       toast.success("Welcome " + data.signIn.firstname + " !", {
         position: toast.POSITION.BOTTOM_RIGHT,
