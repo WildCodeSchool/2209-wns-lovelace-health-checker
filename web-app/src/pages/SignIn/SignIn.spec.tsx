@@ -13,12 +13,13 @@ import { SERVER_IS_KO_ERROR_MESSAGE } from '../../utils/error-messages';
 import SignIn, { SIGN_IN } from './SignIn';
 
 jest.mock("react-toastify");
+const mockRefetch = jest.fn();
 
 const renderSignIn = (mock?: any) => {
   render(
     <MockedProvider mocks={mock}>
       <MemoryRouter>
-        <SignIn />
+        <SignIn onSuccess={mockRefetch} />
       </MemoryRouter>
     </MockedProvider>
   );
@@ -28,7 +29,7 @@ const renderSignInWithHistory = (history: MemoryHistory, mock?: any) => {
   render(
     <MockedProvider mocks={mock}>
       <Router location={history.location} navigator={history}>
-        <SignIn />
+        <SignIn onSuccess={mockRefetch} />
       </Router>
     </MockedProvider>
   );
