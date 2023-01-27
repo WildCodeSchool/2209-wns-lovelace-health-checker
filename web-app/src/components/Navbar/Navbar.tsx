@@ -6,7 +6,7 @@ import { UserContext } from '../../contexts/UserContext';
 import styles from './Navbar.module.scss';
 
 const Navbar = () => {
-  const { user, setUser } = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   let isLogged: boolean = Boolean(user);
   return (
@@ -85,18 +85,6 @@ const Navbar = () => {
         <Link to="/">
           <img className={styles.logo} src={logo} alt="Health Check logo"></img>
         </Link>
-        {isLogged && (
-          <div className={`${styles.navElement}`}>
-            <span
-              className={styles.navlink}
-              onClick={() => {
-                setUser(null);
-              }}
-              style={{ color: "white" }}>
-              Logout
-            </span>
-          </div>
-        )}
 
         <div className="d-flex align-items-center gap-4 h-100">
           <div className={styles.navElement}>
@@ -104,13 +92,6 @@ const Navbar = () => {
               Search
             </Link>
           </div>
-          {isLogged && (
-            <div className={styles.navElement}>
-              <Link className={styles.navlink} to="/">
-                {user?.firstname}
-              </Link>
-            </div>
-          )}
 
           {isLogged ? (
             <div className={`${styles.navElement} `}>
