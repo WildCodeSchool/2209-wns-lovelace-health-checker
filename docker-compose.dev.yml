@@ -17,6 +17,8 @@ services:
       RABBIT_AMQP_URL: ${RABBIT_AMQP_URL}
       NODEMAILER_USER: ${NODEMAILER_USER}
       NODEMAILER_PASS: ${NODEMAILER_PASS}
+      FRONT_END_URL: ${FRONT_END_URL}
+      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
       RESET_PASSWORD_EXPIRATION_DELAY: ${RESET_PASSWORD_EXPIRATION_DELAY}
     ports:
       - 4069:4069
@@ -28,6 +30,8 @@ services:
 
   web-app:
     build: ./web-app
+    environment:
+      REACT_APP_REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
     ports:
       - 3000:3000
     volumes:
