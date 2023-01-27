@@ -22,8 +22,9 @@ export default class RequestResultService extends RequestResultRepository {
 
   public static async checkUrl(
     url: string,
-    // TODO : variabiliser timeout dans un fichier de config
-    timeout: number = 15000
+    timeout: number = process.env.REQUEST_TIMEOUT
+      ? parseInt(process.env.REQUEST_TIMEOUT)
+      : 15000
   ): Promise<RequestResult> {
     const startTimer: number = Date.now();
     const dummyRequestSetting = new RequestSetting(
@@ -44,17 +45,14 @@ export default class RequestResultService extends RequestResultRepository {
       if (error instanceof DOMException && error.name) {
         switch (error.name) {
           case "AbortError":
-            // TODO : variabiliser ce message d'erreur
             throw Error("Request Timeout");
         }
       } else if (error instanceof TypeError && error.message) {
         switch (error.message) {
           case "fetch failed":
-            // TODO : variabiliser ce message d'erreur
             throw Error("Fetch Failed");
-          // It sould never reach this case since url is valided beforehand  
+          // It sould never reach this case since url is valided beforehand
           case "Invalid URL":
-            // TODO : variabiliser ce message d'erreur
             throw Error("Invalid URL");
         }
       }

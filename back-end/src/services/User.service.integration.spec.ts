@@ -1,5 +1,3 @@
-import * as dotenv from "dotenv";
-
 import {
   closeConnection,
   getDatabase,
@@ -12,8 +10,6 @@ import UserRepository from "../repositories/User.repository";
 import * as HttpCookies from "../utils/http-cookies";
 import SessionService from "./Session.service";
 import UserService from "./User.service";
-
-dotenv.config();
 
 const sendMessageOnAccountCreationEmailQueue = () => {
   return jest

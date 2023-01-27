@@ -4,7 +4,7 @@ import styles from "./NotFound.module.scss";
 const NotFound = () => {
   return (
     <div className={styles.contentContainer}>
-      <h2 className={`mb-4`}>Page not found</h2>
+      <h1 className={`mb-4`}>Page not found</h1>
       <div className={styles.desktopContainer}>
         <p>
           We can't seem to find the page you're looking for. Try going back to
