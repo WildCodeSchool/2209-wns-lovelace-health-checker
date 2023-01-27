@@ -1,0 +1,46 @@
+@use "../../variables.scss";
+@import "../../components.scss";
+
+.contentContainer {
+  @include contentContainer;
+  @media (min-width: variables.$mobile-breakpoint) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .desktopContainer {
+    @include desktopContainer;
+  }
+  .btn {
+    @include btn-mobile;
+    margin-top: variables.$margin-md;
+    @media (min-width: variables.$mobile-breakpoint) {
+      @include btn;
+      width: 100%;
+    }
+  }
+  .btnPrimary {
+    @include btnPrimary;
+  }
+
+  .errorMessage {
+    @include errorMessage;
+  }
+
+  .askForNewPasswordForm {
+    position: relative;
+    .loaderContainer {
+      background-color: variables.$loader-transparent-bg;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 2;
+      @media (min-width: variables.$mobile-breakpoint) {
+        background-color: variables.$primary-50;
+      }
+      .loader {
+        @include loader;
+      }
+    }
+  }
+}
