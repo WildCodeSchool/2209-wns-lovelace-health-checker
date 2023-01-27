@@ -1,19 +1,18 @@
-import { gql, useMutation } from "@apollo/client";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
+import { gql, useMutation } from '@apollo/client';
+import { useContext, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
+import FormErrorMessage from '../../components/ErrorMessage/FormErrorMessage';
+import { UserContext } from '../../contexts/UserContext';
 import {
   ResendAccountConfirmationTokenMutation,
   ResendAccountConfirmationTokenMutationVariables,
   SignInMutation,
   SignInMutationVariables,
-} from "../../gql/graphql";
-import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
-import styles from "./SignIn.module.scss";
-
+} from '../../gql/graphql';
+import { SERVER_IS_KO_ERROR_MESSAGE } from '../../utils/error-messages';
 import {
   EMAIL_IS_REQUIRED_ERROR_MESSAGE,
   EMAIL_MAX_LENGTH,
@@ -21,13 +20,15 @@ import {
   EMAIL_PLACEHOLDER,
   PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
   PASSWORD_PLACEHOLDER,
-} from "../../utils/form-validations";
+} from '../../utils/form-validations';
+import styles from './SignIn.module.scss';
 
 export const SIGN_IN = gql`
   mutation SignIn($email: String!, $password: String!) {
     signIn(email: $email, password: $password) {
       id
       firstname
+      role
     }
   }
 `;
@@ -43,6 +44,8 @@ const SignIn = () => {
   const [email, setEmail] = useState("");
   const [isPending, setIsPending] = useState(false);
 
+  const { setUser } = useContext(UserContext);
+
   const navigate = useNavigate();
 
   const [signIn, { loading }] = useMutation<
@@ -50,6 +53,12 @@ const SignIn = () => {
     SignInMutationVariables
   >(SIGN_IN, {
     onCompleted: (data) => {
+      const loggedUser = {
+        id: data.signIn.id,
+        firstname: data.signIn.firstname,
+        role: data.signIn.role,
+      };
+      setUser(loggedUser);
       toast.success("Welcome " + data.signIn.firstname + " !", {
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: 1,
@@ -121,8 +130,7 @@ const SignIn = () => {
         <form className={styles.signUpForm} onSubmit={handleSubmit(onSubmit)}>
           {loading ? (
             <div
-              className={`${styles.loaderContainer} d-flex justify-content-center align-items-center`}
-            >
+              className={`${styles.loaderContainer} d-flex justify-content-center align-items-center`}>
               <div className={styles.loader} role="status"></div>
             </div>
           ) : (
@@ -165,14 +173,12 @@ const SignIn = () => {
                 <i
                   data-testid="passwordEye"
                   onClick={() => setPasswordInputType("text")}
-                  className={`bi bi-eye ${styles.eye}`}
-                ></i>
+                  className={`bi bi-eye ${styles.eye}`}></i>
               ) : (
                 <i
                   data-testid="passwordEyeSlash"
                   onClick={() => setPasswordInputType("password")}
-                  className={`bi bi-eye-slash ${styles.eye}`}
-                ></i>
+                  className={`bi bi-eye-slash ${styles.eye}`}></i>
               )}
             </div>
             <label htmlFor="password">Password</label>
@@ -184,8 +190,7 @@ const SignIn = () => {
             <>
               <div
                 className={`${styles.pendingAccount}`}
-                data-testid="errorMessage"
-              >
+                data-testid="errorMessage">
                 <p>
                   Your account isn't active yet ! Verify your inbox to confirm
                   your account.{" "}
@@ -193,8 +198,7 @@ const SignIn = () => {
                     className={`${styles.navlink}`}
                     style={{ cursor: "pointer" }}
                     onClick={sendConfirmationEmail}
-                    data-testid="resendConfirmationEmail"
-                  >
+                    data-testid="resendConfirmationEmail">
                     Send confirmation email again
                   </span>
                 </p>
@@ -210,8 +214,7 @@ const SignIn = () => {
           </div>
           <button
             type="submit"
-            className={`${styles.btn} ${styles.btnPrimary} mt-4`}
-          >
+            className={`${styles.btn} ${styles.btnPrimary} mt-4`}>
             Sign in
           </button>
         </form>
