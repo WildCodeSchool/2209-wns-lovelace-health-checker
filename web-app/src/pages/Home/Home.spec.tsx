@@ -9,7 +9,6 @@ import { CheckUrlMutation } from "../../gql/graphql";
 import Home, { URL } from "./Home";
 import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
 
-
 jest.mock("react-toastify");
 
 const renderHome = (mock?: any) => {
@@ -148,20 +147,20 @@ describe("Home", () => {
     describe("after form submission", () => {
       it("renders a loader awaiting response", async () => {
         renderHome();
-        const url = "https://www.youtube.com";
-        submitForm(url);
+        const URL = "https://www.youtube.com";
+        submitForm(URL);
         await waitFor(() => {
-          expect(screen.getByText("We are testing " + url)).toBeInTheDocument();
+          expect(screen.getByText("We are testing " + URL)).toBeInTheDocument();
         });
       });
 
       it("renders results with correct input", async () => {
-        const url = "https://www.youtube.com";
+        const URL = "https://www.youtube.com";
         renderHome([CHECK_URL_SUCCESS_MOCK]);
-        submitForm(url);
+        submitForm(URL);
         await waitFor(() => {
           expect(
-            screen.getByText("Result for " + url + " :")
+            screen.getByText("Result for " + URL + " :")
           ).toBeInTheDocument();
         });
         await waitFor(() => {
@@ -179,12 +178,12 @@ describe("Home", () => {
       });
 
       it("renders results with another correct input", async () => {
-        const url = "http://www.youtube.com";
+        const URL = "http://www.youtube.com";
         renderHome([CHECK_URL_SUCCESS_MOCK_ANOTHER]);
-        submitForm(url);
+        submitForm(URL);
         await waitFor(() => {
           expect(
-            screen.getByText("Result for " + url + " :")
+            screen.getByText("Result for " + URL + " :")
           ).toBeInTheDocument();
         });
         await waitFor(() => {
@@ -202,12 +201,12 @@ describe("Home", () => {
       });
 
       it("renders results with another correct input again", async () => {
-        const url = "https://youtube.com";
+        const URL = "https://youtube.com";
         renderHome([CHECK_URL_SUCCESS_MOCK_AGAIN]);
-        submitForm(url);
+        submitForm(URL);
         await waitFor(() => {
           expect(
-            screen.getByText("Result for " + url + " :")
+            screen.getByText("Result for " + URL + " :")
           ).toBeInTheDocument();
         });
         await waitFor(() => {
@@ -225,50 +224,48 @@ describe("Home", () => {
       });
 
       it("no longer renders a loader awaiting response after the response", async () => {
-        const url = "https://youtube.com";
+        const URL = "https://youtube.com";
         renderHome([CHECK_URL_SUCCESS_MOCK_AGAIN]);
-        submitForm(url);
+        submitForm(URL);
         await waitFor(() => {
           expect(
-            screen.getByText("Result for " + url + " :")
+            screen.getByText("Result for " + URL + " :")
           ).toBeInTheDocument();
         });
         await waitFor(() => {
           expect(
-            screen.queryByText("We are testing " + url)
+            screen.queryByText("We are testing " + URL)
           ).not.toBeInTheDocument();
         });
       });
 
       it("throws a timeout error message when the request took too much time", async () => {
-        const url = "https://www.wrongurlthatreturnserror.com";
-        // TODO : variabiliser
-        const defaultRequestTimeoutDuration: number = 15000;
+        const URL = "https://www.wrongurlthatreturnserror.com";
         renderHome([CHECK_URL_TIMEOUT_MOCK]);
-        submitForm(url);
+        submitForm(URL);
         await waitFor(() => {
           expect(
-            screen.getByText("Result for " + url + " :")
+            screen.getByText("Result for " + URL + " :")
           ).toBeInTheDocument();
         });
         await waitFor(() => {
           expect(
             screen.getByText(
-              "Maximum duration for request exceeded (" +
-                defaultRequestTimeoutDuration / 1000 +
-                " seconds)"
+              `Maximum duration for request exceeded (${
+                parseInt(process.env.REACT_APP_REQUEST_TIMEOUT!) / 1000
+              } seconds)`
             )
           ).toBeInTheDocument();
         });
       });
 
       it("throws a no response error message when the url doesn't give a response", async () => {
-        const url = "https://www.wrongurlthatreturnserror.com";
+        const URL = "https://www.wrongurlthatreturnserror.com";
         renderHome([CHECK_URL_NO_RESPONSE_MOCK]);
-        submitForm(url);
+        submitForm(URL);
         await waitFor(() => {
           expect(
-            screen.getByText("Result for " + url + " :")
+            screen.getByText("Result for " + URL + " :")
           ).toBeInTheDocument();
         });
         await waitFor(() => {
@@ -279,12 +276,12 @@ describe("Home", () => {
       });
 
       it("renders a toaster when an unknown error is throw from the back and don't show result", async () => {
-        const url = "https://youtube.com";
+        const URL = "https://youtube.com";
         renderHome([CHECK_URL_UNKNOWN_ERROR_MOCK]);
-        submitForm(url);
+        submitForm(URL);
         await waitFor(() => {
           expect(
-            screen.queryByText("Result for " + url + " :")
+            screen.queryByText("Result for " + URL + " :")
           ).not.toBeInTheDocument();
         });
         await waitFor(() => {

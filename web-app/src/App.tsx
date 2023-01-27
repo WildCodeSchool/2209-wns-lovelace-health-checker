@@ -21,6 +21,7 @@ import ResetPassword from './pages/ResetPassword/ResetPassword';
 import SignIn from './pages/SignIn/SignIn';
 import SignUp from './pages/SignUp/SignUp';
 import Terms from './pages/Terms/Terms';
+import NotFound from './pages/NotFound/NotFound';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -118,6 +119,8 @@ function App() {
                 </AlreadyLoggedIn>
               }
             />
+            {/* Always put the wildcard on last position */}
+            <Route path="/*" element={<NotFound />} />
           </Routes>
         </UserContext.Provider>
       </div>

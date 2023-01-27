@@ -1,7 +1,6 @@
 import { ExpressContext } from "apollo-server-express";
 import { compareSync, hashSync } from "bcryptjs";
 import { randomBytes } from "crypto";
-import * as dotenv from "dotenv";
 
 import Session from "../entities/Session.entity";
 import User, { Status } from "../entities/User.entity";
@@ -13,7 +12,6 @@ import UserRepository from "../repositories/User.repository";
 import { getSessionIdInCookie } from "../utils/http-cookies";
 import SessionService from "./Session.service";
 
-dotenv.config();
 export default class UserService extends UserRepository {
   static async createUser(
     firstname: string,
