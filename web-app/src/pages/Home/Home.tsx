@@ -46,7 +46,7 @@ const renderErrorSwitch = (error: ApolloError | undefined) => {
       return (
         <div>
           Maximum duration for request exceeded (
-          {parseInt(process.env.REQUEST_TIMEOUT!) / 1000} seconds)
+          {parseInt(process.env.REACT_APP_REQUEST_TIMEOUT!) / 1000} seconds)
         </div>
       );
     case FETCH_FAILED_ERROR_MESSAGE:

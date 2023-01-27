@@ -31,7 +31,7 @@ services:
   web-app:
     build: ./web-app
     environment:
-      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
+      REACT_APP_REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
     ports:
       - 3000:3000
     volumes:

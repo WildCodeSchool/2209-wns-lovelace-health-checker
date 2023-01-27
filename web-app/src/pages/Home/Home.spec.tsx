@@ -252,7 +252,7 @@ describe("Home", () => {
           expect(
             screen.getByText(
               `Maximum duration for request exceeded (${
-                parseInt(process.env.REQUEST_TIMEOUT!) / 1000
+                parseInt(process.env.REACT_APP_REQUEST_TIMEOUT!) / 1000
               } seconds)`
             )
           ).toBeInTheDocument();
