@@ -17,6 +17,7 @@ import ResetPassword from './pages/ResetPassword/ResetPassword';
 import SignIn from './pages/SignIn/SignIn';
 import SignUp from './pages/SignUp/SignUp';
 import Terms from './pages/Terms/Terms';
+import NotFound from './pages/NotFound/NotFound';
 
 function App() {
   return (
@@ -41,6 +42,8 @@ function App() {
             path="/account-confirmation/:confirmationToken"
             element={<AccountConfirmation />}
           />
+          {/* Always put the wildcard on last position */}
+          <Route path="/*" element={<NotFound />} />
         </Routes>
       </div>
       <div className={styles.footer}>
