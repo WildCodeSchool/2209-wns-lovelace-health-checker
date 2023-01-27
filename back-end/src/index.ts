@@ -3,7 +3,6 @@ import "reflect-metadata";
 import { ApolloServer } from "apollo-server";
 import { ApolloServerPluginLandingPageLocalDefault } from "apollo-server-core";
 import { ExpressContext } from "apollo-server-express";
-import * as dotenv from "dotenv";
 import { buildSchema } from "type-graphql";
 
 import { getDatabase, initializeRepositories } from "./database/utils";
@@ -17,8 +16,6 @@ import UserService from "./services/User.service";
 export type GlobalContext = ExpressContext & {
   user: User | null;
 };
-
-dotenv.config();
 
 const startServer = async () => {
   const server = new ApolloServer({
