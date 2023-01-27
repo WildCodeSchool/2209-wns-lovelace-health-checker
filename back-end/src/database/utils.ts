@@ -11,7 +11,7 @@ import UserRepository from "../repositories/User.repository";
 
 const dataSource = new DataSource({
   type: "postgres",
-  url: NODE_ENV === "test" ? TEST_DATABASE_URL : DATABASE_URL,
+  url: process.env.DATABASE_URL,
   synchronize: true,
   entities: [
     __dirname + `/../entities/**/*.entity.${NODE_ENV === "test" ? "ts" : "js"}`,

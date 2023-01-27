@@ -8,6 +8,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^29.0.3",
     "@types/node": "^18.7.18",
     "@types/react": "^18.0.20",
     "@types/react-dom": "^18.0.6",
@@ -25,12 +26,10 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "WATCHPACK_POLLING=true react-scripts start --hot",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "test:coverage": "jest --collect-coverage",
-    "test:watch": "jest --watchAll",
-    "test:watch-coverage": "jest --watchAll --collect-coverage",
+    "test-coverage": "jest --collect-coverage",
     "eject": "react-scripts eject",
     "gql-codegen": "graphql-codegen --config codegen.ts"
   },
@@ -55,7 +54,6 @@
   "proxy": "http://back-end:4069",
   "devDependencies": {
     "@graphql-codegen/cli": "2.13.7",
-    "@graphql-codegen/client-preset": "^1.0.7",
-    "@types/jest": "^29.2.4"
+    "@graphql-codegen/client-preset": "^1.0.7"
   }
 }
