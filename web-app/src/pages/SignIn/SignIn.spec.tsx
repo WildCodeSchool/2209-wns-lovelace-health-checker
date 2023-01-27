@@ -57,6 +57,7 @@ const SIGN_IN_SUCCESS: MockedResponse<SignInMutation> = {
       signIn: {
         id: "1",
         firstname: "Vianney",
+        role: "USER",
       },
     },
   },

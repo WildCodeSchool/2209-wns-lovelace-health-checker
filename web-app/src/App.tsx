@@ -1,5 +1,6 @@
 import 'react-toastify/dist/ReactToastify.css';
 
+import { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
@@ -7,6 +8,7 @@ import styles from './App.module.scss';
 import Footer from './components/Footer/Footer';
 import Navbar from './components/Navbar/Navbar';
 import NavLogo from './components/NavLogo/NavLogo';
+import { UserContext } from './contexts/UserContext';
 import Account from './pages/Account/Account';
 import AccountConfirmation from './pages/AccountConfirmation/AccountConfirmation';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
@@ -20,31 +22,35 @@ import Terms from './pages/Terms/Terms';
 import NotFound from './pages/NotFound/NotFound';
 
 function App() {
+  const [user, setUser] = useState(null);
+
   return (
     <main className={`container p-0 ${styles.main}`}>
       <div className={styles.content}>
-        <NavLogo />
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/sign-up" element={<SignUp />} />
-          <Route path="/sign-in" element={<SignIn />} />
-          <Route path="/requests" element={<Requests />} />
-          <Route path="/premium" element={<Premium />} />
-          <Route path="/account" element={<Account />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route
-            path="/reset-password/:resetPasswordToken"
-            element={<ResetPassword />}
-          />
-          <Route
-            path="/account-confirmation/:confirmationToken"
-            element={<AccountConfirmation />}
-          />
-          {/* Always put the wildcard on last position */}
-          <Route path="/*" element={<NotFound />} />
-        </Routes>
+        <UserContext.Provider value={{ user, setUser }}>
+          <NavLogo />
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/sign-up" element={<SignUp />} />
+            <Route path="/sign-in" element={<SignIn />} />
+            <Route path="/requests" element={<Requests />} />
+            <Route path="/premium" element={<Premium />} />
+            <Route path="/account" element={<Account />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route
+              path="/reset-password/:resetPasswordToken"
+              element={<ResetPassword />}
+            />
+            <Route
+              path="/account-confirmation/:confirmationToken"
+              element={<AccountConfirmation />}
+            />
+            {/* Always put the wildcard on last position */}
+            <Route path="/*" element={<NotFound />} />
+          </Routes>
+        </UserContext.Provider>
       </div>
       <div className={styles.footer}>
         <Footer />
