@@ -14,6 +14,7 @@ const Account = () => {
         onClick={() => {
           setUser(null);
           navigate("/");
+          localStorage.removeItem("user");
         }}>
         Logout
       </button>
