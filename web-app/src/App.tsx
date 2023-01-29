@@ -1,6 +1,6 @@
 import 'react-toastify/dist/ReactToastify.css';
 
-import { gql, NetworkStatus, useQuery } from '@apollo/client';
+import { gql, useQuery } from '@apollo/client';
 import { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
@@ -36,41 +36,17 @@ function App() {
   `;
   const [isLogged, setIsLogged] = useState(false);
 
-  const { loading, data, refetch, networkStatus } = useQuery<MyProfileQuery>(
-    MY_PROFILE,
-    {
-      variables: {},
-      notifyOnNetworkStatusChange: true,
-      fetchPolicy: "network-only",
-      onCompleted: (data) => {
-        if (data.myProfile) {
-          console.log("onCompleted", data.myProfile);
-          setIsLogged(true);
-        }
-      },
-      onError: () => {
-        setIsLogged(false);
-      },
-    }
-  );
-
-  // const [getMyProfile, { loading, data, refetch, networkStatus }] =
-  //   useLazyQuery<MyProfileQuery>(MY_PROFILE, {
-  //     variables: {},
-  //     fetchPolicy: "network-only",
-  //     onCompleted: (data) => {
-  //       if (data.myProfile) {
-  //         setIsLogged(true);
-  //       }
-  //     },
-  //     onError: (error) => {
-  //       console.log(error);
-  //       setIsLogged(false);
-  //     }
-  //   });
-
-  console.log(data?.myProfile);
-  console.log(networkStatus === NetworkStatus.refetch);
+  const { loading, refetch, data } = useQuery<MyProfileQuery>(MY_PROFILE, {
+    onCompleted: (data) => {
+      if (data.myProfile) {
+        console.log("onCompleted", data.myProfile);
+        setIsLogged(true);
+      }
+    },
+    onError: () => {
+      setIsLogged(false);
+    },
+  });
 
   return (
     <main className={`container p-0 ${styles.main}`}>
@@ -116,7 +92,7 @@ function App() {
             path="/account"
             element={
               <Protected isLoggedIn={isLogged} loading={loading}>
-                <Account onLogoutSuccess={refetch} />
+                <Account onLogoutSuccess={refetch} user={data?.myProfile} />
               </Protected>
             }
           />
