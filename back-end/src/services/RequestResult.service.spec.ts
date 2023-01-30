@@ -19,12 +19,10 @@ describe("RequestResultService", () => {
   describe("checkUrl", () => {
     const url = "https://www.youtube.com";
     it("should return a RequestResult object with a 200 status code", async () => {
-      jest.mock("node-fetch", () =>
-        jest.fn(() =>
-          Promise.resolve({
-            ok: true,
+      global.fetch = jest.fn(() =>
+        Promise.resolve(
+          new Response(JSON.stringify({}), {
             status: 200,
-            json: () => Promise.resolve({}),
           })
         )
       );
@@ -33,27 +31,21 @@ describe("RequestResultService", () => {
 
       expect(requestResult).toBeInstanceOf(RequestResult);
       expect(requestResult.statusCode).toEqual(200);
+      expect(fetch).toHaveBeenCalled();
     });
 
     it("should throw an error if the request times out", async () => {
+      global.fetch = jest.fn(() => {
+        throw new DOMException("","AbortError");
+      });
 
-      jest.mock("node-fetch", () =>
-        jest.fn(() =>
-          Promise.resolve({
-            ok: true,
-            status: 200,
-            json: () => Promise.resolve({}),
-          })
-        )
-      );
-
-      await expect(RequestResultService.checkUrl(url, 0)).rejects.toThrowError(
+      await expect(RequestResultService.checkUrl(url)).rejects.toThrowError(
         "Request Timeout"
       );
+      expect(fetch).toHaveBeenCalled();
     });
 
     it("should throw an error if the fetch fails", async () => {
-      // Use a mock implementation of the fetch method that always throws an error
       global.fetch = jest.fn(() => {
         throw new TypeError("fetch failed");
       });
@@ -63,6 +55,8 @@ describe("RequestResultService", () => {
       await expect(RequestResultService.checkUrl(url)).rejects.toThrow(
         "Fetch Failed"
       );
+      expect(fetch).toHaveBeenCalled();
     });
   });
 });
+
