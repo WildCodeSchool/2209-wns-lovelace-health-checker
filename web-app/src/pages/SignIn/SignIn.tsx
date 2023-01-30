@@ -1,11 +1,10 @@
 import { gql, useMutation } from '@apollo/client';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import FormErrorMessage from '../../components/ErrorMessage/FormErrorMessage';
-import { UserContext } from '../../contexts/UserContext';
 import {
   ResendAccountConfirmationTokenMutation,
   ResendAccountConfirmationTokenMutationVariables,
@@ -39,12 +38,10 @@ export const RESEND_ACCOUNT_CONFIRMATION_TOKEN = gql`
   }
 `;
 
-const SignIn = () => {
+const SignIn = ({ onSuccess }: { onSuccess: () => {} }) => {
   const [passwordInputType, setPasswordInputType] = useState("password");
   const [email, setEmail] = useState("");
   const [isPending, setIsPending] = useState(false);
-
-  const { setUser } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -53,14 +50,7 @@ const SignIn = () => {
     SignInMutationVariables
   >(SIGN_IN, {
     onCompleted: (data) => {
-      const loggedUser = {
-        id: data.signIn.id,
-        firstname: data.signIn.firstname,
-        role: data.signIn.role,
-      };
-      // set in local storage
-      localStorage.setItem("user", JSON.stringify(loggedUser));
-      setUser(loggedUser);
+      onSuccess();
       toast.success("Welcome " + data.signIn.firstname + " !", {
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: 1,

@@ -3,6 +3,8 @@ import * as types from './graphql';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 
 const documents = {
+    "\n    query MyProfile {\n      myProfile {\n        id\n        firstname\n        role\n      }\n    }\n  ": types.MyProfileDocument,
+    "\n    mutation SignOut {\n      signOut\n    }\n  ": types.SignOutDocument,
     "\n  mutation confirmAccount($token: String!) {\n    confirmAccount(token: $token)\n  }\n": types.ConfirmAccountDocument,
     "\n  mutation AskForNewPassword($email: String!) {\n    askForNewPassword(email: $email)\n  }\n": types.AskForNewPasswordDocument,
     "\n  mutation CheckUrl($url: String!) {\n    checkUrl(url: $url) {\n      getIsAvailable\n      duration\n      statusCode\n    }\n  }\n": types.CheckUrlDocument,
@@ -12,6 +14,8 @@ const documents = {
     "\n  mutation SignUp(\n    $firstname: String!\n    $lastname: String!\n    $email: String!\n    $password: String!\n    $passwordConfirmation: String!\n  ) {\n    signUp(\n      firstname: $firstname\n      lastname: $lastname\n      email: $email\n      password: $password\n      passwordConfirmation: $passwordConfirmation\n    ) {\n      firstname\n      lastname\n      email\n    }\n  }\n": types.SignUpDocument,
 };
 
+export function graphql(source: "\n    query MyProfile {\n      myProfile {\n        id\n        firstname\n        role\n      }\n    }\n  "): (typeof documents)["\n    query MyProfile {\n      myProfile {\n        id\n        firstname\n        role\n      }\n    }\n  "];
+export function graphql(source: "\n    mutation SignOut {\n      signOut\n    }\n  "): (typeof documents)["\n    mutation SignOut {\n      signOut\n    }\n  "];
 export function graphql(source: "\n  mutation confirmAccount($token: String!) {\n    confirmAccount(token: $token)\n  }\n"): (typeof documents)["\n  mutation confirmAccount($token: String!) {\n    confirmAccount(token: $token)\n  }\n"];
 export function graphql(source: "\n  mutation AskForNewPassword($email: String!) {\n    askForNewPassword(email: $email)\n  }\n"): (typeof documents)["\n  mutation AskForNewPassword($email: String!) {\n    askForNewPassword(email: $email)\n  }\n"];
 export function graphql(source: "\n  mutation CheckUrl($url: String!) {\n    checkUrl(url: $url) {\n      getIsAvailable\n      duration\n      statusCode\n    }\n  }\n"): (typeof documents)["\n  mutation CheckUrl($url: String!) {\n    checkUrl(url: $url) {\n      getIsAvailable\n      duration\n      statusCode\n    }\n  }\n"];

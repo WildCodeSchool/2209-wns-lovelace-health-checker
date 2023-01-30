@@ -1,12 +1,9 @@
-import { Args, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import { Args, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 
-import { GlobalContext } from "../..";
-import User from "../../entities/User.entity";
-import {
-  deleteSessionIdInCookie,
-  setSessionIdInCookie,
-} from "../../utils/http-cookies";
-import UserService from "../../services/User.service";
+import { GlobalContext } from '../..';
+import User from '../../entities/User.entity';
+import UserService from '../../services/User.service';
+import { deleteSessionIdInCookie, setSessionIdInCookie } from '../../utils/http-cookies';
 import {
   AskForNewPasswordArgs,
   ConfirmAccountArgs,
@@ -14,7 +11,7 @@ import {
   ResetPasswordArgs,
   SignInArgs,
   SignUpArgs,
-} from "./User.input";
+} from './User.input';
 
 @Resolver(User)
 export default class UserResolver {
@@ -66,7 +63,6 @@ export default class UserResolver {
   @Authorized()
   @Mutation(() => String)
   async signOut(@Ctx() context: GlobalContext): Promise<string> {
-    console.log("context", context);
     await UserService.logout(context);
     deleteSessionIdInCookie(context);
     return "You've been signed out securely";

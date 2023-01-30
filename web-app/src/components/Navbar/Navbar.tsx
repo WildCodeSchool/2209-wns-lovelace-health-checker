@@ -1,14 +1,12 @@
-import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
 import logo from '../../assets/images/logo.png';
-import { UserContext } from '../../contexts/UserContext';
 import styles from './Navbar.module.scss';
 
-const Navbar = () => {
-  const { user } = useContext(UserContext);
+const Navbar = (props: any) => {
+  const logged = props.logged;
 
-  let isLogged: boolean = Boolean(user);
+  let isLogged: boolean = logged;
   return (
     <nav className={`d-flex justify-content-between ${styles.navbar}`}>
       {/* Mobile */}
