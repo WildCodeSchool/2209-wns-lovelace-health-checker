@@ -7,7 +7,6 @@ const Navbar = (props: any) => {
   const logged = props.logged;
 
   let isLogged: boolean = logged;
-  console.log(isLogged);
   return (
     <nav className={`d-flex justify-content-between ${styles.navbar}`}>
       {/* Mobile */}

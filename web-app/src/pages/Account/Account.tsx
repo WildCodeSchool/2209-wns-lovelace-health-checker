@@ -14,7 +14,7 @@ const Account = ({
   onLogoutSuccess,
 }: {
   user: any;
-  onLogoutSuccess(): void;
+  onLogoutSuccess(): Promise<void>;
 }) => {
   const [selectedTab, setSelectedTab] = useState("informations");
 
@@ -28,7 +28,7 @@ const Account = ({
 
   const [signOut] = useMutation<SignOutMutation>(SIGN_OUT, {
     onCompleted: async (data) => {
-      onLogoutSuccess();
+      await onLogoutSuccess();
       toast.success(data.signOut, {
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: "logout-success",

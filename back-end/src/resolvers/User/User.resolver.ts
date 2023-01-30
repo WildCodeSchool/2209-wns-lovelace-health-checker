@@ -60,6 +60,7 @@ export default class UserResolver {
     return user;
   }
 
+  @Authorized()
   @Mutation(() => String)
   async signOut(@Ctx() context: GlobalContext): Promise<string> {
     await UserService.logout(context);

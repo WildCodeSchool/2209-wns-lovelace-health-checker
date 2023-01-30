@@ -3,7 +3,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { gql, useQuery } from '@apollo/client';
 import { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 
 import styles from './App.module.scss';
 import Footer from './components/Footer/Footer';
@@ -39,7 +39,6 @@ function App() {
   const { loading, refetch, data } = useQuery<MyProfileQuery>(MY_PROFILE, {
     onCompleted: (data) => {
       if (data.myProfile) {
-        console.log("onCompleted", data.myProfile);
         setIsLogged(true);
       }
     },
@@ -47,6 +46,13 @@ function App() {
       setIsLogged(false);
     },
   });
+
+  const refreshMyProfile = async () => {
+    try {
+      toast.dismiss();
+      await refetch();
+    } catch (error) {}
+  };
 
   return (
     <main className={`container p-0 ${styles.main}`}>
@@ -92,7 +98,10 @@ function App() {
             path="/account"
             element={
               <Protected isLoggedIn={isLogged} loading={loading}>
-                <Account onLogoutSuccess={refetch} user={data?.myProfile} />
+                <Account
+                  onLogoutSuccess={refreshMyProfile}
+                  user={data?.myProfile}
+                />
               </Protected>
             }
           />
