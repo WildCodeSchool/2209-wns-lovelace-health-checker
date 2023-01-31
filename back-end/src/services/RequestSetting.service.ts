@@ -27,8 +27,4 @@ export default class RequestSettingService extends RequestSettingRepository {
     const savedRequestSetting = await this.saveRequestSetting(requestSetting);
     return savedRequestSetting;
   }
-
-  static async saveUpdatedRequestSetting(requestSetting: RequestSetting) {
-    return await this.saveRequestSetting(requestSetting);
-  }
 }

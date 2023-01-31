@@ -1,15 +1,8 @@
 import { Args, Authorized, Ctx, Mutation, Resolver } from "type-graphql";
-import { GlobalContext } from "../..";
-import { AlertType } from "../../entities/AlertSetting.entity";
-import RequestResult from "../../entities/RequestResult.entity";
 import RequestSetting from "../../entities/RequestSetting.entity";
-import User from "../../entities/User.entity";
-import AlertSettingRepository from "../../repositories/AlertSetting.repository";
-import RequestSettingRepository from "../../repositories/RequestSetting.repository";
 import AlertSettingService from "../../services/AlertSetting.service";
 import RequestSettingService from "../../services/RequestSetting.service";
 import UserService from "../../services/User.service";
-import { HttpErrorStatusCode } from "../../utils/http-error-status-codes.enum";
 import { CreateRequestSettingArgs } from "./RequestSetting.input";
 
 @Resolver(RequestSetting)
@@ -45,87 +38,18 @@ export default class RequestSettingResolver {
         headers
       );
 
-    // Changer le libellé de l'erreur
-    if (!createdRequestSetting)
-      throw Error("Unable to retrieve request result");
-
-    // Si création requete OK, alors création des alertes
-    await setPushAlerts(
+    await AlertSettingService.setPushAlerts(
       customPushErrors,
       allErrorsEnabledPush,
       createdRequestSetting
     );
 
-    await setEmailAlerts(
+    await AlertSettingService.setEmailAlerts(
       customEmailErrors,
       allErrorsEnabledEmail,
       createdRequestSetting
     );
 
-    const alerts = await AlertSettingRepository.getAlertsByRequestSettingId(
-      createdRequestSetting.id
-    );
-
-    console.log("alerts", alerts); // EMPTY
-
-    createdRequestSetting.alerts = alerts;
-
-    const result = await RequestSettingService.saveUpdatedRequestSetting(
-      createdRequestSetting
-    );
-
-    return result;
-  }
-}
-
-async function setPushAlerts(
-  customPushErrors: number[] | undefined,
-  allErrorsEnabledPush: boolean,
-  createdRequestSetting: RequestSetting
-) {
-  if (customPushErrors && customPushErrors.length) {
-    customPushErrors.forEach(async (httpErrorStatusCode) => {
-      await AlertSettingService.createAlertSetting(
-        httpErrorStatusCode,
-        createdRequestSetting,
-        AlertType.PUSH
-      );
-    });
-  } else if (allErrorsEnabledPush) {
-    for (const httpErrorStatusCode in HttpErrorStatusCode) {
-      if (!isNaN(Number(httpErrorStatusCode))) {
-        await AlertSettingService.createAlertSetting(
-          parseInt(httpErrorStatusCode),
-          createdRequestSetting,
-          AlertType.PUSH
-        );
-      }
-    }
-  }
-}
-
-async function setEmailAlerts(
-  customEmailErrors: number[] | undefined,
-  allErrorsEnabledEmail: boolean,
-  createdRequestSetting: RequestSetting
-) {
-  if (customEmailErrors && customEmailErrors.length) {
-    customEmailErrors.forEach(async (httpErrorStatusCode) => {
-      await AlertSettingService.createAlertSetting(
-        httpErrorStatusCode,
-        createdRequestSetting,
-        AlertType.EMAIL
-      );
-    });
-  } else if (allErrorsEnabledEmail) {
-    for (const httpErrorStatusCode in HttpErrorStatusCode) {
-      if (!isNaN(Number(httpErrorStatusCode))) {
-        await AlertSettingService.createAlertSetting(
-          parseInt(httpErrorStatusCode),
-          createdRequestSetting,
-          AlertType.EMAIL
-        );
-      }
-    }
+    return createdRequestSetting;
   }
 }

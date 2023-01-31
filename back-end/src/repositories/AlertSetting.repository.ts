@@ -23,7 +23,7 @@ export default class AlertSettingRepository {
   static async getAlertsByRequestSettingId(
     id: string
   ): Promise<AlertSetting[]> {
-    return await this.repository.find({
+    return this.repository.find({
       where: { requestSetting: { id: id } },
     });
   }

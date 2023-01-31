@@ -4,7 +4,7 @@ import { getRepository } from "../database/utils";
 import RequestSetting from "../entities/RequestSetting.entity";
 
 export default class RequestSettingRepository {
-  protected static repository: Repository<RequestSetting>;
+  static repository: Repository<RequestSetting>;
 
   static async initializeRepository() {
     this.repository = await getRepository(RequestSetting);
