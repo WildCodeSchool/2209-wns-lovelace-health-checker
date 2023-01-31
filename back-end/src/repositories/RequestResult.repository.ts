@@ -1,7 +1,7 @@
-import { Repository } from 'typeorm';
+import { Repository } from "typeorm";
 
-import { getRepository } from '../database/utils';
-import RequestResult from '../entities/RequestResult.entity';
+import { getRepository } from "../database/utils";
+import RequestResult from "../entities/RequestResult.entity";
 
 export default class RequestResultRepository {
   protected static repository: Repository<RequestResult>;
@@ -17,6 +17,6 @@ export default class RequestResultRepository {
   }
 
   static async clearRepository(): Promise<void> {
-    this.repository.delete({});
+    await this.repository.delete({});
   }
 }

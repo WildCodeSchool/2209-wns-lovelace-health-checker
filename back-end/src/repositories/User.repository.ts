@@ -19,7 +19,7 @@ export default class UserRepository {
   }
 
   static async clearRepository(): Promise<void> {
-    this.repository.delete({});
+    await this.repository.delete({});
   }
 
   protected static getUserByAccountConfirmationToken = async (

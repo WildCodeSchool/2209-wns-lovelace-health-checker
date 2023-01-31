@@ -1,7 +1,7 @@
-import { Repository } from 'typeorm';
+import { Repository } from "typeorm";
 
-import { getRepository } from '../database/utils';
-import Alert from '../entities/Alert.entity';
+import { getRepository } from "../database/utils";
+import Alert from "../entities/Alert.entity";
 
 export default class AlertRepository {
   protected static repository: Repository<Alert>;
@@ -15,6 +15,6 @@ export default class AlertRepository {
   }
 
   static async clearRepository(): Promise<void> {
-    this.repository.delete({});
+    await this.repository.delete({});
   }
 }

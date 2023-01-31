@@ -12,6 +12,7 @@ import { connectionToRabbitMQ } from "./rabbitmq/config";
 import RequestResultResolver from "./resolvers/RequestResult/RequestResult.resolver";
 import UserResolver from "./resolvers/User/User.resolver";
 import UserService from "./services/User.service";
+import RequestSettingResolver from "./resolvers/RequestSetting/RequestSetting.resolver";
 
 export type GlobalContext = ExpressContext & {
   user: User | null;
@@ -20,7 +21,7 @@ export type GlobalContext = ExpressContext & {
 const startServer = async () => {
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, RequestResultResolver],
+      resolvers: [UserResolver, RequestResultResolver, RequestSettingResolver],
       authChecker: async ({ context }) => {
         return Boolean(context.user);
       },
