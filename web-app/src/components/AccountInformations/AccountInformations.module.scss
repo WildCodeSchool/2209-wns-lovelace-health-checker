@@ -1,0 +1,41 @@
+@use "../../variables.scss";
+@import "../../components.scss";
+
+.formContainer {
+  .header {
+    display: flex;
+    gap: 1rem;
+    margin-left: variables.$margin-xs;
+    color: variables.$primary-1000;
+    font-size: variables.$font-md;
+    font-weight: variables.$font-weight-500;
+  }
+  .formContent {
+    padding: variables.$padding-md;
+    margin-top: variables.$margin-md;
+    background-color: variables.$primary-100;
+    border-radius: variables.$border-radius-sm;
+    .mainButton {
+      @include btn;
+      @include btnSecondary;
+      width: variables.$width-100;
+    }
+  }
+  .dangerZone {
+    padding: variables.$padding-md;
+    margin-top: variables.$margin-md;
+    background-color: variables.$red-200;
+    border-radius: variables.$border-radius-sm;
+    .dangerButton {
+      @include btn;
+      @include btnSecondary;
+      color: variables.$red-1000;
+      border-color: variables.$red-1000;
+      width: variables.$width-100;
+      &:hover {
+        background-color: variables.$red-1000;
+        color: white;
+      }
+    }
+  }
+}
