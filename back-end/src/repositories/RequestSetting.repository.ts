@@ -19,4 +19,10 @@ export default class RequestSettingRepository {
   static async clearRepository(): Promise<void> {
     await this.repository.delete({});
   }
+
+  static async getRequestSettingsByUserId(
+    id: string
+  ): Promise<RequestSetting[]> {
+    return this.repository.find({ where: { user: { id: id } } });
+  }
 }

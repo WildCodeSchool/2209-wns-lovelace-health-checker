@@ -1,4 +1,10 @@
-import { IsBoolean, IsNotEmpty, IsString, MinLength } from "class-validator";
+import {
+  IsBoolean,
+  IsDate,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+} from "class-validator";
 import { Field, ID, ObjectType } from "type-graphql";
 import {
   Column,
@@ -42,6 +48,7 @@ export default class RequestSetting {
     this.isActive = true;
     this.name = name;
     this.headers = headers;
+    this.createdAt = new Date();
   }
 
   @PrimaryGeneratedColumn("uuid")
@@ -49,6 +56,17 @@ export default class RequestSetting {
   @IsString()
   @IsNotEmpty()
   id: string;
+
+  @Column()
+  @Field()
+  @IsDate()
+  @IsNotEmpty()
+  createdAt: Date;
+
+  @Column({ nullable: true, default: null })
+  @Field({ nullable: true })
+  @IsDate()
+  updatedAt: Date;
 
   @ManyToOne(() => User, { eager: true })
   user: User;
@@ -84,7 +102,7 @@ export default class RequestSetting {
   @OneToMany(
     () => AlertSetting,
     (alertSetting) => alertSetting.requestSetting,
-    { eager: true }
+    { lazy: true }
   )
   @Field(() => [AlertSetting])
   alerts: AlertSetting[];
