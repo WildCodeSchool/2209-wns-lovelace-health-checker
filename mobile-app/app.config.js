@@ -1,4 +1,6 @@
-require("dotenv").config({ path: ".." });
+require("dotenv").config();
+
+console.log("env", process.env.GRAPHQL_API_URL);
 
 export default {
   extra: {
