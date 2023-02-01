@@ -1,9 +1,13 @@
-import { Args, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql';
+import { Args, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
 
-import { GlobalContext } from '../..';
-import User from '../../entities/User.entity';
-import UserService from '../../services/User.service';
-import { deleteSessionIdInCookie, setSessionIdInCookie } from '../../utils/http-cookies';
+import { GlobalContext } from "../..";
+import User from "../../entities/User.entity";
+import UserService from "../../services/User/User.service";
+
+import {
+  deleteSessionIdInCookie,
+  setSessionIdInCookie,
+} from "../../utils/http-cookies";
 import {
   AskForNewPasswordArgs,
   ConfirmAccountArgs,
@@ -11,7 +15,7 @@ import {
   ResetPasswordArgs,
   SignInArgs,
   SignUpArgs,
-} from './User.input';
+} from "./User.input";
 
 @Resolver(User)
 export default class UserResolver {

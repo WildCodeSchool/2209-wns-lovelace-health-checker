@@ -11,8 +11,9 @@ import { getSessionIdInCookie } from "./utils/http-cookies";
 import { connectionToRabbitMQ } from "./rabbitmq/config";
 import RequestResultResolver from "./resolvers/RequestResult/RequestResult.resolver";
 import UserResolver from "./resolvers/User/User.resolver";
-import UserService from "./services/User.service";
+
 import RequestSettingResolver from "./resolvers/RequestSetting/RequestSetting.resolver";
+import UserService from "./services/User/User.service";
 
 export type GlobalContext = ExpressContext & {
   user: User | null;

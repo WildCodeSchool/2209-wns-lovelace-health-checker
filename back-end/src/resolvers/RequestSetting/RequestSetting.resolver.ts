@@ -1,12 +1,25 @@
-import { Args, Authorized, Ctx, Mutation, Resolver } from "type-graphql";
+import { Args, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import { GlobalContext } from "../..";
 import RequestSetting from "../../entities/RequestSetting.entity";
+import User from "../../entities/User.entity";
 import AlertSettingService from "../../services/AlertSetting/AlertSetting.service";
 import RequestSettingService from "../../services/RequestSetting/RequestSetting.service";
-import UserService from "../../services/User.service";
+import UserService from "../../services/User/User.service";
+
 import { CreateRequestSettingArgs } from "./RequestSetting.input";
 
 @Resolver(RequestSetting)
 export default class RequestSettingResolver {
+  @Authorized()
+  @Query(() => Boolean)
+  async checkIfNonPremiumUserHasReachedMaxRequestsCount(
+    @Ctx() context: GlobalContext
+  ): Promise<boolean> {
+    return RequestSettingService.checkIfNonPremiumUserHasReachedMaxRequestsCount(
+      context.user as User
+    );
+  }
+
   // @Ctx() context: GlobalContext
   //@Authorized()
   @Mutation(() => RequestSetting)

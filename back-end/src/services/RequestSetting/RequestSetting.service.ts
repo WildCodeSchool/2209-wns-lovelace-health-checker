@@ -40,6 +40,7 @@ export default class RequestSettingService extends RequestSettingRepository {
           `As a non-premium user you're limited to ${process.env.NON_PREMIUM_MAX_AUTHORIZED_REQUESTS} queries. Delete existing queries to create new ones or subscribe to Premium.`
         );
     }
+    return false;
   };
 
   static async checkIfURLorNameAreAlreadyUsed(
@@ -47,6 +48,8 @@ export default class RequestSettingService extends RequestSettingRepository {
     url: string,
     name: string | undefined
   ) {
+    if (!name) return;
+
     const userSettingRequests =
       await RequestSettingRepository.getRequestSettingsByUserId(user.id);
 
@@ -54,6 +57,7 @@ export default class RequestSettingService extends RequestSettingRepository {
       (request: RequestSetting) => request.url === url
     );
     if (URLAlreadyExists) throw Error("This URL already exists");
+
     const nameAlreadyExists = userSettingRequests.some(
       (request: RequestSetting) => request.name === name
     );
