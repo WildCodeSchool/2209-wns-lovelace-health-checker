@@ -1,16 +1,13 @@
-import { ExpressContext } from "apollo-server-express";
-import { compareSync, hashSync } from "bcryptjs";
-import { randomBytes } from "crypto";
+import { ExpressContext } from 'apollo-server-express';
+import { compareSync, hashSync } from 'bcryptjs';
+import { randomBytes } from 'crypto';
 
-import Session from "../../entities/Session.entity";
-import User, { Status } from "../../entities/User.entity";
-import {
-  sendMessageOnAccountCreationEmailQueue,
-  sendMessageOnResetPasswordEmailQueue,
-} from "../../rabbitmq/providers";
-import UserRepository from "../../repositories/User.repository";
-import { getSessionIdInCookie } from "../../utils/http-cookies";
-import SessionService from "../Session/Session.service";
+import Session from '../../entities/Session.entity';
+import User, { Status } from '../../entities/User.entity';
+import { sendMessageOnAccountCreationEmailQueue, sendMessageOnResetPasswordEmailQueue } from '../../rabbitmq/providers';
+import UserRepository from '../../repositories/User.repository';
+import { getSessionIdInCookie } from '../../utils/http-cookies';
+import SessionService from '../Session/Session.service';
 
 export default class UserService extends UserRepository {
   static async createUser(
@@ -188,7 +185,7 @@ export default class UserService extends UserRepository {
     newPassword: string,
     disconnectMe: boolean,
     sessionId: string
-  ): Promise<User> => {
+  ): Promise<string> => {
     if (!compareSync(currentPassword, user.password)) {
       throw new Error("Incorrect current password");
     }
@@ -197,7 +194,8 @@ export default class UserService extends UserRepository {
     await this.saveUser(user);
     if (disconnectMe) {
       await SessionService.deleteAllSessionsButNotCurrentOne(user, sessionId);
+      return "Your password has been updated successfully. You have been disconnected from all your other devices";
     }
-    return user;
+    return "Your password has been updated successfully";
   };
 }

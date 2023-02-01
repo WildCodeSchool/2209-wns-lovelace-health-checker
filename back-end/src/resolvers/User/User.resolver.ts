@@ -91,7 +91,7 @@ export default class UserResolver {
   }
 
   @Authorized()
-  @Mutation(() => User)
+  @Mutation(() => String)
   async updatePassword(
     @Args()
     {
@@ -101,7 +101,7 @@ export default class UserResolver {
       disconnectMe,
     }: UpdatePasswordArgs,
     @Ctx() context: GlobalContext
-  ): Promise<User> {
+  ): Promise<string> {
     if (!context.user) throw Error("You're not authenticated");
     const currentSessionId = context.sessionId;
     if (!currentSessionId) throw Error("You're not authenticated");
