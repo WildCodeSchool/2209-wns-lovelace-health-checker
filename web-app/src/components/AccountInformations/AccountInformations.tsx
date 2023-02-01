@@ -25,6 +25,9 @@ import {
   LASTNAME_MIN_LENGTH,
   LASTNAME_MIN_LENGTH_ERROR_MESSAGE,
   LASTNAME_PLACEHOLDER,
+  PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE,
+  PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE,
+  PASSWORD_CONFIRMATION_PLACEHOLDER,
   PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
   PASSWORD_PATTERN_ERROR_MESSAGE,
 } from '../../utils/form-validations';
@@ -43,6 +46,7 @@ const AccountInformations = (user: any) => {
     register: registerPassword,
     handleSubmit: handleSubmitPassword,
     formState: { errors: errorsPassword },
+    reset: resetPassword,
   } = useForm();
 
   const {
@@ -51,12 +55,18 @@ const AccountInformations = (user: any) => {
     formState: { errors: errorsEmail },
   } = useForm();
 
-  const onSubmitPassword = (data: any) => {
-    console.log(data);
+  const onSubmitPassword = async (data: any) => {
+    await updatePassword({
+      variables: {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+        newPasswordConfirmation: data.newPasswordConfirmation,
+        disconnectMe: data.disconnectMe,
+      },
+    });
   };
 
   const onSubmitIdentity = (data: any) => {
-    console.log(data);
     updateIdentity({
       variables: {
         firstname: data.firstname,
@@ -105,10 +115,7 @@ const AccountInformations = (user: any) => {
         newPassword: $newPassword
         newPasswordConfirmation: $newPasswordConfirmation
         disconnectMe: $disconnectMe
-      ) {
-        firstname
-        lastname
-      }
+      )
     }
   `;
 
@@ -117,13 +124,13 @@ const AccountInformations = (user: any) => {
     UpdatePasswordMutationVariables
   >(UPDATE_PASSWORD, {
     onCompleted: (data) => {
-      console.log(data);
-      toast.success(
-        data.updatePassword.firstname + " " + data.updatePassword.lastname
-      );
+      console.log(data.updatePassword);
+      resetPassword();
+      toast.success(data.updatePassword);
     },
     onError: (error) => {
       console.log(error);
+      toast.error(error.message);
     },
   });
 
@@ -280,24 +287,24 @@ const AccountInformations = (user: any) => {
                   type="password"
                   defaultValue={""}
                   className="form-control"
-                  {...registerPassword("newConfirmationPassword", {
-                    required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
+                  {...registerPassword("newPasswordConfirmation", {
+                    required: PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE,
                     pattern: {
                       value: passwordRegExp,
-                      message: PASSWORD_PATTERN_ERROR_MESSAGE,
+                      message: PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE,
                     },
                   })}
-                  id="newConfirmationPassword"
-                  placeholder={EMAIL_PLACEHOLDER}
+                  id="newPasswordConfirmation"
+                  placeholder={PASSWORD_CONFIRMATION_PLACEHOLDER}
                 />
-                <label htmlFor="newConfirmationPassword">
+                <label htmlFor="newPasswordConfirmation">
                   New Password Confirmation
                 </label>
               </div>
               <div className={styles.errorMessage}>
                 <FormErrorMessage
                   errors={errorsPassword}
-                  name={"newPassword"}
+                  name={"newPasswordConfirmation"}
                 />
               </div>
               <div className="form-check mb-3">

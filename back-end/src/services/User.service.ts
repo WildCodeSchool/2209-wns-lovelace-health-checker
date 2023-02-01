@@ -185,7 +185,7 @@ export default class UserService extends UserRepository {
     newPassword: string,
     disconnectMe: boolean,
     sessionId: string
-  ): Promise<User> => {
+  ): Promise<string> => {
     if (!compareSync(currentPassword, user.password)) {
       throw new Error("Incorrect current password");
     }
@@ -194,7 +194,8 @@ export default class UserService extends UserRepository {
     await this.saveUser(user);
     if (disconnectMe) {
       await SessionService.deleteAllSessionsButNotCurrentOne(user, sessionId);
+      return "Your password has been updated successfully. You have been disconnected from all your other devices";
     }
-    return user;
+    return "Your password has been updated successfully";
   };
 }

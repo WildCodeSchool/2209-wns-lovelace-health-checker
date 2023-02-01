@@ -12,6 +12,7 @@
     color: variables.$primary-800;
     font-weight: variables.$font-weight-600;
     font-size: variables.$font-sm;
+    @include clickable;
   }
   .tabs {
     color: variables.$primary-1000;
