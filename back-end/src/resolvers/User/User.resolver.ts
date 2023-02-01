@@ -11,6 +11,8 @@ import {
   ResetPasswordArgs,
   SignInArgs,
   SignUpArgs,
+  UpdateIdentityArgs,
+  UpdatePasswordArgs,
 } from './User.input';
 
 @Resolver(User)
@@ -72,5 +74,39 @@ export default class UserResolver {
   @Query(() => User)
   async myProfile(@Ctx() context: GlobalContext): Promise<User> {
     return context.user as User;
+  }
+
+  @Authorized()
+  @Mutation(() => User)
+  async updateIdentity(
+    @Args() { firstname, lastname }: UpdateIdentityArgs,
+    @Ctx() context: GlobalContext
+  ): Promise<User> {
+    if (!context.user) throw Error("You're not authenticated");
+    return UserService.updateUserIdentity(context.user, firstname, lastname);
+  }
+
+  @Authorized()
+  @Mutation(() => User)
+  async updatePassword(
+    @Args()
+    {
+      currentPassword,
+      newPassword,
+      newPasswordConfirmation,
+      disconnectMe,
+    }: UpdatePasswordArgs,
+    @Ctx() context: GlobalContext
+  ): Promise<User> {
+    if (!context.user) throw Error("You're not authenticated");
+    const currentSessionId = context.sessionId;
+    if (!currentSessionId) throw Error("You're not authenticated");
+    return UserService.updateUserPassword(
+      context.user,
+      currentPassword,
+      newPassword,
+      disconnectMe,
+      currentSessionId
+    );
   }
 }

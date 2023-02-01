@@ -1,5 +1,13 @@
+import { gql, useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
 
+import {
+  UpdateIdentityMutation,
+  UpdateIdentityMutationVariables,
+  UpdatePasswordMutation,
+  UpdatePasswordMutationVariables,
+} from '../../gql/graphql';
 import {
   EMAIL_IS_REQUIRED_ERROR_MESSAGE,
   EMAIL_MAX_LENGTH,
@@ -26,12 +34,98 @@ import styles from './AccountInformations.module.scss';
 
 const AccountInformations = (user: any) => {
   const {
-    register,
-
-    formState: { errors },
+    register: registerIdentity,
+    handleSubmit: handleSubmitIdentity,
+    formState: { errors: errorsIdentity },
   } = useForm();
 
-  console.log(user.user.firstname);
+  const {
+    register: registerPassword,
+    handleSubmit: handleSubmitPassword,
+    formState: { errors: errorsPassword },
+  } = useForm();
+
+  const {
+    register: registerEmail,
+    handleSubmit: handleSubmitEmail,
+    formState: { errors: errorsEmail },
+  } = useForm();
+
+  const onSubmitPassword = (data: any) => {
+    console.log(data);
+  };
+
+  const onSubmitIdentity = (data: any) => {
+    console.log(data);
+    updateIdentity({
+      variables: {
+        firstname: data.firstname,
+        lastname: data.lastname,
+      },
+    });
+  };
+
+  const onSubmitEmail = (data: any) => {
+    console.log(data);
+  };
+
+  const UPDATE_IDENTITY = gql`
+    mutation UpdateIdentity($lastname: String!, $firstname: String!) {
+      updateIdentity(lastname: $lastname, firstname: $firstname) {
+        lastname
+        firstname
+      }
+    }
+  `;
+
+  const [updateIdentity] = useMutation<
+    UpdateIdentityMutation,
+    UpdateIdentityMutationVariables
+  >(UPDATE_IDENTITY, {
+    onCompleted: (data) => {
+      console.log(data);
+      toast.success(
+        data.updateIdentity.firstname + " " + data.updateIdentity.lastname
+      );
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
+
+  const UPDATE_PASSWORD = gql`
+    mutation UpdatePassword(
+      $currentPassword: String!
+      $newPassword: String!
+      $newPasswordConfirmation: String!
+      $disconnectMe: Boolean!
+    ) {
+      updatePassword(
+        currentPassword: $currentPassword
+        newPassword: $newPassword
+        newPasswordConfirmation: $newPasswordConfirmation
+        disconnectMe: $disconnectMe
+      ) {
+        firstname
+        lastname
+      }
+    }
+  `;
+
+  const [updatePassword] = useMutation<
+    UpdatePasswordMutation,
+    UpdatePasswordMutationVariables
+  >(UPDATE_PASSWORD, {
+    onCompleted: (data) => {
+      console.log(data);
+      toast.success(
+        data.updatePassword.firstname + " " + data.updatePassword.lastname
+      );
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
 
   return (
     <>
@@ -41,13 +135,13 @@ const AccountInformations = (user: any) => {
             <i className="bi bi-person"></i> Personnal informations
           </div>
           <div className={`${styles.formContent}`}>
-            <form>
+            <form onSubmit={handleSubmitIdentity(onSubmitIdentity)}>
               <div className="form-floating mb-3">
                 <input
                   type="text"
                   defaultValue={user.user.firstname}
                   className="form-control"
-                  {...register("firstname", {
+                  {...registerIdentity("firstname", {
                     required: FIRSTNAME_IS_REQUIRED_ERROR_MESSAGE,
                     maxLength: {
                       value: FIRSTNAME_MAX_LENGTH,
@@ -64,14 +158,14 @@ const AccountInformations = (user: any) => {
                 <label htmlFor="firstname">Firstname</label>
               </div>
               <div className={styles.errorMessage}>
-                <FormErrorMessage errors={errors} name={"firstname"} />
+                <FormErrorMessage errors={errorsIdentity} name={"firstname"} />
               </div>
               <div className="form-floating mb-3">
                 <input
                   type="text"
-                  defaultValue={""}
+                  defaultValue={user.user.lastname}
                   className="form-control"
-                  {...register("lastname", {
+                  {...registerIdentity("lastname", {
                     required: LASTNAME_IS_REQUIRED_ERROR_MESSAGE,
                     maxLength: {
                       value: LASTNAME_MAX_LENGTH,
@@ -88,7 +182,7 @@ const AccountInformations = (user: any) => {
                 <label htmlFor="lastname">Lastname</label>
               </div>
               <div className={styles.errorMessage}>
-                <FormErrorMessage errors={errors} name={"lastname"} />
+                <FormErrorMessage errors={errorsIdentity} name={"lastname"} />
               </div>
 
               <button className={`${styles.mainButton}`}>Save</button>
@@ -100,13 +194,13 @@ const AccountInformations = (user: any) => {
             <i className="bi bi-envelope"></i> Change your email
           </div>
           <div className={`${styles.formContent}`}>
-            <form>
+            <form onSubmit={handleSubmitEmail(onSubmitEmail)}>
               <div className="form-floating mb-3">
                 <input
                   type="email"
                   defaultValue={""}
                   className="form-control"
-                  {...register("email", {
+                  {...registerEmail("email", {
                     required: EMAIL_IS_REQUIRED_ERROR_MESSAGE,
                     maxLength: {
                       value: EMAIL_MAX_LENGTH,
@@ -119,7 +213,7 @@ const AccountInformations = (user: any) => {
                 <label htmlFor="email">Email</label>
               </div>
               <div className={styles.errorMessage}>
-                <FormErrorMessage errors={errors} name={"email"} />
+                <FormErrorMessage errors={errorsEmail} name={"email"} />
               </div>
               <button className={`${styles.mainButton}`}>
                 Change your email
@@ -134,13 +228,13 @@ const AccountInformations = (user: any) => {
             <i className="bi bi-lock-fill"></i> Change your password
           </div>
           <div className={`${styles.formContent}`}>
-            <form>
+            <form onSubmit={handleSubmitPassword(onSubmitPassword)}>
               <div className="form-floating mb-3">
                 <input
                   type="password"
                   defaultValue={""}
                   className="form-control"
-                  {...register("currentPassword", {
+                  {...registerPassword("currentPassword", {
                     required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                     pattern: {
                       value: passwordRegExp,
@@ -153,14 +247,17 @@ const AccountInformations = (user: any) => {
                 <label htmlFor="currentPassword">Current Password</label>
               </div>
               <div className={styles.errorMessage}>
-                <FormErrorMessage errors={errors} name={"currentPassword"} />
+                <FormErrorMessage
+                  errors={errorsPassword}
+                  name={"currentPassword"}
+                />
               </div>
               <div className="form-floating mb-3">
                 <input
                   type="password"
                   defaultValue={""}
                   className="form-control"
-                  {...register("newPassword", {
+                  {...registerPassword("newPassword", {
                     required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                     pattern: {
                       value: passwordRegExp,
@@ -173,14 +270,17 @@ const AccountInformations = (user: any) => {
                 <label htmlFor="newPassword">New Password</label>
               </div>
               <div className={styles.errorMessage}>
-                <FormErrorMessage errors={errors} name={"newPassword"} />
+                <FormErrorMessage
+                  errors={errorsPassword}
+                  name={"newPassword"}
+                />
               </div>
               <div className="form-floating mb-3">
                 <input
                   type="password"
                   defaultValue={""}
                   className="form-control"
-                  {...register("newConfirmationPassword", {
+                  {...registerPassword("newConfirmationPassword", {
                     required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                     pattern: {
                       value: passwordRegExp,
@@ -195,7 +295,23 @@ const AccountInformations = (user: any) => {
                 </label>
               </div>
               <div className={styles.errorMessage}>
-                <FormErrorMessage errors={errors} name={"newPassword"} />
+                <FormErrorMessage
+                  errors={errorsPassword}
+                  name={"newPassword"}
+                />
+              </div>
+              <div className="form-check mb-3">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="disconnectMe"
+                  {...registerPassword("disconnectMe")}
+                />
+                <label
+                  className={`form-check-label ${styles.checkLabel}`}
+                  htmlFor="disconnectMe">
+                  Disconnect me from all my devices
+                </label>
               </div>
               <button className={`${styles.mainButton}`}>
                 Change password
@@ -209,10 +325,9 @@ const AccountInformations = (user: any) => {
           </div>
           <div className={`${styles.dangerZone}`}>
             <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Veniam
-              eaque laudantium itaque quod repellat illo nemo saepe ea non
-              obcaecati labore modi tenetur, sint cum dolorum tempore, omnis
-              quisquam architecto.
+              Once you delete your account, there is no going back. You will
+              loose all your requests. If you are Premium member, your plan will
+              be canceled. Please be certain.
             </p>
             <button className={`${styles.dangerButton}`}>
               Delete your account

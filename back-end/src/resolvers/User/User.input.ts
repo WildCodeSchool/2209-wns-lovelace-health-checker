@@ -104,3 +104,34 @@ export class ConfirmAccountArgs {
   @Field()
   token: string;
 }
+
+@ArgsType()
+export class UpdateIdentityArgs {
+  @Field()
+  lastname?: string;
+
+  @Field()
+  firstname?: string;
+}
+
+@ArgsType()
+export class UpdatePasswordArgs {
+  @Field()
+  currentPassword: string;
+
+  @Field()
+  @Matches(passwordRegExp, {
+    message:
+      "Password must have at least 8 characters, one upper case, one lower case, and one number",
+  })
+  newPassword: string;
+
+  @Field()
+  @Match("newPassword", {
+    message: "Passwords don't match",
+  })
+  newPasswordConfirmation: string;
+
+  @Field()
+  disconnectMe: boolean;
+}

@@ -20,6 +20,9 @@
       @include btnSecondary;
       width: variables.$width-100;
     }
+    .checkLabel {
+      color: variables.$primary-1000;
+    }
   }
   .dangerZone {
     padding: variables.$padding-md;
