@@ -169,4 +169,35 @@ export default class UserService extends UserRepository {
     if (!sessionId) throw new Error("You're not signed in");
     await SessionService.deleteSessionById(sessionId);
   };
+
+  static updateUserIdentity = async (
+    user: User,
+    firstname?: string,
+    lastname?: string
+  ) => {
+    if (firstname) user.firstname = firstname;
+    if (lastname) user.lastname = lastname;
+    user.updatedAt = new Date();
+    await this.saveUser(user);
+    return user;
+  };
+
+  static updateUserPassword = async (
+    user: User,
+    currentPassword: string,
+    newPassword: string,
+    disconnectMe: boolean,
+    sessionId: string
+  ): Promise<User> => {
+    if (!compareSync(currentPassword, user.password)) {
+      throw new Error("Incorrect current password");
+    }
+    user.password = hashSync(newPassword);
+    user.updatedAt = new Date();
+    await this.saveUser(user);
+    if (disconnectMe) {
+      await SessionService.deleteAllSessionsButNotCurrentOne(user, sessionId);
+    }
+    return user;
+  };
 }

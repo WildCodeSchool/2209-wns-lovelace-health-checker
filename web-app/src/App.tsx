@@ -32,6 +32,7 @@ function App() {
       myProfile {
         id
         firstname
+        lastname
         role
       }
     }

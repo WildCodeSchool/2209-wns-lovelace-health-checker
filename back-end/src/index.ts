@@ -17,6 +17,7 @@ import UserService from "./services/User/User.service";
 
 export type GlobalContext = ExpressContext & {
   user: User | null;
+  sessionId: string | undefined;
 };
 
 const startServer = async () => {
@@ -33,7 +34,7 @@ const startServer = async () => {
         ? null
         : await UserService.findBySessionId(sessionId);
 
-      return { res: context.res, req: context.req, user };
+      return { res: context.res, req: context.req, user, sessionId };
     },
     csrfPrevention: true,
     cache: "bounded",

@@ -18,4 +18,17 @@ export default class SessionService extends SessionRepository {
       this.deleteSessions(sessions);
     }
   }
+
+  static async deleteAllSessionsButNotCurrentOne(
+    user: User,
+    currentSessionId: string
+  ) {
+    const sessions = await this.findByUser(user);
+    if (sessions) {
+      const sessionsToDelete = sessions.filter(
+        (session) => session.id !== currentSessionId
+      );
+      this.deleteSessions(sessionsToDelete);
+    }
+  }
 }
