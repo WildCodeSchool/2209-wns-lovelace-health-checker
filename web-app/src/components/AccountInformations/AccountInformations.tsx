@@ -93,9 +93,10 @@ const AccountInformations = (user: any) => {
   >(UPDATE_IDENTITY, {
     onCompleted: (data) => {
       console.log(data);
-      toast.success(
-        data.updateIdentity.firstname + " " + data.updateIdentity.lastname
-      );
+      toast.success("Your identity has been updated successfully !", {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        toastId: "updateIdentity",
+      });
     },
     onError: (error) => {
       console.log(error);
@@ -125,7 +126,10 @@ const AccountInformations = (user: any) => {
     onCompleted: (data) => {
       console.log(data.updatePassword);
       resetPassword();
-      toast.success(data.updatePassword);
+      toast.success(data.updatePassword, {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        toastId: "updatePassword",
+      });
     },
     onError: (error) => {
       console.log(error);
@@ -204,7 +208,7 @@ const AccountInformations = (user: any) => {
               <div className="form-floating mb-3">
                 <input
                   type="email"
-                  defaultValue={""}
+                  defaultValue={user.user.email}
                   className="form-control"
                   {...registerEmail("email", {
                     required: EMAIL_IS_REQUIRED_ERROR_MESSAGE,
@@ -316,7 +320,7 @@ const AccountInformations = (user: any) => {
                 <label
                   className={`form-check-label ${styles.checkLabel}`}
                   htmlFor="disconnectMe">
-                  Disconnect me from all my devices
+                  Disconnect me from all my other devices
                 </label>
               </div>
               <button className={`${styles.mainButton}`}>
