@@ -1,13 +1,13 @@
-import { gql, useMutation } from '@apollo/client';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
+import { gql, useMutation } from "@apollo/client";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 import {
   UpdateIdentityMutation,
   UpdateIdentityMutationVariables,
   UpdatePasswordMutation,
   UpdatePasswordMutationVariables,
-} from '../../gql/graphql';
+} from "../../gql/graphql";
 import {
   EMAIL_IS_REQUIRED_ERROR_MESSAGE,
   EMAIL_MAX_LENGTH,
@@ -27,10 +27,10 @@ import {
   LASTNAME_PLACEHOLDER,
   PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
   PASSWORD_PATTERN_ERROR_MESSAGE,
-} from '../../utils/form-validations';
-import { passwordRegExp } from '../../utils/regular-expressions';
-import FormErrorMessage from '../ErrorMessage/FormErrorMessage';
-import styles from './AccountInformations.module.scss';
+} from "../../utils/form-validations";
+import { PASSWORD_REG_EXP } from "../../utils/regular-expressions";
+import FormErrorMessage from "../ErrorMessage/FormErrorMessage";
+import styles from "./AccountInformations.module.scss";
 
 const AccountInformations = (user: any) => {
   const {
@@ -237,7 +237,7 @@ const AccountInformations = (user: any) => {
                   {...registerPassword("currentPassword", {
                     required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                     pattern: {
-                      value: passwordRegExp,
+                      value: PASSWORD_REG_EXP,
                       message: PASSWORD_PATTERN_ERROR_MESSAGE,
                     },
                   })}
@@ -260,7 +260,7 @@ const AccountInformations = (user: any) => {
                   {...registerPassword("newPassword", {
                     required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                     pattern: {
-                      value: passwordRegExp,
+                      value: PASSWORD_REG_EXP,
                       message: PASSWORD_PATTERN_ERROR_MESSAGE,
                     },
                   })}
@@ -283,7 +283,7 @@ const AccountInformations = (user: any) => {
                   {...registerPassword("newConfirmationPassword", {
                     required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                     pattern: {
-                      value: passwordRegExp,
+                      value: PASSWORD_REG_EXP,
                       message: PASSWORD_PATTERN_ERROR_MESSAGE,
                     },
                   })}
@@ -309,7 +309,8 @@ const AccountInformations = (user: any) => {
                 />
                 <label
                   className={`form-check-label ${styles.checkLabel}`}
-                  htmlFor="disconnectMe">
+                  htmlFor="disconnectMe"
+                >
                   Disconnect me from all my devices
                 </label>
               </div>

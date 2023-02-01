@@ -123,7 +123,7 @@ export class UpdatePasswordArgs {
   currentPassword: string;
 
   @Field()
-  @Matches(passwordRegExp, {
+  @Matches(PASSWORD_REG_EXP, {
     message:
       "Password must have at least 8 characters, one upper case, one lower case, and one number",
   })
