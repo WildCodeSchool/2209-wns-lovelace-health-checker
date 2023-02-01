@@ -3,12 +3,13 @@ import {
   getDatabase,
   initializeRepositories,
   truncateAllTables,
-} from "../database/utils";
-import User, { Status } from "../entities/User.entity";
-import * as provider from "../rabbitmq/providers";
-import UserRepository from "../repositories/User.repository";
-import * as HttpCookies from "../utils/http-cookies";
-import SessionService from "./Session.service";
+} from "../../database/utils";
+import User, { Status } from "../../entities/User.entity";
+import * as provider from "../../rabbitmq/providers";
+import UserRepository from "../../repositories/User.repository";
+import * as HttpCookies from "../../utils/http-cookies";
+import SessionService from "../Session/Session.service";
+
 import UserService from "./User.service";
 
 const sendMessageOnAccountCreationEmailQueue = () => {

@@ -14,7 +14,7 @@ export const FIRSTNAME_PATTERN_ERROR_MESSAGE =
   "First name must not contain numbers or special characters";
 export const FIRSTNAME_PLACEHOLDER = "John";
 
-// Firstname
+// Lastname
 export const LASTNAME_IS_REQUIRED_ERROR_MESSAGE = "Last name is required";
 export const LASTNAME_MIN_LENGTH = 2;
 export const LASTNAME_MIN_LENGTH_ERROR_MESSAGE = `Last name must have at least ${LASTNAME_MIN_LENGTH} characters`;

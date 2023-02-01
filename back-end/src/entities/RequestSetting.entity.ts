@@ -1,9 +1,21 @@
-import { IsBoolean, IsNotEmpty, IsString, MinLength } from 'class-validator';
-import { Field, ID, ObjectType } from 'type-graphql';
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  IsBoolean,
+  IsDate,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+} from "class-validator";
+import { Field, ID, ObjectType } from "type-graphql";
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
-import AlertSetting from './AlertSetting.entity';
-import User from './User.entity';
+import AlertSetting from "./AlertSetting.entity";
+import User from "./User.entity";
 
 export enum Frequency {
   THIRTY_DAYS = 2592000,
@@ -27,16 +39,16 @@ export default class RequestSetting {
     user: User,
     url: string,
     frequency: number,
-    isActive: boolean,
-    name?: string | any, // Can't set to string | undefined because of TypeORM
-    headers?: JSON
+    name?: string,
+    headers?: string
   ) {
     this.user = user;
     this.frequency = frequency;
     this.url = url;
-    this.isActive = isActive;
+    this.isActive = true;
     this.name = name;
-    this.headers = JSON.stringify(headers);
+    this.headers = headers;
+    this.createdAt = new Date();
   }
 
   @PrimaryGeneratedColumn("uuid")
@@ -44,6 +56,17 @@ export default class RequestSetting {
   @IsString()
   @IsNotEmpty()
   id: string;
+
+  @Column()
+  @Field()
+  @IsDate()
+  @IsNotEmpty()
+  createdAt: Date;
+
+  @Column({ nullable: true, default: null })
+  @Field({ nullable: true })
+  @IsDate()
+  updatedAt: Date;
 
   @ManyToOne(() => User, { eager: true })
   user: User;
@@ -69,17 +92,17 @@ export default class RequestSetting {
   @Field({ nullable: true })
   @IsString()
   @MinLength(1)
-  name: string;
+  name?: string;
 
   @Column({ nullable: true, default: null })
   @Field({ nullable: true })
   @IsString()
-  headers: string;
+  headers?: string;
 
   @OneToMany(
     () => AlertSetting,
     (alertSetting) => alertSetting.requestSetting,
-    { eager: true }
+    { lazy: true }
   )
   @Field(() => [AlertSetting])
   alerts: AlertSetting[];

@@ -1,8 +1,9 @@
-import { Args, Mutation, Resolver } from 'type-graphql';
+import { Args, Mutation, Resolver } from "type-graphql";
 
-import RequestResult from '../../entities/RequestResult.entity';
-import RequestResultService from '../../services/RequestResult.service';
-import { checkUrlArgs } from './RequestResult.input';
+import RequestResult from "../../entities/RequestResult.entity";
+import RequestResultService from "../../services/RequestResult/RequestResult.service";
+
+import { checkUrlArgs } from "./RequestResult.input";
 
 @Resolver(RequestResult)
 export default class RequestResultResolver {

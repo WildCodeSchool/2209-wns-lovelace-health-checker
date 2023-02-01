@@ -1,7 +1,12 @@
-import { closeConnection, getDatabase, initializeRepositories, truncateAllTables } from '../database/utils';
-import * as provider from '../rabbitmq/providers';
-import SessionService from './Session.service';
-import UserService from './User.service';
+import {
+  closeConnection,
+  getDatabase,
+  initializeRepositories,
+  truncateAllTables,
+} from "../../database/utils";
+import * as provider from "../../rabbitmq/providers";
+import SessionService from "./Session.service";
+import UserService from "../User/User.service";
 
 const sendMessageOnAccountCreationEmailQueueSpy = () => {
   return jest

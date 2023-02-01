@@ -1,17 +1,19 @@
-import 'reflect-metadata';
+import "reflect-metadata";
 
-import { ApolloServer } from 'apollo-server';
-import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
-import { ExpressContext } from 'apollo-server-express';
-import { buildSchema } from 'type-graphql';
+import { ApolloServer } from "apollo-server";
+import { ApolloServerPluginLandingPageLocalDefault } from "apollo-server-core";
+import { ExpressContext } from "apollo-server-express";
+import { buildSchema } from "type-graphql";
 
-import { getDatabase, initializeRepositories } from './database/utils';
-import User from './entities/User.entity';
-import { connectionToRabbitMQ } from './rabbitmq/config';
-import RequestResultResolver from './resolvers/RequestResult/RequestResult.resolver';
-import UserResolver from './resolvers/User/User.resolver';
-import UserService from './services/User.service';
-import { getSessionIdInCookie } from './utils/http-cookies';
+import { getDatabase, initializeRepositories } from "./database/utils";
+import User from "./entities/User.entity";
+import { getSessionIdInCookie } from "./utils/http-cookies";
+import { connectionToRabbitMQ } from "./rabbitmq/config";
+import RequestResultResolver from "./resolvers/RequestResult/RequestResult.resolver";
+import UserResolver from "./resolvers/User/User.resolver";
+
+import RequestSettingResolver from "./resolvers/RequestSetting/RequestSetting.resolver";
+import UserService from "./services/User/User.service";
 
 export type GlobalContext = ExpressContext & {
   user: User | null;
@@ -21,7 +23,7 @@ export type GlobalContext = ExpressContext & {
 const startServer = async () => {
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, RequestResultResolver],
+      resolvers: [UserResolver, RequestResultResolver, RequestSettingResolver],
       authChecker: async ({ context }) => {
         return Boolean(context.user);
       },
