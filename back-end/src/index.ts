@@ -1,20 +1,21 @@
-import "reflect-metadata";
+import 'reflect-metadata';
 
-import { ApolloServer } from "apollo-server";
-import { ApolloServerPluginLandingPageLocalDefault } from "apollo-server-core";
-import { ExpressContext } from "apollo-server-express";
-import { buildSchema } from "type-graphql";
+import { ApolloServer } from 'apollo-server';
+import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
+import { ExpressContext } from 'apollo-server-express';
+import { buildSchema } from 'type-graphql';
 
-import { getDatabase, initializeRepositories } from "./database/utils";
-import User from "./entities/User.entity";
-import { getSessionIdInCookie } from "./utils/http-cookies";
-import { connectionToRabbitMQ } from "./rabbitmq/config";
-import RequestResultResolver from "./resolvers/RequestResult/RequestResult.resolver";
-import UserResolver from "./resolvers/User/User.resolver";
-import UserService from "./services/User.service";
+import { getDatabase, initializeRepositories } from './database/utils';
+import User from './entities/User.entity';
+import { connectionToRabbitMQ } from './rabbitmq/config';
+import RequestResultResolver from './resolvers/RequestResult/RequestResult.resolver';
+import UserResolver from './resolvers/User/User.resolver';
+import UserService from './services/User.service';
+import { getSessionIdInCookie } from './utils/http-cookies';
 
 export type GlobalContext = ExpressContext & {
   user: User | null;
+  sessionId: string | undefined;
 };
 
 const startServer = async () => {
@@ -31,7 +32,7 @@ const startServer = async () => {
         ? null
         : await UserService.findBySessionId(sessionId);
 
-      return { res: context.res, req: context.req, user };
+      return { res: context.res, req: context.req, user, sessionId };
     },
     csrfPrevention: true,
     cache: "bounded",

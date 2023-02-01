@@ -83,7 +83,9 @@ const Account = ({
           </div>
         </div>
         <div>
-          {selectedTab === "informations" && <AccountInformations />}
+          {selectedTab === "informations" && (
+            <AccountInformations user={user} />
+          )}
           {selectedTab === "premium" && <AccountPremium />}
           {selectedTab === "bills" && <AccountBills />}
         </div>

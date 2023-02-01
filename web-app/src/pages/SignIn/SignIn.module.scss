@@ -40,7 +40,7 @@
     margin-top: variables.$margin-md;
     @media (min-width: variables.$mobile-breakpoint) {
       @include btn;
-      width: 100%;
+      width: variables.$width-100;
     }
   }
   .btnPrimary {
@@ -76,7 +76,7 @@
     position: relative;
     .loaderContainer {
       background-color: variables.$loader-transparent-bg;
-      width: 100%;
+      width: variables.$width-100;
       height: 100%;
       position: absolute;
       z-index: 2;

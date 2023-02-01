@@ -41,7 +41,7 @@
 
 @mixin btn-mobile {
   @include btn();
-  width: 100%;
+  width: variables.$width-100;
 }
 
 @mixin btnPrimary {
