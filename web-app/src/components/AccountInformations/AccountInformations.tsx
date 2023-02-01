@@ -26,12 +26,11 @@ import {
   LASTNAME_MIN_LENGTH_ERROR_MESSAGE,
   LASTNAME_PLACEHOLDER,
   PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE,
-  PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE,
   PASSWORD_CONFIRMATION_PLACEHOLDER,
   PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
   PASSWORD_PATTERN_ERROR_MESSAGE,
 } from '../../utils/form-validations';
-import { passwordRegExp } from '../../utils/regular-expressions';
+import { PASSWORD_REG_EXP } from '../../utils/regular-expressions';
 import FormErrorMessage from '../ErrorMessage/FormErrorMessage';
 import styles from './AccountInformations.module.scss';
 
@@ -244,7 +243,7 @@ const AccountInformations = (user: any) => {
                   {...registerPassword("currentPassword", {
                     required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                     pattern: {
-                      value: passwordRegExp,
+                      value: PASSWORD_REG_EXP,
                       message: PASSWORD_PATTERN_ERROR_MESSAGE,
                     },
                   })}
@@ -267,7 +266,7 @@ const AccountInformations = (user: any) => {
                   {...registerPassword("newPassword", {
                     required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                     pattern: {
-                      value: passwordRegExp,
+                      value: PASSWORD_REG_EXP,
                       message: PASSWORD_PATTERN_ERROR_MESSAGE,
                     },
                   })}
@@ -290,8 +289,8 @@ const AccountInformations = (user: any) => {
                   {...registerPassword("newPasswordConfirmation", {
                     required: PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE,
                     pattern: {
-                      value: passwordRegExp,
-                      message: PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE,
+                      value: PASSWORD_REG_EXP,
+                      message: PASSWORD_PATTERN_ERROR_MESSAGE,
                     },
                   })}
                   id="newPasswordConfirmation"

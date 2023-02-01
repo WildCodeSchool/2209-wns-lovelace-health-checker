@@ -1,7 +1,7 @@
-import RequestResult from "../entities/RequestResult.entity";
-import RequestSetting from "../entities/RequestSetting.entity";
-import User from "../entities/User.entity";
-import RequestResultRepository from "../repositories/RequestResult.repository";
+import RequestResult from "../../entities/RequestResult.entity";
+import RequestSetting from "../../entities/RequestSetting.entity";
+import User from "../../entities/User.entity";
+import RequestResultRepository from "../../repositories/RequestResult.repository";
 
 export default class RequestResultService extends RequestResultRepository {
   private static async fetchWithTimeout(
@@ -30,8 +30,7 @@ export default class RequestResultService extends RequestResultRepository {
     const dummyRequestSetting = new RequestSetting(
       new User("", "", "", ""),
       url,
-      0,
-      false
+      0
     );
     try {
       const response = await this.fetchWithTimeout(new URL(url), timeout);

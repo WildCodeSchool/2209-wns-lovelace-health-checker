@@ -1,11 +1,11 @@
-import { IsDate, IsNotEmpty, IsString } from 'class-validator';
-import { Field, ID, ObjectType } from 'type-graphql';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { IsDate, IsNotEmpty, IsString } from "class-validator";
+import { Field, ID, ObjectType } from "type-graphql";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-import { HttpErrorStatusCode } from '../utils/http-error-status-codes.enum';
-import RequestSetting from './RequestSetting.entity';
+import { HttpErrorStatusCode } from "../utils/http-error-status-codes.enum";
+import RequestSetting from "./RequestSetting.entity";
 
-enum AlertType {
+export enum AlertType {
   PUSH = "push",
   EMAIL = "email",
 }

@@ -35,8 +35,8 @@ import {
   PASSWORD_PLACEHOLDER,
 } from "../../utils/form-validations";
 import {
-  firstNameAndLastNameRegExp,
-  passwordRegExp,
+  FIRSTNAME_AND_LASTNAME_REG_EXP,
+  PASSWORD_REG_EXP,
 } from "../../utils/regular-expressions";
 import styles from "./SignUp.module.scss";
 
@@ -195,7 +195,7 @@ const SignUp = () => {
                     message: FIRSTNAME_MAX_LENGTH_ERROR_MESSAGE,
                   },
                   pattern: {
-                    value: firstNameAndLastNameRegExp,
+                    value: FIRSTNAME_AND_LASTNAME_REG_EXP,
                     message: FIRSTNAME_PATTERN_ERROR_MESSAGE,
                   },
                 })}
@@ -224,7 +224,7 @@ const SignUp = () => {
                     message: LASTNAME_MAX_LENGTH_ERROR_MESSAGE,
                   },
                   pattern: {
-                    value: firstNameAndLastNameRegExp,
+                    value: FIRSTNAME_AND_LASTNAME_REG_EXP,
                     message: LASTNAME_PATTERN_ERROR_MESSAGE,
                   },
                 })}
@@ -246,7 +246,7 @@ const SignUp = () => {
                 {...register("password", {
                   required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                   pattern: {
-                    value: passwordRegExp,
+                    value: PASSWORD_REG_EXP,
                     message: PASSWORD_PATTERN_ERROR_MESSAGE,
                   },
                 })}

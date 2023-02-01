@@ -1,10 +1,11 @@
 import RequestResultService from "./RequestResult.service";
-import RequestResult from "../entities/RequestResult.entity";
+
 import {
   closeConnection,
   getDatabase,
   initializeRepositories,
-} from "../database/utils";
+} from "../../database/utils";
+import RequestResult from "../../entities/RequestResult.entity";
 
 beforeAll(async () => {
   await getDatabase();
@@ -36,7 +37,7 @@ describe("RequestResultService", () => {
 
     it("should throw an error if the request times out", async () => {
       global.fetch = jest.fn(() => {
-        throw new DOMException("","AbortError");
+        throw new DOMException("", "AbortError");
       });
 
       await expect(RequestResultService.checkUrl(url)).rejects.toThrowError(
@@ -59,4 +60,3 @@ describe("RequestResultService", () => {
     });
   });
 });
-
