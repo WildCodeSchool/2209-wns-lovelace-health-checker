@@ -1,7 +1,7 @@
 import { Args, Authorized, Ctx, Mutation, Resolver } from "type-graphql";
 import RequestSetting from "../../entities/RequestSetting.entity";
-import AlertSettingService from "../../services/AlertSetting.service";
-import RequestSettingService from "../../services/RequestSetting.service";
+import AlertSettingService from "../../services/AlertSetting/AlertSetting.service";
+import RequestSettingService from "../../services/RequestSetting/RequestSetting.service";
 import UserService from "../../services/User.service";
 import { CreateRequestSettingArgs } from "./RequestSetting.input";
 

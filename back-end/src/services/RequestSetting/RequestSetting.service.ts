@@ -1,6 +1,8 @@
-import RequestSetting, { Frequency } from "../entities/RequestSetting.entity";
-import User, { Role } from "../entities/User.entity";
-import RequestSettingRepository from "../repositories/RequestSetting.repository";
+import RequestSetting, {
+  Frequency,
+} from "../../entities/RequestSetting.entity";
+import User, { Role } from "../../entities/User.entity";
+import RequestSettingRepository from "../../repositories/RequestSetting.repository";
 
 export default class RequestSettingService extends RequestSettingRepository {
   static async createRequestSetting(
