@@ -1,15 +1,18 @@
-import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
-import { ArgsType, Field } from 'type-graphql';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+} from "class-validator";
+import { ArgsType, Field } from "type-graphql";
 
-import { Match } from '../../utils/match.decorator';
-
-// Minimum eight characters, at least one uppercase letter, one lowercase letter and one number, for special character, add " (?=.*[*.!@$%^&(){}[]:;<>/,.?~_+-=|\]) "
-const passwordRegExp = new RegExp("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$");
-
-// Support international names with super sweet unicode
-const regExp = RegExp(
-  /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
-);
+import { Match } from "../../utils/match.decorator";
+import {
+  PASSWORD_REG_EXP,
+  FIRSTNAME_AND_LASTNAME_REG_EXP,
+} from "../../utils/regular-expressions";
 
 @ArgsType()
 export class SignUpArgs {
@@ -19,7 +22,7 @@ export class SignUpArgs {
     message: "First name must have at least 2 characters",
   })
   @MaxLength(100, { message: "First name must have maximum 100 characters" })
-  @Matches(regExp, {
+  @Matches(FIRSTNAME_AND_LASTNAME_REG_EXP, {
     message: "First name must not contain numbers or special characters",
   })
   firstname: string;
@@ -28,7 +31,7 @@ export class SignUpArgs {
   @IsNotEmpty()
   @MinLength(2, { message: "Last name must have at least 2 characters" })
   @MaxLength(100, { message: "Last name must have maximum 100 characters" })
-  @Matches(regExp, {
+  @Matches(FIRSTNAME_AND_LASTNAME_REG_EXP, {
     message: "Last name must not contain numbers or special characters",
   })
   lastname: string;
@@ -41,7 +44,7 @@ export class SignUpArgs {
   email: string;
 
   @Field()
-  @Matches(passwordRegExp, {
+  @Matches(PASSWORD_REG_EXP, {
     message:
       "Password must have at least 8 characters, one upper case, one lower case, and one number",
   })
@@ -86,7 +89,7 @@ export class ResetPasswordArgs {
   token: string;
 
   @Field()
-  @Matches(passwordRegExp, {
+  @Matches(PASSWORD_REG_EXP, {
     message:
       "Password must have at least 8 characters, one upper case, one lower case, and one number",
   })
