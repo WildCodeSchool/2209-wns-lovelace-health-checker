@@ -45,6 +45,9 @@
       .premiumIcon {
         color: variables.$yellow-1000;
       }
+      .inline {
+        display: inline;
+      }
     }
 
     .btn {
@@ -58,4 +61,8 @@
       @include btnSecondary;
     }
   }
+}
+
+.reactSelect {
+  background-color: red;
 }

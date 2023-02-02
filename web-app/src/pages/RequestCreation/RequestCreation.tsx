@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
 import styles from "./RequestCreation.module.scss";
 import Select from "react-select";
@@ -24,17 +24,39 @@ const RequestCreation = () => {
   const clearMultiSelectAndEmptyEmailErrorValues = () => {
     setEmailSpecificErrorsInputValue(null);
     setEmailSpecificErrors([]);
+    setEmailSpecificErrorRadioIsChecked(false);
   };
 
   const clearMultiSelectAndEmptyPushErrorValues = () => {
     setPushSpecificErrorsInputValue(null);
     setPushSpecificErrors([]);
+    setPushSpecificErrorRadioIsChecked(false);
   };
 
   const onPushSpecificErrorChange = (selectedErrors: any) => {
     setPushSpecificErrors(selectedErrors);
     setPushSpecificErrorsInputValue(selectedErrors);
   };
+
+  const [
+    emailSpecificErrorRadioIsChecked,
+    setEmailSpecificErrorRadioIsChecked,
+  ] = useState(false);
+
+  const [pushSpecificErrorRadioIsChecked, setPushSpecificErrorRadioIsChecked] =
+    useState(false);
+
+  useEffect(() => {
+    if (emailSpecificErrors.length) {
+      setEmailSpecificErrorRadioIsChecked(true);
+    }
+  }, [emailSpecificErrors, emailSpecificErrorRadioIsChecked]);
+
+  useEffect(() => {
+    if (pushSpecificErrors.length) {
+      setPushSpecificErrorRadioIsChecked(true);
+    }
+  }, [pushSpecificErrors, pushSpecificErrorRadioIsChecked]);
 
   return (
     <div className={`${styles.contentContainer}`}>
@@ -313,7 +335,7 @@ const RequestCreation = () => {
                 name="emailAlerts"
                 id="flexRadioDefault1"
                 defaultChecked
-                onChange={clearMultiSelectAndEmptyEmailErrorValues}
+                onClick={clearMultiSelectAndEmptyEmailErrorValues}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault1">
                 No email alert
@@ -338,14 +360,24 @@ const RequestCreation = () => {
                 name="emailAlerts"
                 id="flexRadioDefault2"
                 disabled={!isPremium}
+                checked={emailSpecificErrorRadioIsChecked}
+                onChange={() =>
+                  setEmailSpecificErrorRadioIsChecked(
+                    !emailSpecificErrorRadioIsChecked
+                  )
+                }
               />
               <label className="form-check-label" htmlFor="flexRadioDefault2">
-                Receive email on specific error(s){" "}
-              </label>{" "}
+                Receive email on specific error(s)
+              </label>
               {isPremium ? (
                 ""
               ) : (
-                <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
+                <span>
+                  <i
+                    className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}
+                  ></i>
+                </span>
               )}
             </div>
             <Select
@@ -370,7 +402,7 @@ const RequestCreation = () => {
                 name="pushAlerts"
                 id="flexRadioDefault1"
                 defaultChecked
-                onChange={clearMultiSelectAndEmptyPushErrorValues}
+                onClick={clearMultiSelectAndEmptyPushErrorValues}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault1">
                 No push notification
@@ -395,14 +427,27 @@ const RequestCreation = () => {
                 name="pushAlerts"
                 id="flexRadioDefault2"
                 disabled={!isPremium}
+                checked={pushSpecificErrorRadioIsChecked}
+                onChange={() =>
+                  setPushSpecificErrorRadioIsChecked(
+                    !pushSpecificErrorRadioIsChecked
+                  )
+                }
               />
-              <label className="form-check-label" htmlFor="flexRadioDefault2">
-                Push notification on specific error(s){" "}
-              </label>{" "}
+              <label
+                className={` ${styles.inline} form-check-label`}
+                htmlFor="flexRadioDefault2"
+              >
+                Push notification on specific error(s)
+              </label>
               {isPremium ? (
                 ""
               ) : (
-                <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
+                <span>
+                  <i
+                    className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}
+                  ></i>
+                </span>
               )}
             </div>
             <Select
@@ -472,7 +517,13 @@ const RequestCreation = () => {
         </div>
 
         <div className={`col ${styles.formContainer}`}>
-          <button className={`${styles.btn} ${styles.btnPrimary} my-md-4`}>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              console.log({ emailSpecificErrors, pushSpecificErrors });
+            }}
+            className={`${styles.btn} ${styles.btnPrimary} my-md-4`}
+          >
             Save
           </button>
         </div>
