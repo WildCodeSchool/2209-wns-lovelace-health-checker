@@ -15,3 +15,8 @@ export const sendMessageOnResetPasswordEmailQueue = async (data: any) => {
   );
   console.log("A new message was sent to 'reset-password-queue'");
 };
+
+export const sendMessageOnResetEmailQueue = async (data: any) => {
+  await channel.sendToQueue("reset-email", Buffer.from(JSON.stringify(data)));
+  console.log("A new message was sent to 'reset-email-queue'");
+};

@@ -16,13 +16,13 @@
   }
   .tabs {
     color: variables.$primary-1000;
-    font-size: variables.$font-xs;
+    font-size: variables.$font-sm;
     font-weight: variables.$font-weight-600;
     @include clickable;
   }
   .tabContainer {
     padding: 3px 5px;
-    width: 119px;
+    width: 129px;
     border-radius: 50px;
     text-align: center;
   }
