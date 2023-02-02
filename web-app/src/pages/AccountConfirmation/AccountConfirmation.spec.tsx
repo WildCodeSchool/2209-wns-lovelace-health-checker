@@ -1,10 +1,10 @@
-import "@testing-library/jest-dom";
+import '@testing-library/jest-dom';
 
-import { MockedProvider } from "@apollo/client/testing";
-import { render, screen } from "@testing-library/react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MockedProvider } from '@apollo/client/testing';
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
-import AccountConfirmation, { CONFIRM_ACCOUNT } from "./AccountConfirmation";
+import AccountConfirmation, { CONFIRM_ACCOUNT } from './AccountConfirmation';
 
 const renderAccountConfirmation = (token: string, mock?: any) => {
   render(
@@ -13,7 +13,7 @@ const renderAccountConfirmation = (token: string, mock?: any) => {
         <Routes>
           <Route
             path="/account-confirmation/:confirmationToken"
-            element={<AccountConfirmation />}
+            element={<AccountConfirmation onSuccess={() => {}} />}
           />
         </Routes>
       </MemoryRouter>

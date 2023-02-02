@@ -1,10 +1,30 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 import logo from '../../assets/images/logo.png';
 import styles from './Navbar.module.scss';
 
 const Navbar = (props: any) => {
+  const [selectedTab, setSelectedTab] = useState("search");
   const logged = props.logged;
+
+  const route = useLocation();
+
+  useEffect(() => {
+    if (route.pathname === "/") {
+      setSelectedTab("search");
+    } else if (route.pathname === "/sign-in") {
+      setSelectedTab("sign-in");
+    } else if (route.pathname === "/sign-up") {
+      setSelectedTab("sign-up");
+    } else if (route.pathname === "/premium") {
+      setSelectedTab("premium");
+    } else if (route.pathname === "/requests") {
+      setSelectedTab("requests");
+    } else if (route.pathname === "/account") {
+      setSelectedTab("account");
+    }
+  }, [route]);
 
   let isLogged: boolean = logged;
   return (
@@ -84,16 +104,32 @@ const Navbar = (props: any) => {
           <img className={styles.logo} src={logo} alt="Health Check logo"></img>
         </Link>
 
-        <div className="d-flex align-items-center gap-4 h-100">
-          <div className={styles.navElement}>
-            <Link className={styles.navlink} to="/">
+        <div className="d-flex align-items-center  h-100">
+          <div
+            className={`${styles.navElement} ${
+              selectedTab === "search" && styles.selectedTab
+            }`}>
+            <Link
+              className={`${styles.navlink} ${
+                selectedTab === "search" && styles.selectedLink
+              }`}
+              to="/"
+              onClick={() => setSelectedTab("search")}>
               Search
             </Link>
           </div>
 
           {isLogged ? (
-            <div className={`${styles.navElement} `}>
-              <Link className={styles.navlink} to="/requests">
+            <div
+              className={`${styles.navElement} ${
+                selectedTab === "requests" && styles.selectedTab
+              } `}>
+              <Link
+                className={`${styles.navlink} ${
+                  selectedTab === "requests" && styles.selectedLink
+                }`}
+                to="/requests"
+                onClick={() => setSelectedTab("requests")}>
                 Requests
               </Link>
             </div>
@@ -101,15 +137,31 @@ const Navbar = (props: any) => {
             <></>
           )}
 
-          <div className={`${styles.navElement} `}>
-            <Link className={styles.navlink} to="/premium">
+          <div
+            className={`${styles.navElement} ${
+              selectedTab === "premium" && styles.selectedTab
+            } `}>
+            <Link
+              className={`${styles.navlink} ${
+                selectedTab === "premium" && styles.selectedLink
+              }`}
+              to="/premium"
+              onClick={() => setSelectedTab("premium")}>
               Premium
             </Link>
           </div>
 
           {isLogged ? (
-            <div className={styles.navElement}>
-              <Link className={styles.navlink} to="/account">
+            <div
+              className={`${styles.navElement} ${
+                selectedTab === "account" && styles.selectedTab
+              } `}>
+              <Link
+                className={`${styles.navlink} ${
+                  selectedTab === "account" && styles.selectedLink
+                }`}
+                to="/account"
+                onClick={() => setSelectedTab("account")}>
                 Account
               </Link>
             </div>
@@ -118,21 +170,24 @@ const Navbar = (props: any) => {
           )}
 
           {!isLogged ? (
-            <Link className="m-0" to="/sign-up">
-              <button className={`${styles.btn} ${styles.btnPrimary}`}>
-                Sign up
-              </button>
-            </Link>
-          ) : (
-            <></>
-          )}
-
-          {!isLogged ? (
-            <Link className="m-0" to="/sign-in">
-              <button className={`${styles.btn} ${styles.btnSecondary}`}>
-                Sign in
-              </button>
-            </Link>
+            <div>
+              <Link
+                className={`m-0 ${styles.notLogged}`}
+                to="/sign-up"
+                onClick={() => setSelectedTab("sign-up")}>
+                <button className={`${styles.btn} ${styles.btnPrimary}`}>
+                  Sign up
+                </button>
+              </Link>{" "}
+              <Link
+                className={`m-0 `}
+                to="/sign-in"
+                onClick={() => setSelectedTab("sign-in")}>
+                <button className={`${styles.btn} ${styles.btnSecondary}`}>
+                  Sign in
+                </button>
+              </Link>
+            </div>
           ) : (
             <></>
           )}

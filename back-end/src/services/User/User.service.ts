@@ -4,7 +4,11 @@ import { randomBytes } from 'crypto';
 
 import Session from '../../entities/Session.entity';
 import User, { Status } from '../../entities/User.entity';
-import { sendMessageOnAccountCreationEmailQueue, sendMessageOnResetPasswordEmailQueue } from '../../rabbitmq/providers';
+import {
+  sendMessageOnAccountCreationEmailQueue,
+  sendMessageOnResetEmailQueue,
+  sendMessageOnResetPasswordEmailQueue,
+} from '../../rabbitmq/providers';
 import UserRepository from '../../repositories/User.repository';
 import { getSessionIdInCookie } from '../../utils/http-cookies';
 import SessionService from '../Session/Session.service';
@@ -82,7 +86,7 @@ export default class UserService extends UserRepository {
     if (!user) throw Error("Invalid confirmation token");
 
     user.status = Status.ACTIVE;
-    user.accountConfirmationToken = "";
+    user.accountConfirmationToken = null;
     await this.saveUser(user);
     return true;
   };
@@ -197,5 +201,48 @@ export default class UserService extends UserRepository {
       return "Your password has been updated successfully. You have been disconnected from all your other devices";
     }
     return "Your password has been updated successfully";
+  };
+
+  static updateUserEmail = async (user: User, email: string) => {
+    const userWithDesiredEmail = await UserRepository.findByEmail(email);
+    if (userWithDesiredEmail) throw Error("This email is already used");
+
+    user.emailAwaitingConfirmation = email;
+    user.confirmationEmailToken = randomBytes(32).toString("hex");
+    user.confirmationEmailCreatedAt = new Date();
+    const savedUser = await this.saveUser(user);
+    this.buildResetEmailMessageToQueue(savedUser);
+    return "Your request has been processed successfully. Please, check your inbox to confirm your email !";
+  };
+
+  static buildResetEmailMessageToQueue = (user: User) => {
+    const message = {
+      firstname: user.firstname,
+      email: user.emailAwaitingConfirmation,
+      resetEmailToken: user.confirmationEmailToken,
+    };
+    sendMessageOnResetEmailQueue(message);
+    return message;
+  };
+
+  static confirmEmail = async (confirmationEmailToken: string) => {
+    const user = await this.getUserByConfirmationEmailToken(
+      confirmationEmailToken
+    );
+    if (!user) throw Error("Invalid email confirmation token");
+    if (!user.emailAwaitingConfirmation)
+      throw Error("No email awaiting confirmation");
+    const alreadyUsedEmail = await this.findByEmail(
+      user.emailAwaitingConfirmation
+    );
+    if (alreadyUsedEmail) throw Error("This email is already used");
+
+    user.email = user.emailAwaitingConfirmation;
+    user.emailAwaitingConfirmation = null;
+    user.confirmationEmailToken = null;
+    user.confirmationEmailCreatedAt = null;
+    user.updatedAt = new Date();
+    await this.saveUser(user);
+    return true;
   };
 }

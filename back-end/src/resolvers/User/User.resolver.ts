@@ -1,13 +1,9 @@
-import { Args, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Args, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 
-import { GlobalContext } from "../..";
-import User from "../../entities/User.entity";
-import UserService from "../../services/User/User.service";
-
-import {
-  deleteSessionIdInCookie,
-  setSessionIdInCookie,
-} from "../../utils/http-cookies";
+import { GlobalContext } from '../..';
+import User from '../../entities/User.entity';
+import UserService from '../../services/User/User.service';
+import { deleteSessionIdInCookie, setSessionIdInCookie } from '../../utils/http-cookies';
 import {
   AskForNewPasswordArgs,
   ConfirmAccountArgs,
@@ -17,7 +13,7 @@ import {
   SignUpArgs,
   UpdateIdentityArgs,
   UpdatePasswordArgs,
-} from "./User.input";
+} from './User.input';
 
 @Resolver(User)
 export default class UserResolver {
@@ -112,5 +108,23 @@ export default class UserResolver {
       disconnectMe,
       currentSessionId
     );
+  }
+
+  @Authorized()
+  @Mutation(() => String)
+  async updateEmail(
+    @Arg("newEmail") newEmail: string,
+
+    @Ctx() context: GlobalContext
+  ): Promise<string> {
+    if (!context.user) throw Error("You're not authenticated");
+    return UserService.updateUserEmail(context.user, newEmail);
+  }
+
+  @Mutation(() => Boolean)
+  confirmEmail(
+    @Arg("confirmationToken") confirmationToken: string
+  ): Promise<Boolean> {
+    return UserService.confirmEmail(confirmationToken);
   }
 }
