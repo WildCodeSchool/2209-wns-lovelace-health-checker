@@ -5,3 +5,7 @@ export const PASSWORD_REG_EXP = new RegExp(
 export const FIRSTNAME_AND_LASTNAME_REG_EXP = new RegExp(
   /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
 );
+
+export const URL_REG_EXP = new RegExp(
+  /^(http|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/
+);
