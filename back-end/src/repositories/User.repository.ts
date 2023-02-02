@@ -1,8 +1,8 @@
-import { Repository } from "typeorm";
+import { Repository } from 'typeorm';
 
-import { getRepository } from "../database/utils";
-import User from "../entities/User.entity";
-import SessionRepository from "./Session.repository";
+import { getRepository } from '../database/utils';
+import User from '../entities/User.entity';
+import SessionRepository from './Session.repository';
 
 export default class UserRepository {
   static repository: Repository<User>;
@@ -40,5 +40,11 @@ export default class UserRepository {
       return null;
     }
     return session.user;
+  }
+
+  static async getUserByConfirmationEmailToken(
+    token: string
+  ): Promise<User | null> {
+    return this.repository.findOneBy({ confirmationEmailToken: token });
   }
 }

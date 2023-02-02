@@ -29,6 +29,12 @@ export const PASSWORD_IS_REQUIRED_ERROR_MESSAGE = "Password is required";
 export const PASSWORD_PATTERN_ERROR_MESSAGE =
   "Password must have at least 8 characters, one upper case, one lower case, and one number";
 export const PASSWORD_PLACEHOLDER = "Your password";
+export const CURRENT_PASSWORD_IS_REQUIRED_ERROR_MESSAGE =
+  "Current password is required";
+export const NEW_PASSWORD_IS_REQUIRED_ERROR_MESSAGE =
+  "New password is required";
+export const NEW_PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE =
+  "New password confirmation is required";
 
 // Password
 export const PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE =

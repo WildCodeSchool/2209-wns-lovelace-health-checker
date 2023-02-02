@@ -11,41 +11,35 @@ export const CONFIRM_ACCOUNT = gql`
   }
 `;
 
-const AccountConfirmation = () => {
+const AccountConfirmation = ({ onSuccess }: { onSuccess: () => void }) => {
   const [success, setSuccess] = useState<boolean>(false);
 
   const [confirmAccount, { loading }] = useMutation<
     ConfirmAccountMutation,
     ConfirmAccountMutationVariables
-  >(CONFIRM_ACCOUNT);
+  >(CONFIRM_ACCOUNT, {
+    onCompleted: (data) => {
+      if (data.confirmAccount) {
+        setSuccess(true);
+        onSuccess();
+      }
+    },
+    onError: (error) => {
+      if (error.message === "Invalid confirmation token") {
+        setSuccess(false);
+      }
+    },
+  });
 
   let { confirmationToken } = useParams();
-  const validateAccount = async () => {
-    try {
-      const result = await confirmAccount({
-        variables: { token: confirmationToken as string },
-      });
-
-      if (result.data?.confirmAccount) {
-        setSuccess(true);
-      } else if (result.errors) {
-        if (
-          result.errors?.length > 0 &&
-          result.errors[0].message === "Invalid confirmation token"
-        ) {
-          setSuccess(false);
-        }
-      }
-    } catch (e) {
-      setSuccess(false);
-    }
-  };
 
   useEffect(() => {
-    if (confirmationToken) {
-      validateAccount();
-    }
-  }, [confirmationToken]);
+    confirmAccount({
+      variables: {
+        token: confirmationToken as string,
+      },
+    });
+  }, [confirmAccount, confirmationToken]);
 
   if (loading)
     return (

@@ -3,12 +3,15 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 
 import {
+  UpdateEmailMutation,
+  UpdateEmailMutationVariables,
   UpdateIdentityMutation,
   UpdateIdentityMutationVariables,
   UpdatePasswordMutation,
   UpdatePasswordMutationVariables,
 } from '../../gql/graphql';
 import {
+  CURRENT_PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
   EMAIL_IS_REQUIRED_ERROR_MESSAGE,
   EMAIL_MAX_LENGTH,
   EMAIL_MAX_LENGTH_ERROR_MESSAGE,
@@ -25,9 +28,9 @@ import {
   LASTNAME_MIN_LENGTH,
   LASTNAME_MIN_LENGTH_ERROR_MESSAGE,
   LASTNAME_PLACEHOLDER,
-  PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE,
+  NEW_PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE,
+  NEW_PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
   PASSWORD_CONFIRMATION_PLACEHOLDER,
-  PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
   PASSWORD_PATTERN_ERROR_MESSAGE,
 } from '../../utils/form-validations';
 import { PASSWORD_REG_EXP } from '../../utils/regular-expressions';
@@ -39,20 +42,26 @@ const AccountInformations = (user: any) => {
     register: registerIdentity,
     handleSubmit: handleSubmitIdentity,
     formState: { errors: errorsIdentity },
-  } = useForm();
+  } = useForm({
+    criteriaMode: "all",
+  });
 
   const {
     register: registerPassword,
     handleSubmit: handleSubmitPassword,
     formState: { errors: errorsPassword },
     reset: resetPassword,
-  } = useForm();
+  } = useForm({
+    criteriaMode: "all",
+  });
 
   const {
     register: registerEmail,
     handleSubmit: handleSubmitEmail,
     formState: { errors: errorsEmail },
-  } = useForm();
+  } = useForm({
+    criteriaMode: "all",
+  });
 
   const onSubmitPassword = async (data: any) => {
     await updatePassword({
@@ -66,6 +75,7 @@ const AccountInformations = (user: any) => {
   };
 
   const onSubmitIdentity = (data: any) => {
+    console.log({ errorsIdentity });
     updateIdentity({
       variables: {
         firstname: data.firstname,
@@ -75,7 +85,12 @@ const AccountInformations = (user: any) => {
   };
 
   const onSubmitEmail = (data: any) => {
-    console.log(data);
+    console.log({ data });
+    updateEmail({
+      variables: {
+        newEmail: data.email,
+      },
+    });
   };
 
   const UPDATE_IDENTITY = gql`
@@ -137,6 +152,28 @@ const AccountInformations = (user: any) => {
     },
   });
 
+  const UPDATE_EMAIL = gql`
+    mutation UpdateEmail($newEmail: String!) {
+      updateEmail(newEmail: $newEmail)
+    }
+  `;
+
+  const [updateEmail] = useMutation<
+    UpdateEmailMutation,
+    UpdateEmailMutationVariables
+  >(UPDATE_EMAIL, {
+    onCompleted: (data) => {
+      console.log(data.updateEmail);
+      toast.success(data.updateEmail, {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        toastId: "updateEmail",
+      });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   return (
     <>
       <div className="mt-5 d-flex flex-wrap gap-5 gap-md-3">
@@ -146,7 +183,7 @@ const AccountInformations = (user: any) => {
           </div>
           <div className={`${styles.formContent}`}>
             <form onSubmit={handleSubmitIdentity(onSubmitIdentity)}>
-              <div className="form-floating mb-3">
+              <div className="form-floating mb-2">
                 <input
                   type="text"
                   defaultValue={user.user.firstname}
@@ -167,10 +204,11 @@ const AccountInformations = (user: any) => {
                 />
                 <label htmlFor="firstname">Firstname</label>
               </div>
-              <div className={styles.errorMessage}>
+
+              <div className={`${styles.errorMessage}`}>
                 <FormErrorMessage errors={errorsIdentity} name={"firstname"} />
               </div>
-              <div className="form-floating mb-3">
+              <div className="form-floating mb-2 mt-3">
                 <input
                   type="text"
                   defaultValue={user.user.lastname}
@@ -191,11 +229,13 @@ const AccountInformations = (user: any) => {
                 />
                 <label htmlFor="lastname">Lastname</label>
               </div>
-              <div className={styles.errorMessage}>
+              <div className={`${styles.errorMessage} mb-2`}>
                 <FormErrorMessage errors={errorsIdentity} name={"lastname"} />
               </div>
 
-              <button className={`${styles.mainButton}`}>Save</button>
+              <button type="submit" className={`${styles.mainButton} mt-2`}>
+                Save
+              </button>
             </form>
           </div>
         </div>
@@ -205,7 +245,7 @@ const AccountInformations = (user: any) => {
           </div>
           <div className={`${styles.formContent}`}>
             <form onSubmit={handleSubmitEmail(onSubmitEmail)}>
-              <div className="form-floating mb-3">
+              <div className="form-floating mb-2">
                 <input
                   type="email"
                   defaultValue={user.user.email}
@@ -225,7 +265,7 @@ const AccountInformations = (user: any) => {
               <div className={styles.errorMessage}>
                 <FormErrorMessage errors={errorsEmail} name={"email"} />
               </div>
-              <button className={`${styles.mainButton}`}>
+              <button className={`${styles.mainButton} mt-2`}>
                 Change your email
               </button>
             </form>
@@ -239,13 +279,13 @@ const AccountInformations = (user: any) => {
           </div>
           <div className={`${styles.formContent}`}>
             <form onSubmit={handleSubmitPassword(onSubmitPassword)}>
-              <div className="form-floating mb-3">
+              <div className="form-floating mb-2">
                 <input
                   type="password"
                   defaultValue={""}
                   className="form-control"
                   {...registerPassword("currentPassword", {
-                    required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
+                    required: CURRENT_PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                     pattern: {
                       value: PASSWORD_REG_EXP,
                       message: PASSWORD_PATTERN_ERROR_MESSAGE,
@@ -262,13 +302,13 @@ const AccountInformations = (user: any) => {
                   name={"currentPassword"}
                 />
               </div>
-              <div className="form-floating mb-3">
+              <div className="form-floating mb-2 mt-3">
                 <input
                   type="password"
                   defaultValue={""}
                   className="form-control"
                   {...registerPassword("newPassword", {
-                    required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
+                    required: NEW_PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                     pattern: {
                       value: PASSWORD_REG_EXP,
                       message: PASSWORD_PATTERN_ERROR_MESSAGE,
@@ -285,13 +325,14 @@ const AccountInformations = (user: any) => {
                   name={"newPassword"}
                 />
               </div>
-              <div className="form-floating mb-3">
+              <div className="form-floating mb-2 mt-3">
                 <input
                   type="password"
                   defaultValue={""}
                   className="form-control"
                   {...registerPassword("newPasswordConfirmation", {
-                    required: PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE,
+                    required:
+                      NEW_PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE,
                     pattern: {
                       value: PASSWORD_REG_EXP,
                       message: PASSWORD_PATTERN_ERROR_MESSAGE,
@@ -310,7 +351,7 @@ const AccountInformations = (user: any) => {
                   name={"newPasswordConfirmation"}
                 />
               </div>
-              <div className="form-check mb-3">
+              <div className="form-check mb-2 mt-3">
                 <input
                   className="form-check-input"
                   type="checkbox"
@@ -323,7 +364,7 @@ const AccountInformations = (user: any) => {
                   Disconnect me from all my other devices
                 </label>
               </div>
-              <button className={`${styles.mainButton}`}>
+              <button className={`${styles.mainButton} mt-2`}>
                 Change password
               </button>
             </form>

@@ -12,6 +12,7 @@ import NavLogo from './components/NavLogo/NavLogo';
 import { MyProfileQuery } from './gql/graphql';
 import Account from './pages/Account/Account';
 import AccountConfirmation from './pages/AccountConfirmation/AccountConfirmation';
+import EmailConfirmation from './pages/EmailConfirmation/EmailConfirmation';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import AlreadyLoggedIn from './pages/Guards/AlreadyLoggedIn';
 import Protected from './pages/Guards/Protected';
@@ -128,9 +129,13 @@ function App() {
             path="/account-confirmation/:confirmationToken"
             element={
               <AlreadyLoggedIn isLoggedIn={isLogged}>
-                <AccountConfirmation />
+                <AccountConfirmation onSuccess={refetch} />
               </AlreadyLoggedIn>
             }
+          />
+          <Route
+            path="/reset-email/:confirmationToken"
+            element={<EmailConfirmation onSuccess={refetch} />}
           />
           {/* Always put the wildcard on last position */}
           <Route path="/*" element={<NotFound />} />
