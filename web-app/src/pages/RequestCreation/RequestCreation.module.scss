@@ -38,11 +38,15 @@
       }
       .frequencyLabel {
         color: variables.$primary-800;
-        .premiumIcon {
-          color: variables.$yellow-1000;
-        }
+      }
+      .emailSpecificErrors {
+        margin-bottom: 44px;
+      }
+      .premiumIcon {
+        color: variables.$yellow-1000;
       }
     }
+
     .btn {
       @include btn;
       width: variables.$width-100;
