@@ -64,4 +64,51 @@ export default class RequestSettingService extends RequestSettingRepository {
     );
     if (nameAlreadyExists) throw Error("This name already exists");
   }
+
+  static checkIfGivenFrequencyIsPremiumFrequency = (
+    frequency: number
+  ): boolean => {
+    return (
+      frequency <= Frequency.THIRTY_MINUTES &&
+      frequency >= Frequency.FIVE_SECONDS
+    );
+  };
+
+  static headerHasAllHaveProperties = async (array: any[]) => {
+    return array.every(function (element) {
+      return (
+        element.hasOwnProperty("property") && element.hasOwnProperty("value")
+      );
+    });
+  };
+
+  static checkIfHeadersAreRightFormatted = (headers: string) => {
+    const headersFormatIsCorrect = this.headerHasAllHaveProperties(
+      JSON.parse(headers)
+    );
+    if (!headersFormatIsCorrect) throw Error("Headers format is incorrect");
+  };
+
+  static checkIfNonPremiumUserTryToUsePremiumFrequency = (
+    user: User,
+    frequency: Frequency
+  ) => {
+    if (
+      user.role === Role.USER &&
+      this.checkIfGivenFrequencyIsPremiumFrequency(frequency)
+    )
+      throw Error("This frequency is only useable by Premium users");
+  };
+
+  static checkIfNonPremiumUserTryToUseCustomError = (
+    user: User,
+    customEmailErrors: number[] | undefined,
+    customPushErrors: number[] | undefined
+  ) => {
+    if (
+      user.role === Role.USER &&
+      (customEmailErrors?.length || customPushErrors?.length)
+    )
+      throw Error("Non Premium users can't use custom error alerts");
+  };
 }
