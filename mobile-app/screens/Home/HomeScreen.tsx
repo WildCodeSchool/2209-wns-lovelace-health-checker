@@ -1,12 +1,21 @@
 import { ApolloError, gql, useMutation } from "@apollo/client";
-import { Link } from "@react-navigation/native";
-import React, { useState } from "react";
+import { useState } from "react";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
-import { StyleSheet, View, Text, Button, TextInput } from "react-native";
+import { Link } from "@react-navigation/native";
+// TODO: import toast
 import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
+
 import HomepageRequestTable from "../../components/HomepageRequestTable/HomepageRequestTable";
 import { CheckUrlMutation, CheckUrlMutationVariables } from "../../gql/graphql";
-import { getErrorMessage } from "../../utils/error-messages";
+import {
+  getErrorMessage,
+  SERVER_IS_KO_ERROR_MESSAGE,
+} from "../../utils/error-messages";
+import { styles } from "./HomeStyle";
+import { View, Text, Button, TextInput } from "react-native";
+import Constants from "expo-constants";
+
+const REQUEST_TIMEOUT = Constants?.expoConfig?.extra?.REQUEST_TIMEOUT;
 
 export const URL = gql`
   mutation CheckUrl($url: String!) {
@@ -41,7 +50,7 @@ const renderErrorSwitch = (error: ApolloError | undefined) => {
       return (
         <View>
           Maximum duration for request exceeded (
-          {parseInt(process.env.REACT_APP_REQUEST_TIMEOUT!) / 1000} seconds)
+          {parseInt(REQUEST_TIMEOUT!) / 1000} seconds)
         </View>
       );
     case FETCH_FAILED_ERROR_MESSAGE:
@@ -78,7 +87,6 @@ const Home = () => {
     },
   });
   const {
-    setValue,
     register,
     control,
     handleSubmit,
@@ -87,11 +95,9 @@ const Home = () => {
 
   const onSubmit: SubmitHandler<any> = async (urlToTest) => {
     setUrl(urlToTest.url);
-    console.log(urlToTest.url);
     await search({
       variables: { url: urlToTest.url },
     });
-    console.log('search complete')
   };
 
   return (
@@ -103,14 +109,12 @@ const Home = () => {
         <View style={{}}>
           <Controller
             control={control}
-            render={({ field: { onChange, onBlur, value } }) => (
+            render={({ field: { onChange, value } }) => (
               <TextInput
                 data-testid="url-input"
                 style={{}}
-                // onBlur={onBlur}
                 onChangeText={(value) => onChange(value)}
                 value={value}
-                // defaultValue={""}
                 placeholder="https://example.com"
                 {...register("url", {
                   required: "URL is required",
@@ -122,20 +126,7 @@ const Home = () => {
               />
             )}
             name="url"
-            // rules={{ required: true }}
           />
-          {/* <TextInput
-            style={{}}
-            defaultValue={""}
-            placeholder="https://example.com"
-            {...register("url", {
-              required: "URL is required",
-              pattern: {
-                value: URL_REG_EXP,
-                message: "URL format is invalid",
-              },
-            })}
-          /> */}
           <Button
             data-testid="url-button"
             disabled={loading}
@@ -222,35 +213,5 @@ const Home = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  H2: {
-    fontSize: 24,
-  },
-  bsPMarginBottom: {
-    marginBottom: 16,
-  },
-  bold: {
-    fontWeight: "600", // variabiliser
-  },
-  contentContainer: {
-    padding: 24, // variabiliser
-  },
-  btn: {
-    height: 60,
-    borderRadius: 5,
-    marginTop: 16,
-    alignItems: "center", // align horizontally
-    justifyContent: "center", // align vertically
-  }, // variabiliser
-  btnPrimary: {
-    backgroundColor: "#195078", // variabiliser
-    border: "none", // variabiliser
-  },
-  btnText: {
-    color: "white", // variabiliser
-    fontSize: 16, // trouver où le mettre dans l'app
-  },
-});
 
 export default Home;
