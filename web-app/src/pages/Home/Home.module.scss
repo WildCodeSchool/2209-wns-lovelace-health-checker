@@ -16,7 +16,7 @@
   }
   .searchBar {
     height: variables.$height-lg;
-    width: 100%;
+    width: variables.$width-100;
     padding-left: variables.$height-md;
     color: variables.$neutral-800;
     border: none;
@@ -49,7 +49,7 @@
 .contentContainer {
   @include contentContainer;
   .requestContainer {
-    width: 100%;
+    width: variables.$width-100;
     height: variables.$height-xxl;
     .loader {
       @include loader;

@@ -11,16 +11,19 @@ import { getSessionIdInCookie } from "./utils/http-cookies";
 import { connectionToRabbitMQ } from "./rabbitmq/config";
 import RequestResultResolver from "./resolvers/RequestResult/RequestResult.resolver";
 import UserResolver from "./resolvers/User/User.resolver";
-import UserService from "./services/User.service";
+
+import RequestSettingResolver from "./resolvers/RequestSetting/RequestSetting.resolver";
+import UserService from "./services/User/User.service";
 
 export type GlobalContext = ExpressContext & {
   user: User | null;
+  sessionId: string | undefined;
 };
 
 const startServer = async () => {
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, RequestResultResolver],
+      resolvers: [UserResolver, RequestResultResolver, RequestSettingResolver],
       authChecker: async ({ context }) => {
         return Boolean(context.user);
       },
@@ -31,7 +34,7 @@ const startServer = async () => {
         ? null
         : await UserService.findBySessionId(sessionId);
 
-      return { res: context.res, req: context.req, user };
+      return { res: context.res, req: context.req, user, sessionId };
     },
     csrfPrevention: true,
     cache: "bounded",

@@ -1,13 +1,13 @@
-import { gql, useMutation } from '@apollo/client';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { gql, useMutation } from "@apollo/client";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-import AccountBills from '../../components/AccountBills/AccountBills';
-import AccountInformations from '../../components/AccountInformations/AccountInformations';
-import AccountPremium from '../../components/AccountPremium/AccountPremium';
-import { SignOutMutation } from '../../gql/graphql';
-import styles from './Account.module.scss';
+import AccountBills from "../../components/AccountBills/AccountBills";
+import AccountInformations from "../../components/AccountInformations/AccountInformations";
+import AccountPremium from "../../components/AccountPremium/AccountPremium";
+import { SignOutMutation } from "../../gql/graphql";
+import styles from "./Account.module.scss";
 
 const Account = ({
   user,
@@ -46,7 +46,8 @@ const Account = ({
             className={`${styles.logout}`}
             onClick={async () => {
               await signOut();
-            }}>
+            }}
+          >
             Log out
           </span>
         </div>
@@ -54,36 +55,44 @@ const Account = ({
           <div
             className={`${
               selectedTab === "informations" && styles.selectedTab
-            }  ${styles.tabContainer}`}>
+            }  ${styles.tabContainer}`}
+          >
             <span
               className={`${styles.tabs} `}
-              onClick={() => setSelectedTab("informations")}>
+              onClick={() => setSelectedTab("informations")}
+            >
               Informations
             </span>
           </div>
           <div
             className={`${selectedTab === "premium" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}>
+            }`}
+          >
             <span
               className={`${styles.tabs} `}
-              onClick={() => setSelectedTab("premium")}>
+              onClick={() => setSelectedTab("premium")}
+            >
               Premium
             </span>
           </div>
           <div
             className={`${selectedTab === "bills" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}>
+            }`}
+          >
             <span
               className={`${styles.tabs} `}
-              onClick={() => setSelectedTab("bills")}>
+              onClick={() => setSelectedTab("bills")}
+            >
               Bills
             </span>
           </div>
         </div>
         <div>
-          {selectedTab === "informations" && <AccountInformations />}
+          {selectedTab === "informations" && (
+            <AccountInformations user={user} />
+          )}
           {selectedTab === "premium" && <AccountPremium />}
           {selectedTab === "bills" && <AccountBills />}
         </div>

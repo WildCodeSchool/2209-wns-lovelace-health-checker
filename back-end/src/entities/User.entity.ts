@@ -105,37 +105,37 @@ export default class User {
   @IsNotEmpty()
   role: Role;
 
-  @Column({ unique: true, nullable: true, default: null })
+  @Column({ unique: true, nullable: true, default: null, type: "varchar" })
   @IsString()
   @Length(1, 64)
-  confirmationEmailToken: string;
+  confirmationEmailToken: string | null;
 
   /*   Use Index() in case where two users have same value here. The first user who confirms got the new email address, so we need to delete all other emailAwaitingConfirmation where value is the same. So, we'll not search by user id, but by user emailAwaitingConfirmation. */
-  @Column({ nullable: true, default: null })
+  @Column({ nullable: true, default: null, type: "varchar" })
   @Index()
   @IsString()
   @IsEmail()
   @Length(1, 320)
-  emailAwaitingConfirmation: string;
+  emailAwaitingConfirmation: string | null;
 
-  @Column({ nullable: true, default: null })
+  @Column({ nullable: true, default: null, type: "date" })
   @IsDate()
-  confirmationEmailCreatedAt: Date;
+  confirmationEmailCreatedAt: Date | null;
 
-  @Column({ nullable: true, default: null })
+  @Column({ nullable: true, default: null, type: "varchar" })
   @Index({ unique: true })
   @IsString()
   @Length(1, 64)
-  resetPasswordToken: string;
+  resetPasswordToken: string | null;
 
   @Column({ nullable: true, default: null })
   @IsDate()
   resetPasswordTokenCreatedAt: Date;
 
-  @Column({ unique: true, nullable: true, default: null })
+  @Column({ unique: true, nullable: true, default: null, type: "varchar" })
   @IsString()
   @Length(1, 64)
-  accountConfirmationToken: string;
+  accountConfirmationToken: string | null;
 
   @Column({ nullable: true, default: null })
   @IsDate()

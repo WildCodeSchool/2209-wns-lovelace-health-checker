@@ -1,15 +1,10 @@
-import {
-  closeConnection,
-  getDatabase,
-  initializeRepositories,
-  truncateAllTables,
-} from "../database/utils";
-import User, { Status } from "../entities/User.entity";
-import * as provider from "../rabbitmq/providers";
-import UserRepository from "../repositories/User.repository";
-import * as HttpCookies from "../utils/http-cookies";
-import SessionService from "./Session.service";
-import UserService from "./User.service";
+import { closeConnection, getDatabase, initializeRepositories, truncateAllTables } from '../../database/utils';
+import User, { Status } from '../../entities/User.entity';
+import * as provider from '../../rabbitmq/providers';
+import UserRepository from '../../repositories/User.repository';
+import * as HttpCookies from '../../utils/http-cookies';
+import SessionService from '../Session/Session.service';
+import UserService from './User.service';
 
 const sendMessageOnAccountCreationEmailQueue = () => {
   return jest
@@ -236,6 +231,7 @@ describe("UserService integration", () => {
           emailAddress,
           "password"
         );
+        if (!user.accountConfirmationToken) throw new Error("No token found");
 
         const result = await UserService.confirmAccount(
           user.accountConfirmationToken
@@ -245,7 +241,7 @@ describe("UserService integration", () => {
         });
         expect(result).toBe(true);
         expect(confirmedUser?.status).toEqual(Status.ACTIVE);
-        expect(confirmedUser?.accountConfirmationToken).toEqual("");
+        expect(confirmedUser?.accountConfirmationToken).toEqual(null);
       });
     });
   });

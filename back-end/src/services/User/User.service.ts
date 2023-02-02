@@ -1,16 +1,17 @@
-import { ExpressContext } from "apollo-server-express";
-import { compareSync, hashSync } from "bcryptjs";
-import { randomBytes } from "crypto";
+import { ExpressContext } from 'apollo-server-express';
+import { compareSync, hashSync } from 'bcryptjs';
+import { randomBytes } from 'crypto';
 
-import Session from "../entities/Session.entity";
-import User, { Status } from "../entities/User.entity";
+import Session from '../../entities/Session.entity';
+import User, { Status } from '../../entities/User.entity';
 import {
   sendMessageOnAccountCreationEmailQueue,
+  sendMessageOnResetEmailQueue,
   sendMessageOnResetPasswordEmailQueue,
-} from "../rabbitmq/providers";
-import UserRepository from "../repositories/User.repository";
-import { getSessionIdInCookie } from "../utils/http-cookies";
-import SessionService from "./Session.service";
+} from '../../rabbitmq/providers';
+import UserRepository from '../../repositories/User.repository';
+import { getSessionIdInCookie } from '../../utils/http-cookies';
+import SessionService from '../Session/Session.service';
 
 export default class UserService extends UserRepository {
   static async createUser(
@@ -85,7 +86,7 @@ export default class UserService extends UserRepository {
     if (!user) throw Error("Invalid confirmation token");
 
     user.status = Status.ACTIVE;
-    user.accountConfirmationToken = "";
+    user.accountConfirmationToken = null;
     await this.saveUser(user);
     return true;
   };
@@ -168,5 +169,80 @@ export default class UserService extends UserRepository {
     const sessionId = getSessionIdInCookie(context);
     if (!sessionId) throw new Error("You're not signed in");
     await SessionService.deleteSessionById(sessionId);
+  };
+
+  static updateUserIdentity = async (
+    user: User,
+    firstname?: string,
+    lastname?: string
+  ) => {
+    if (firstname) user.firstname = firstname;
+    if (lastname) user.lastname = lastname;
+    user.updatedAt = new Date();
+    await this.saveUser(user);
+    return user;
+  };
+
+  static updateUserPassword = async (
+    user: User,
+    currentPassword: string,
+    newPassword: string,
+    disconnectMe: boolean,
+    sessionId: string
+  ): Promise<string> => {
+    if (!compareSync(currentPassword, user.password)) {
+      throw new Error("Incorrect current password");
+    }
+    user.password = hashSync(newPassword);
+    user.updatedAt = new Date();
+    await this.saveUser(user);
+    if (disconnectMe) {
+      await SessionService.deleteAllSessionsButNotCurrentOne(user, sessionId);
+      return "Your password has been updated successfully. You have been disconnected from all your other devices";
+    }
+    return "Your password has been updated successfully";
+  };
+
+  static updateUserEmail = async (user: User, email: string) => {
+    const userWithDesiredEmail = await UserRepository.findByEmail(email);
+    if (userWithDesiredEmail) throw Error("This email is already used");
+
+    user.emailAwaitingConfirmation = email;
+    user.confirmationEmailToken = randomBytes(32).toString("hex");
+    user.confirmationEmailCreatedAt = new Date();
+    const savedUser = await this.saveUser(user);
+    this.buildResetEmailMessageToQueue(savedUser);
+    return "Your request has been processed successfully. Please, check your inbox to confirm your email !";
+  };
+
+  static buildResetEmailMessageToQueue = (user: User) => {
+    const message = {
+      firstname: user.firstname,
+      email: user.emailAwaitingConfirmation,
+      resetEmailToken: user.confirmationEmailToken,
+    };
+    sendMessageOnResetEmailQueue(message);
+    return message;
+  };
+
+  static confirmEmail = async (confirmationEmailToken: string) => {
+    const user = await this.getUserByConfirmationEmailToken(
+      confirmationEmailToken
+    );
+    if (!user) throw Error("Invalid email confirmation token");
+    if (!user.emailAwaitingConfirmation)
+      throw Error("No email awaiting confirmation");
+    const alreadyUsedEmail = await this.findByEmail(
+      user.emailAwaitingConfirmation
+    );
+    if (alreadyUsedEmail) throw Error("This email is already used");
+
+    user.email = user.emailAwaitingConfirmation;
+    user.emailAwaitingConfirmation = null;
+    user.confirmationEmailToken = null;
+    user.confirmationEmailCreatedAt = null;
+    user.updatedAt = new Date();
+    await this.saveUser(user);
+    return true;
   };
 }

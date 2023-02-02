@@ -1,7 +1,7 @@
-import { Repository } from 'typeorm';
+import { Repository } from "typeorm";
 
-import { getRepository } from '../database/utils';
-import Premium from '../entities/Premium.entity';
+import { getRepository } from "../database/utils";
+import Premium from "../entities/Premium.entity";
 
 export default class PremiumRepository {
   protected static repository: Repository<Premium>;
@@ -15,6 +15,6 @@ export default class PremiumRepository {
   }
 
   static async clearRepository(): Promise<void> {
-    this.repository.delete({});
+    await this.repository.delete({});
   }
 }

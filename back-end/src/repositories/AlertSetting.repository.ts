@@ -1,7 +1,7 @@
-import { Repository } from 'typeorm';
+import { Repository } from "typeorm";
 
-import { getRepository } from '../database/utils';
-import AlertSetting from '../entities/AlertSetting.entity';
+import { getRepository } from "../database/utils";
+import AlertSetting from "../entities/AlertSetting.entity";
 
 export default class AlertSettingRepository {
   protected static repository: Repository<AlertSetting>;
@@ -17,6 +17,14 @@ export default class AlertSettingRepository {
   }
 
   static async clearRepository(): Promise<void> {
-    this.repository.delete({});
+    await this.repository.delete({});
+  }
+
+  static async getAlertsByRequestSettingId(
+    id: string
+  ): Promise<AlertSetting[]> {
+    return this.repository.find({
+      where: { requestSetting: { id: id } },
+    });
   }
 }

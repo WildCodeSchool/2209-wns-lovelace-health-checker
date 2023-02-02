@@ -14,7 +14,7 @@ export const FIRSTNAME_PATTERN_ERROR_MESSAGE =
   "First name must not contain numbers or special characters";
 export const FIRSTNAME_PLACEHOLDER = "John";
 
-// Firstname
+// Lastname
 export const LASTNAME_IS_REQUIRED_ERROR_MESSAGE = "Last name is required";
 export const LASTNAME_MIN_LENGTH = 2;
 export const LASTNAME_MIN_LENGTH_ERROR_MESSAGE = `Last name must have at least ${LASTNAME_MIN_LENGTH} characters`;
@@ -29,6 +29,12 @@ export const PASSWORD_IS_REQUIRED_ERROR_MESSAGE = "Password is required";
 export const PASSWORD_PATTERN_ERROR_MESSAGE =
   "Password must have at least 8 characters, one upper case, one lower case, and one number";
 export const PASSWORD_PLACEHOLDER = "Your password";
+export const CURRENT_PASSWORD_IS_REQUIRED_ERROR_MESSAGE =
+  "Current password is required";
+export const NEW_PASSWORD_IS_REQUIRED_ERROR_MESSAGE =
+  "New password is required";
+export const NEW_PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE =
+  "New password confirmation is required";
 
 // Password
 export const PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE =

@@ -24,14 +24,14 @@ export default class SessionRepository {
   }
 
   static async clearRepository(): Promise<void> {
-    this.repository.delete({});
+    await this.repository.delete({});
   }
 
   static async deleteSession(id: string): Promise<void> {
-    this.repository.delete({ id });
+    await this.repository.delete({ id });
   }
 
   static async deleteSessions(sessions: Session[]): Promise<void> {
-    this.repository.remove(sessions);
+    await this.repository.remove(sessions);
   }
 }

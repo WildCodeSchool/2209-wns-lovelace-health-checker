@@ -10,7 +10,7 @@ import {
 } from "../../gql/graphql";
 import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
 import styles from "./ResetPassword.module.scss";
-import { passwordRegExp } from "../../utils/regular-expressions";
+import { PASSWORD_REG_EXP } from "../../utils/regular-expressions";
 import {
   PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE,
   PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE,
@@ -137,7 +137,7 @@ const ResetPassword = () => {
               {...register("password", {
                 required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                 pattern: {
-                  value: passwordRegExp,
+                  value: PASSWORD_REG_EXP,
                   message: PASSWORD_PATTERN_ERROR_MESSAGE,
                 },
               })}
