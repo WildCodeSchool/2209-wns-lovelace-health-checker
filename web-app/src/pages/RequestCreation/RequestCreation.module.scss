@@ -66,3 +66,33 @@
 .reactSelect {
   background-color: red;
 }
+
+.removeHeaderIcon {
+  @include clickable;
+  font-size: variables.$font-md;
+  &:hover {
+    color: variables.$red-1000;
+  }
+  display: none !important;
+  @media (min-width: 767px) {
+    display: flex !important;
+  }
+}
+
+.deleteHeaderText {
+  display: none;
+  @include clickableText;
+  color: variables.$red-1000;
+  @media (max-width: 767px) {
+    display: block;
+  }
+}
+
+.addHeaderBtn {
+  @include clickable;
+  @include clickableText;
+}
+
+.errorMessage {
+  @include errorMessage;
+}

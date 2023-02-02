@@ -4,7 +4,6 @@ import RequestSetting from "../../entities/RequestSetting.entity";
 import User from "../../entities/User.entity";
 import AlertSettingService from "../../services/AlertSetting/AlertSetting.service";
 import RequestSettingService from "../../services/RequestSetting/RequestSetting.service";
-import UserService from "../../services/User/User.service";
 
 import { CreateRequestSettingArgs } from "./RequestSetting.input";
 
@@ -21,7 +20,7 @@ export default class RequestSettingResolver {
   }
 
   // @Ctx() context: GlobalContext
-  //@Authorized()
+  @Authorized()
   @Mutation(() => RequestSetting)
   async create(
     @Args()
@@ -30,23 +29,26 @@ export default class RequestSettingResolver {
       frequency,
       name,
       headers,
+      isActive,
       allErrorsEnabledEmail,
       allErrorsEnabledPush,
       customEmailErrors,
       customPushErrors,
-    }: CreateRequestSettingArgs
+    }: CreateRequestSettingArgs,
+    @Ctx() context: GlobalContext
   ): Promise<RequestSetting> {
-    /*     const user = context.user as User;
-    if (!user) throw Error("Unable to find user from global context"); */
+    const user = context.user as User;
+    if (!user) throw Error("Unable to find user from global context");
 
-    // Only for test purposes
-    const dummyUser = await UserService.findByEmail("vianneyaccart@gmail.com");
+    /*     // Only for test purposes
+    const dummyUser = await UserService.findByEmail("vianneyaccart@gmail.com"); */
 
     const createdRequestSetting =
       await RequestSettingService.createRequestSetting(
-        dummyUser!,
+        user,
         url,
         frequency,
+        isActive,
         name,
         headers
       );

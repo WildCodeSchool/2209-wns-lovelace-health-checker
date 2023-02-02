@@ -1,5 +1,4 @@
 import {
-  ArrayNotEmpty,
   IsArray,
   IsBoolean,
   IsNotEmpty,
@@ -48,6 +47,10 @@ export class CreateRequestSettingArgs {
 
   @Field()
   @IsBoolean()
+  isActive: boolean;
+
+  @Field()
+  @IsBoolean()
   @IsNotEmpty()
   allErrorsEnabledEmail: boolean;
 
@@ -58,11 +61,9 @@ export class CreateRequestSettingArgs {
 
   @Field(() => [Number], { nullable: true })
   @IsArray()
-  @ArrayNotEmpty()
   customEmailErrors?: number[];
 
   @Field(() => [Number], { nullable: true })
   @IsArray()
-  @ArrayNotEmpty()
   customPushErrors?: number[];
 }

@@ -3,6 +3,64 @@ import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
 import styles from "./RequestCreation.module.scss";
 import Select from "react-select";
 import { HTTP_ERROR_STATUS_CODES } from "../../utils/http-error-status-codes.enum";
+import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
+import { gql, useMutation } from "@apollo/client";
+import {
+  CreateRequestSettingMutation,
+  CreateRequestSettingMutationVariables,
+} from "../../gql/graphql";
+import { Frequency } from "../../utils/request-frequency.enum";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+
+export const CREATE_REQUEST = gql`
+  mutation CreateRequestSetting(
+    $url: String!
+    $frequency: Float!
+    $isActive: Boolean!
+    $allErrorsEnabledEmail: Boolean!
+    $allErrorsEnabledPush: Boolean!
+    $name: String
+    $headers: String
+    $customEmailErrors: [Float!]
+    $customPushErrors: [Float!]
+  ) {
+    create(
+      url: $url
+      frequency: $frequency
+      isActive: $isActive
+      allErrorsEnabledEmail: $allErrorsEnabledEmail
+      allErrorsEnabledPush: $allErrorsEnabledPush
+      name: $name
+      headers: $headers
+      customEmailErrors: $customEmailErrors
+      customPushErrors: $customPushErrors
+    ) {
+      id
+      url
+      name
+      frequency
+      isActive
+      headers
+      alerts {
+        type
+        httpStatusCode
+      }
+    }
+  }
+`;
+
+type RequestCreationInputs = {
+  url: string;
+  name: string;
+  isActive: boolean;
+  frequency: number;
+  allErrorsEnabledEmail: boolean;
+  allErrorsEnabledPush: boolean;
+  customEmailErrors: number[];
+  customPushErrors: number[];
+  headers: { property: string; value: string }[];
+};
 
 const RequestCreation = () => {
   const [requestIsActive, setRequestIsActive] = useState(true);
@@ -58,11 +116,102 @@ const RequestCreation = () => {
     }
   }, [pushSpecificErrors, pushSpecificErrorRadioIsChecked]);
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    control,
+  } = useForm<RequestCreationInputs>({
+    criteriaMode: "all",
+    defaultValues: {
+      isActive: true,
+      frequency: 3600,
+      allErrorsEnabledEmail: false,
+      allErrorsEnabledPush: false,
+      customEmailErrors: [],
+      customPushErrors: [],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "headers",
+  });
+
+  const navigate = useNavigate();
+
+  const [create, { data, loading }] = useMutation<
+    CreateRequestSettingMutation,
+    CreateRequestSettingMutationVariables
+  >(CREATE_REQUEST, {
+    onCompleted: () => {
+      toast.success("Request created successfully !", {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        toastId: 1,
+      });
+      navigate("/requests");
+    },
+    onError: (error) => {},
+  });
+
+  const onSubmit: SubmitHandler<any> = async (data: any) => {
+    const allErrorsEnabledEmail =
+      data.allErrorsEnabledEmail === "true" ? true : false;
+
+    const allErrorsEnabledPush =
+      data.allErrorsEnabledPush === "true" ? true : false;
+
+    const getEmailSpecificErrorsValues = (): number[] => {
+      const values: number[] = [];
+      emailSpecificErrors.forEach((element: any) => {
+        values.push(element.value);
+      });
+      return values;
+    };
+
+    const getPushSpecificErrorsValues = (): number[] => {
+      const values: number[] = [];
+      pushSpecificErrors.forEach((element: any) => {
+        values.push(element.value);
+      });
+      return values;
+    };
+
+    await create({
+      variables: {
+        url: data.url,
+        frequency: parseInt(data.frequency),
+        isActive: requestIsActive,
+        allErrorsEnabledEmail: allErrorsEnabledEmail,
+        allErrorsEnabledPush: allErrorsEnabledPush,
+        customEmailErrors: getEmailSpecificErrorsValues(),
+        customPushErrors: getPushSpecificErrorsValues(),
+        name: data.name.length ? data.name : undefined,
+        headers: data.headers.length ? JSON.stringify(data.headers) : undefined,
+      },
+    });
+
+    console.log({
+      url: data.url,
+      frequency: parseInt(data.frequency),
+      isActive: requestIsActive,
+      allErrorsEnabledEmail: allErrorsEnabledEmail,
+      allErrorsEnabledPush: allErrorsEnabledPush,
+      customEmailErrors: getEmailSpecificErrorsValues(),
+      customPushErrors: getPushSpecificErrorsValues(),
+      name: data.name,
+      headers: JSON.stringify(data.headers),
+    });
+  };
+
   return (
     <div className={`${styles.contentContainer}`}>
       <h1 className={`${styles.pageTitle}`}>Request creation</h1>
       <div onClick={() => setIsPremium(!isPremium)}>Toggle Premium</div>
-      <form className="mt-5 d-flex flex-wrap gap-5 gap-md-3">
+      <form
+        className="mt-5 d-flex flex-wrap gap-5 gap-md-3"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         {/* General */}
         <div className={`col-12 col-md-6 ${styles.formContainer}`}>
           <h2 className={`${styles.header} mt-md-3`}>
@@ -73,22 +222,24 @@ const RequestCreation = () => {
               <input
                 type="text"
                 className="form-control"
-                id="firstname"
+                id="url"
                 placeholder="URL"
+                {...register("url")}
               />
-              <label htmlFor="firstname">URL</label>
+              <label htmlFor="url">URL</label>
             </div>
-            {/*             <div className={styles.errorMessage}>
-              <FormErrorMessage errors={errorsIdentity} name={"firstname"} />
-            </div> */}
+            <div className={styles.errorMessage}>
+              <FormErrorMessage errors={errors} name={"lastname"} />
+            </div>
             <div className="form-floating">
               <input
                 type="text"
                 className="form-control"
-                id="firstname"
-                placeholder="URL"
+                id="name"
+                placeholder="name"
+                {...register("name")}
               />
-              <label htmlFor="firstname">Name</label>
+              <label htmlFor="name">Name</label>
             </div>
             {/*             <div className={styles.errorMessage}>
               <FormErrorMessage errors={errorsIdentity} name={"lastname"} />
@@ -143,8 +294,9 @@ const RequestCreation = () => {
                 <input
                   className="form-check-input"
                   type="radio"
-                  name="frequencySelection"
                   id="day30"
+                  value={Frequency.THIRTY_DAYS}
+                  {...register("frequency")}
                 />
                 <label className="form-check-label" htmlFor="day30">
                   30 days
@@ -154,8 +306,9 @@ const RequestCreation = () => {
                 <input
                   className="form-check-input"
                   type="radio"
-                  name="frequencySelection"
                   id="day7"
+                  value={Frequency.SEVEN_DAYS}
+                  {...register("frequency")}
                 />
                 <label className="form-check-label" htmlFor="day7">
                   7 days
@@ -165,8 +318,9 @@ const RequestCreation = () => {
                 <input
                   className="form-check-input"
                   type="radio"
-                  name="frequencySelection"
                   id="day1"
+                  value={Frequency.ONE_DAY}
+                  {...register("frequency")}
                 />
                 <label className="form-check-label" htmlFor="day1">
                   1 day
@@ -181,8 +335,9 @@ const RequestCreation = () => {
                 <input
                   className="form-check-input"
                   type="radio"
-                  name="frequencySelection"
                   id="hr12"
+                  value={Frequency.TWELVE_HOURS}
+                  {...register("frequency")}
                 />
                 <label className="form-check-label" htmlFor="hr12">
                   12 hrs
@@ -192,8 +347,9 @@ const RequestCreation = () => {
                 <input
                   className="form-check-input"
                   type="radio"
-                  name="frequencySelection"
                   id="hr6"
+                  value={Frequency.SIX_HOURS}
+                  {...register("frequency")}
                 />
                 <label className="form-check-label" htmlFor="hr6">
                   6 hrs
@@ -203,8 +359,9 @@ const RequestCreation = () => {
                 <input
                   className="form-check-input"
                   type="radio"
-                  name="frequencySelection"
                   id="hr1"
+                  value={Frequency.ONE_HOUR}
+                  {...register("frequency")}
                   defaultChecked
                 />
                 <label className="form-check-label" htmlFor="hr1">
@@ -232,8 +389,9 @@ const RequestCreation = () => {
                 <input
                   className="form-check-input"
                   type="radio"
-                  name="frequencySelection"
                   id="mn30"
+                  value={Frequency.THIRTY_MINUTES}
+                  {...register("frequency")}
                   disabled={!isPremium}
                 />
                 <label className="form-check-label" htmlFor="mn30">
@@ -244,8 +402,9 @@ const RequestCreation = () => {
                 <input
                   className="form-check-input"
                   type="radio"
-                  name="frequencySelection"
                   id="mn15"
+                  value={Frequency.FIFTEEN_MINUTES}
+                  {...register("frequency")}
                   disabled={!isPremium}
                 />
                 <label className="form-check-label" htmlFor="mn15">
@@ -256,8 +415,9 @@ const RequestCreation = () => {
                 <input
                   className="form-check-input"
                   type="radio"
-                  name="frequencySelection"
                   id="mn1"
+                  value={Frequency.ONE_MINUTE}
+                  {...register("frequency")}
                   disabled={!isPremium}
                 />
                 <label className="form-check-label" htmlFor="mn1">
@@ -285,8 +445,9 @@ const RequestCreation = () => {
                 <input
                   className="form-check-input"
                   type="radio"
-                  name="frequencySelection"
                   id="sec30"
+                  value={Frequency.THIRTY_SECONDS}
+                  {...register("frequency")}
                   disabled={!isPremium}
                 />
                 <label className="form-check-label" htmlFor="sec30">
@@ -297,8 +458,9 @@ const RequestCreation = () => {
                 <input
                   className="form-check-input"
                   type="radio"
-                  name="frequencySelection"
                   id="sec15"
+                  value={Frequency.FIFTEEN_SECONDS}
+                  {...register("frequency")}
                   disabled={!isPremium}
                 />
                 <label className="form-check-label" htmlFor="sec15">
@@ -309,8 +471,9 @@ const RequestCreation = () => {
                 <input
                   className="form-check-input"
                   type="radio"
-                  name="frequencySelection"
                   id="sec5"
+                  value={Frequency.FIVE_SECONDS}
+                  {...register("frequency")}
                   disabled={!isPremium}
                 />
                 <label className="form-check-label" htmlFor="sec5">
@@ -332,7 +495,8 @@ const RequestCreation = () => {
               <input
                 className="form-check-input"
                 type="radio"
-                name="emailAlerts"
+                value="false"
+                {...register("allErrorsEnabledEmail")}
                 id="flexRadioDefault1"
                 defaultChecked
                 onClick={clearMultiSelectAndEmptyEmailErrorValues}
@@ -345,7 +509,8 @@ const RequestCreation = () => {
               <input
                 className="form-check-input"
                 type="radio"
-                name="emailAlerts"
+                value="true"
+                {...register("allErrorsEnabledEmail")}
                 id="flexRadioDefault1"
                 onChange={clearMultiSelectAndEmptyEmailErrorValues}
               />
@@ -357,7 +522,7 @@ const RequestCreation = () => {
               <input
                 className="form-check-input"
                 type="radio"
-                name="emailAlerts"
+                {...register("allErrorsEnabledEmail")}
                 id="flexRadioDefault2"
                 disabled={!isPremium}
                 checked={emailSpecificErrorRadioIsChecked}
@@ -399,7 +564,8 @@ const RequestCreation = () => {
               <input
                 className="form-check-input"
                 type="radio"
-                name="pushAlerts"
+                value="false"
+                {...register("allErrorsEnabledPush")}
                 id="flexRadioDefault1"
                 defaultChecked
                 onClick={clearMultiSelectAndEmptyPushErrorValues}
@@ -412,7 +578,8 @@ const RequestCreation = () => {
               <input
                 className="form-check-input"
                 type="radio"
-                name="pushAlerts"
+                value="true"
+                {...register("allErrorsEnabledPush")}
                 id="flexRadioDefault1"
                 onChange={clearMultiSelectAndEmptyPushErrorValues}
               />
@@ -424,7 +591,7 @@ const RequestCreation = () => {
               <input
                 className="form-check-input"
                 type="radio"
-                name="pushAlerts"
+                {...register("allErrorsEnabledPush")}
                 id="flexRadioDefault2"
                 disabled={!isPremium}
                 checked={pushSpecificErrorRadioIsChecked}
@@ -467,48 +634,85 @@ const RequestCreation = () => {
         </div>
 
         {/* Headers */}
-        <div className={`col-12 col-md-6 ${styles.formContainer}`}>
+        <div className={`col-12 ${styles.formContainer}`}>
           <h2 className={`${styles.header} mt-md-4`}>
             <i className="bi bi-card-heading"></i> Headers
           </h2>
           <div className={`${styles.formContent}`}>
-            <div className="form-floating mb-3">
-              <input
-                type="text"
-                className="form-control"
-                id="firstname"
-                placeholder="URL"
-              />
-              <label htmlFor="firstname">URL</label>
-            </div>
-            {/*             <div className={styles.errorMessage}>
-              <FormErrorMessage errors={errorsIdentity} name={"firstname"} />
-            </div> */}
-            <div className="form-floating">
-              <input
-                type="text"
-                className="form-control"
-                id="firstname"
-                placeholder="URL"
-              />
-              <label htmlFor="firstname">Name</label>
-            </div>
-            {/*             <div className={styles.errorMessage}>
-              <FormErrorMessage errors={errorsIdentity} name={"lastname"} />
-            </div> */}
-            <div className="form-floating">
-              <input
-                type="text"
-                className="form-control"
-                id="firstname"
-                placeholder="URL"
-              />
-              <label htmlFor="firstname">Name</label>
-            </div>
+            {fields.map((field, index) => (
+              <div key={field.id} className="row g-2 mb-3">
+                <div className="col-md">
+                  <div className="form-floating">
+                    <input
+                      {...register(`headers.${index}.property`, {
+                        required: {
+                          value: true,
+                          message: "This field couln't be empty",
+                        },
+                      })}
+                      type="text"
+                      className="form-control"
+                      placeholder="content-type"
+                    />
+                    <label>Property</label>
+                  </div>
+                  <div className={styles.errorMessage}>
+                    <FormErrorMessage
+                      errors={errors}
+                      name={`headers.${index}.property`}
+                    />
+                  </div>
+                </div>
+                <div className="col-md">
+                  <div className="form-floating">
+                    <input
+                      {...register(`headers.${index}.value`, {
+                        required: true,
+                      })}
+                      type="text"
+                      className="form-control"
+                      placeholder="content-type"
+                    />
+                    <label>Value</label>
+                  </div>
+                </div>
+
+                <div
+                  onClick={() => remove(index)}
+                  className={`${styles.removeHeaderIcon} col-1 d-flex justify-content-center align-items-center`}
+                >
+                  <i className="bi bi-trash3"></i>
+                </div>
+                <p
+                  onClick={() => remove(index)}
+                  className={`${styles.deleteHeaderText} text-center mt-2`}
+                >
+                  Delete above header
+                </p>
+              </div>
+            ))}
+            <p
+              className={styles.addHeaderBtn}
+              onClick={() => {
+                append({
+                  property: "",
+                  value: "",
+                });
+              }}
+            >
+              {fields.length ? (
+                <span>
+                  <i className="bi bi-plus-circle me-1"></i> Add another header
+                </span>
+              ) : (
+                <span>
+                  <i className="bi bi-plus-circle me-1"></i> Add your first
+                  request header
+                </span>
+              )}
+            </p>
           </div>
         </div>
-
-        <div className={`col ${styles.formContainer}`}></div>
 
         <div className={`col-12 col-md-6 ${styles.formContainer}`}>
           <button className={`${styles.btn} ${styles.btnSecondary} my-md-4`}>
@@ -518,10 +722,7 @@ const RequestCreation = () => {
 
         <div className={`col ${styles.formContainer}`}>
           <button
-            onClick={(e) => {
-              e.preventDefault();
-              console.log({ emailSpecificErrors, pushSpecificErrors });
-            }}
+            type="submit"
             className={`${styles.btn} ${styles.btnPrimary} my-md-4`}
           >
             Save

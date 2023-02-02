@@ -39,13 +39,14 @@ export default class RequestSetting {
     user: User,
     url: string,
     frequency: number,
+    isActive: boolean,
     name?: string,
     headers?: string
   ) {
     this.user = user;
     this.frequency = frequency;
     this.url = url;
-    this.isActive = true;
+    this.isActive = isActive;
     this.name = name;
     this.headers = headers;
     this.createdAt = new Date();
@@ -82,7 +83,7 @@ export default class RequestSetting {
   @IsNotEmpty()
   frequency: Frequency;
 
-  @Column({ default: true })
+  @Column()
   @Field()
   @IsNotEmpty()
   @IsBoolean()

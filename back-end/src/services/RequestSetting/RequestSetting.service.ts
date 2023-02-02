@@ -9,16 +9,18 @@ export default class RequestSettingService extends RequestSettingRepository {
     user: User,
     url: string,
     frequency: Frequency,
+    isActive: boolean,
     name?: string,
     headers?: string
   ): Promise<RequestSetting> {
     await this.checkIfNonPremiumUserHasReachedMaxRequestsCount(user);
-    await this.checkIfURLorNameAreAlreadyUsed(user, url, name);
+    await this.checkIfURLOrNameAreAlreadyUsed(user, url, name);
 
     let requestSetting: RequestSetting = new RequestSetting(
       user,
       url,
       frequency,
+      isActive,
       name,
       headers
     );
@@ -43,13 +45,11 @@ export default class RequestSettingService extends RequestSettingRepository {
     return false;
   };
 
-  static async checkIfURLorNameAreAlreadyUsed(
+  static async checkIfURLOrNameAreAlreadyUsed(
     user: User,
     url: string,
     name: string | undefined
   ) {
-    if (!name) return;
-
     const userSettingRequests =
       await RequestSettingRepository.getRequestSettingsByUserId(user.id);
 
@@ -59,7 +59,8 @@ export default class RequestSettingService extends RequestSettingRepository {
     if (URLAlreadyExists) throw Error("This URL already exists");
 
     const nameAlreadyExists = userSettingRequests.some(
-      (request: RequestSetting) => request.name === name
+      (request: RequestSetting) =>
+        request.name === name && request.name !== null
     );
     if (nameAlreadyExists) throw Error("This name already exists");
   }
