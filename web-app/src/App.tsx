@@ -94,7 +94,7 @@ function App() {
             path="/request-creation"
             element={
               <PreventRequestCreationPageAccessIfLimitHasBeenReached>
-                <RequestCreation />
+                <RequestCreation role={data?.myProfile.role} />
               </PreventRequestCreationPageAccessIfLimitHasBeenReached>
             }
           />

@@ -11,6 +11,12 @@ import {
   getErrorMessage,
   SERVER_IS_KO_ERROR_MESSAGE,
 } from "../../utils/error-messages";
+import {
+  URL_IS_REQUIRED_ERROR_MESSAGE,
+  URL_PATTERN_ERROR_MESSAGE,
+  URL_PLACEHOLDER,
+} from "../../utils/form-validations";
+import { URL_REG_EXP } from "../../utils/regular-expressions";
 import styles from "./Home.module.scss";
 
 export const URL = gql`
@@ -35,10 +41,6 @@ const ERROR_MESSAGE_ARRAY = [
 type SearchInput = {
   url: string;
 };
-
-const URL_REG_EXP = new RegExp(
-  /^(http|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/
-);
 
 const renderErrorSwitch = (error: ApolloError | undefined) => {
   switch (getErrorMessage(error)) {
@@ -107,12 +109,12 @@ const Home = () => {
               className={`is-invalid ${styles.searchBar}`}
               type="text"
               defaultValue={""}
-              placeholder="https://example.com"
+              placeholder={URL_PLACEHOLDER}
               {...register("url", {
-                required: "URL is required",
+                required: URL_IS_REQUIRED_ERROR_MESSAGE,
                 pattern: {
                   value: URL_REG_EXP,
-                  message: "URL format is invalid",
+                  message: URL_PATTERN_ERROR_MESSAGE,
                 },
               })}
             />

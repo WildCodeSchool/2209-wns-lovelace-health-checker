@@ -47,6 +47,7 @@ export class CreateRequestSettingArgs {
 
   @Field()
   @IsBoolean()
+  @IsNotEmpty()
   isActive: boolean;
 
   @Field()

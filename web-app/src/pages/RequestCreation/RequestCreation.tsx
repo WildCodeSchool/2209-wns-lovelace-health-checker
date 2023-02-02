@@ -12,6 +12,19 @@ import {
 import { Frequency } from "../../utils/request-frequency.enum";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { URL_REG_EXP } from "../../utils/regular-expressions";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import {
+  NAME_MAX_LENGTH,
+  NAME_MAX_LENGTH_ERROR_MESSAGE,
+  NAME_MIN_LENGTH,
+  NAME_MIN_LENGTH_ERROR_MESSAGE,
+  NAME_PLACEHOLDER,
+  URL_HEADER_ERROR_MESSAGE,
+  URL_IS_REQUIRED_ERROR_MESSAGE,
+  URL_PATTERN_ERROR_MESSAGE,
+  URL_PLACEHOLDER,
+} from "../../utils/form-validations";
 
 export const CREATE_REQUEST = gql`
   mutation CreateRequestSetting(
@@ -62,9 +75,8 @@ type RequestCreationInputs = {
   headers: { property: string; value: string }[];
 };
 
-const RequestCreation = () => {
+const RequestCreation = ({ role }: { role: string | undefined }) => {
   const [requestIsActive, setRequestIsActive] = useState(true);
-  const [isPremium, setIsPremium] = useState(false);
 
   const [emailSpecificErrors, setEmailSpecificErrors] = useState([]);
   const [emailSpecificErrorsInputValue, setEmailSpecificErrorsInputValue] =
@@ -123,14 +135,6 @@ const RequestCreation = () => {
     control,
   } = useForm<RequestCreationInputs>({
     criteriaMode: "all",
-    defaultValues: {
-      isActive: true,
-      frequency: 3600,
-      allErrorsEnabledEmail: false,
-      allErrorsEnabledPush: false,
-      customEmailErrors: [],
-      customPushErrors: [],
-    },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -140,7 +144,7 @@ const RequestCreation = () => {
 
   const navigate = useNavigate();
 
-  const [create, { data, loading }] = useMutation<
+  const [create] = useMutation<
     CreateRequestSettingMutation,
     CreateRequestSettingMutationVariables
   >(CREATE_REQUEST, {
@@ -151,63 +155,55 @@ const RequestCreation = () => {
       });
       navigate("/requests");
     },
-    onError: (error) => {},
+    onError: (error) => {
+      switch (error.message) {
+        case "Argument Validation Error":
+          toast.error(
+            "Your form contains one or more errors. Please check your input values",
+            {
+              position: toast.POSITION.BOTTOM_RIGHT,
+              toastId: 2,
+            }
+          );
+          break;
+        default:
+          toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 3,
+          });
+      }
+    },
   });
 
+  const getSpecificErrorsValues = (errors: any[]): number[] => {
+    const values: number[] = [];
+    errors.forEach((element: any) => {
+      values.push(element.value);
+    });
+    return values;
+  };
+
   const onSubmit: SubmitHandler<any> = async (data: any) => {
-    const allErrorsEnabledEmail =
-      data.allErrorsEnabledEmail === "true" ? true : false;
-
-    const allErrorsEnabledPush =
-      data.allErrorsEnabledPush === "true" ? true : false;
-
-    const getEmailSpecificErrorsValues = (): number[] => {
-      const values: number[] = [];
-      emailSpecificErrors.forEach((element: any) => {
-        values.push(element.value);
-      });
-      return values;
-    };
-
-    const getPushSpecificErrorsValues = (): number[] => {
-      const values: number[] = [];
-      pushSpecificErrors.forEach((element: any) => {
-        values.push(element.value);
-      });
-      return values;
-    };
-
     await create({
       variables: {
         url: data.url,
         frequency: parseInt(data.frequency),
         isActive: requestIsActive,
-        allErrorsEnabledEmail: allErrorsEnabledEmail,
-        allErrorsEnabledPush: allErrorsEnabledPush,
-        customEmailErrors: getEmailSpecificErrorsValues(),
-        customPushErrors: getPushSpecificErrorsValues(),
+        allErrorsEnabledEmail:
+          data.allErrorsEnabledEmail === "true" ? true : false,
+        allErrorsEnabledPush:
+          data.allErrorsEnabledPush === "true" ? true : false,
+        customEmailErrors: getSpecificErrorsValues(emailSpecificErrors),
+        customPushErrors: getSpecificErrorsValues(pushSpecificErrors),
         name: data.name.length ? data.name : undefined,
         headers: data.headers.length ? JSON.stringify(data.headers) : undefined,
       },
-    });
-
-    console.log({
-      url: data.url,
-      frequency: parseInt(data.frequency),
-      isActive: requestIsActive,
-      allErrorsEnabledEmail: allErrorsEnabledEmail,
-      allErrorsEnabledPush: allErrorsEnabledPush,
-      customEmailErrors: getEmailSpecificErrorsValues(),
-      customPushErrors: getPushSpecificErrorsValues(),
-      name: data.name,
-      headers: JSON.stringify(data.headers),
     });
   };
 
   return (
     <div className={`${styles.contentContainer}`}>
       <h1 className={`${styles.pageTitle}`}>Request creation</h1>
-      <div onClick={() => setIsPremium(!isPremium)}>Toggle Premium</div>
       <form
         className="mt-5 d-flex flex-wrap gap-5 gap-md-3"
         onSubmit={handleSubmit(onSubmit)}
@@ -218,32 +214,48 @@ const RequestCreation = () => {
             <i className="bi bi-info-circle"></i> General
           </h2>
           <div className={`${styles.formContent}`}>
-            <div className="form-floating mb-3">
+            <div className="form-floating mb-2">
               <input
                 type="text"
                 className="form-control"
                 id="url"
-                placeholder="URL"
-                {...register("url")}
+                placeholder={URL_PLACEHOLDER}
+                {...register("url", {
+                  required: URL_IS_REQUIRED_ERROR_MESSAGE,
+                  pattern: {
+                    value: URL_REG_EXP,
+                    message: URL_PATTERN_ERROR_MESSAGE,
+                  },
+                })}
               />
               <label htmlFor="url">URL</label>
             </div>
             <div className={styles.errorMessage}>
-              <FormErrorMessage errors={errors} name={"lastname"} />
+              <FormErrorMessage errors={errors} name={"url"} />
             </div>
-            <div className="form-floating">
+
+            <div className="form-floating mt-3 mb-2">
               <input
                 type="text"
                 className="form-control"
                 id="name"
-                placeholder="name"
-                {...register("name")}
+                placeholder={NAME_PLACEHOLDER}
+                {...register("name", {
+                  minLength: {
+                    value: NAME_MIN_LENGTH,
+                    message: NAME_MIN_LENGTH_ERROR_MESSAGE,
+                  },
+                  maxLength: {
+                    value: NAME_MAX_LENGTH,
+                    message: NAME_MAX_LENGTH_ERROR_MESSAGE,
+                  },
+                })}
               />
               <label htmlFor="name">Name</label>
             </div>
-            {/*             <div className={styles.errorMessage}>
-              <FormErrorMessage errors={errorsIdentity} name={"lastname"} />
-            </div> */}
+            <div className={styles.errorMessage}>
+              <FormErrorMessage errors={errors} name={"name"} />
+            </div>
           </div>
         </div>
 
@@ -374,11 +386,13 @@ const RequestCreation = () => {
             <p
               className={styles.frequencyLabel}
               title={
-                isPremium ? "" : "You must be Premium to unlock these options"
+                role === "premium"
+                  ? ""
+                  : "You must be Premium to unlock these options"
               }
             >
               Minutes{" "}
-              {isPremium ? (
+              {role === "premium" ? (
                 ""
               ) : (
                 <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
@@ -392,7 +406,7 @@ const RequestCreation = () => {
                   id="mn30"
                   value={Frequency.THIRTY_MINUTES}
                   {...register("frequency")}
-                  disabled={!isPremium}
+                  disabled={role !== "premium"}
                 />
                 <label className="form-check-label" htmlFor="mn30">
                   30 mn
@@ -405,7 +419,7 @@ const RequestCreation = () => {
                   id="mn15"
                   value={Frequency.FIFTEEN_MINUTES}
                   {...register("frequency")}
-                  disabled={!isPremium}
+                  disabled={role !== "premium"}
                 />
                 <label className="form-check-label" htmlFor="mn15">
                   15 mn
@@ -418,7 +432,7 @@ const RequestCreation = () => {
                   id="mn1"
                   value={Frequency.ONE_MINUTE}
                   {...register("frequency")}
-                  disabled={!isPremium}
+                  disabled={role !== "premium"}
                 />
                 <label className="form-check-label" htmlFor="mn1">
                   1 mn
@@ -430,11 +444,13 @@ const RequestCreation = () => {
             <p
               className={styles.frequencyLabel}
               title={
-                isPremium ? "" : "You must be Premium to unlock these options"
+                role === "premium"
+                  ? ""
+                  : "You must be Premium to unlock these options"
               }
             >
               Seconds{" "}
-              {isPremium ? (
+              {role === "premium" ? (
                 ""
               ) : (
                 <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
@@ -448,7 +464,7 @@ const RequestCreation = () => {
                   id="sec30"
                   value={Frequency.THIRTY_SECONDS}
                   {...register("frequency")}
-                  disabled={!isPremium}
+                  disabled={role !== "premium"}
                 />
                 <label className="form-check-label" htmlFor="sec30">
                   30 sec
@@ -461,7 +477,7 @@ const RequestCreation = () => {
                   id="sec15"
                   value={Frequency.FIFTEEN_SECONDS}
                   {...register("frequency")}
-                  disabled={!isPremium}
+                  disabled={role !== "premium"}
                 />
                 <label className="form-check-label" htmlFor="sec15">
                   15 sec
@@ -474,7 +490,7 @@ const RequestCreation = () => {
                   id="sec5"
                   value={Frequency.FIVE_SECONDS}
                   {...register("frequency")}
-                  disabled={!isPremium}
+                  disabled={role !== "premium"}
                 />
                 <label className="form-check-label" htmlFor="sec5">
                   5 sec
@@ -524,7 +540,7 @@ const RequestCreation = () => {
                 type="radio"
                 {...register("allErrorsEnabledEmail")}
                 id="flexRadioDefault2"
-                disabled={!isPremium}
+                disabled={role !== "premium"}
                 checked={emailSpecificErrorRadioIsChecked}
                 onChange={() =>
                   setEmailSpecificErrorRadioIsChecked(
@@ -535,7 +551,7 @@ const RequestCreation = () => {
               <label className="form-check-label" htmlFor="flexRadioDefault2">
                 Receive email on specific error(s)
               </label>
-              {isPremium ? (
+              {role === "premium" ? (
                 ""
               ) : (
                 <span>
@@ -549,7 +565,7 @@ const RequestCreation = () => {
               isMulti
               value={emailSpecificErrorsInputValue}
               placeholder="Select specific error(s)..."
-              isDisabled={!isPremium}
+              isDisabled={role !== "premium"}
               name="emailSpecificErrors"
               options={HTTP_ERROR_STATUS_CODES}
               className={`${styles.emailSpecificErrors} basic-multi-select`}
@@ -593,7 +609,7 @@ const RequestCreation = () => {
                 type="radio"
                 {...register("allErrorsEnabledPush")}
                 id="flexRadioDefault2"
-                disabled={!isPremium}
+                disabled={role !== "premium"}
                 checked={pushSpecificErrorRadioIsChecked}
                 onChange={() =>
                   setPushSpecificErrorRadioIsChecked(
@@ -607,7 +623,7 @@ const RequestCreation = () => {
               >
                 Push notification on specific error(s)
               </label>
-              {isPremium ? (
+              {role === "premium" ? (
                 ""
               ) : (
                 <span>
@@ -620,7 +636,7 @@ const RequestCreation = () => {
             <Select
               isMulti
               value={pushSpecificErrorsInputValue}
-              isDisabled={!isPremium}
+              isDisabled={role !== "premium"}
               placeholder="Select specific error(s)..."
               name="pushSpecificErrors"
               options={HTTP_ERROR_STATUS_CODES}
@@ -642,12 +658,12 @@ const RequestCreation = () => {
             {fields.map((field, index) => (
               <div key={field.id} className="row g-2 mb-3">
                 <div className="col-md">
-                  <div className="form-floating">
+                  <div className="form-floating mb-2">
                     <input
                       {...register(`headers.${index}.property`, {
                         required: {
                           value: true,
-                          message: "This field couln't be empty",
+                          message: URL_HEADER_ERROR_MESSAGE,
                         },
                       })}
                       type="text"
@@ -664,16 +680,25 @@ const RequestCreation = () => {
                   </div>
                 </div>
                 <div className="col-md">
-                  <div className="form-floating">
+                  <div className="form-floating mb-2">
                     <input
                       {...register(`headers.${index}.value`, {
-                        required: true,
+                        required: {
+                          value: true,
+                          message: URL_HEADER_ERROR_MESSAGE,
+                        },
                       })}
                       type="text"
                       className="form-control"
                       placeholder="content-type"
                     />
                     <label>Value</label>
+                  </div>
+                  <div className={styles.errorMessage}>
+                    <FormErrorMessage
+                      errors={errors}
+                      name={`headers.${index}.value`}
+                    />
                   </div>
                 </div>
 
@@ -685,7 +710,7 @@ const RequestCreation = () => {
                 </div>
                 <p
                   onClick={() => remove(index)}
-                  className={`${styles.deleteHeaderText} text-center mt-2`}
+                  className={`${styles.deleteHeaderText} text-center mt-1 mb-4`}
                 >
                   Delete above header
                 </p>
@@ -715,7 +740,11 @@ const RequestCreation = () => {
         </div>
 
         <div className={`col-12 col-md-6 ${styles.formContainer}`}>
-          <button className={`${styles.btn} ${styles.btnSecondary} my-md-4`}>
+          <button
+            type="reset"
+            onClick={() => navigate("/requests")}
+            className={`${styles.btn} ${styles.btnSecondary} my-md-4`}
+          >
             Cancel
           </button>
         </div>
