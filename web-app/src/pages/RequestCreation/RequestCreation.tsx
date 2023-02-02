@@ -151,7 +151,7 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
     onCompleted: () => {
       toast.success("Request created successfully !", {
         position: toast.POSITION.BOTTOM_RIGHT,
-        toastId: 1,
+        toastId: 100,
       });
       navigate("/requests");
     },
@@ -166,10 +166,28 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
             }
           );
           break;
+        case "This frequency is only useable by Premium users":
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 3,
+          });
+          break;
+        case "Non Premium users can't use custom error alerts":
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 4,
+          });
+          break;
+        case "Headers format is incorrect":
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 5,
+          });
+          break;
         default:
           toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
             position: toast.POSITION.BOTTOM_RIGHT,
-            toastId: 3,
+            toastId: 6,
           });
       }
     },

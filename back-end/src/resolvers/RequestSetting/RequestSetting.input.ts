@@ -1,6 +1,8 @@
 import {
+  ArrayUnique,
   IsArray,
   IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   Matches,
@@ -30,6 +32,7 @@ export class CreateRequestSettingArgs {
   @Field()
   @IsNumber()
   @IsNotEmpty()
+  @IsEnum(Frequency)
   frequency: Frequency;
 
   @Field({ nullable: true })
@@ -62,9 +65,11 @@ export class CreateRequestSettingArgs {
 
   @Field(() => [Number], { nullable: true })
   @IsArray()
+  @ArrayUnique()
   customEmailErrors?: number[];
 
   @Field(() => [Number], { nullable: true })
   @IsArray()
+  @ArrayUnique()
   customPushErrors?: number[];
 }

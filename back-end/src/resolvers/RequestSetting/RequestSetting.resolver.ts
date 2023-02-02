@@ -19,7 +19,6 @@ export default class RequestSettingResolver {
     );
   }
 
-  // @Ctx() context: GlobalContext
   @Authorized()
   @Mutation(() => RequestSetting)
   async create(
@@ -40,8 +39,20 @@ export default class RequestSettingResolver {
     const user = context.user as User;
     if (!user) throw Error("Unable to find user from global context");
 
-    /*     // Only for test purposes
-    const dummyUser = await UserService.findByEmail("vianneyaccart@gmail.com"); */
+    if (headers) {
+      RequestSettingService.checkIfHeadersAreRightFormatted(headers);
+    }
+
+    RequestSettingService.checkIfNonPremiumUserTryToUsePremiumFrequency(
+      user,
+      frequency
+    );
+
+    RequestSettingService.checkIfNonPremiumUserTryToUseCustomError(
+      user,
+      customEmailErrors,
+      customPushErrors
+    );
 
     const createdRequestSetting =
       await RequestSettingService.createRequestSetting(
