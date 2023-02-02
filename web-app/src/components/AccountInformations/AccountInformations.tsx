@@ -1,4 +1,5 @@
 import { gql, useMutation } from '@apollo/client';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 
@@ -34,10 +35,13 @@ import {
   PASSWORD_PATTERN_ERROR_MESSAGE,
 } from '../../utils/form-validations';
 import { PASSWORD_REG_EXP } from '../../utils/regular-expressions';
+import DeleteAccountModal from '../DeleteAccountModal/DeleteAccountModal';
 import FormErrorMessage from '../ErrorMessage/FormErrorMessage';
 import styles from './AccountInformations.module.scss';
 
 const AccountInformations = (user: any) => {
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+
   const {
     register: registerIdentity,
     handleSubmit: handleSubmitIdentity,
@@ -176,6 +180,13 @@ const AccountInformations = (user: any) => {
 
   return (
     <>
+      {showDeleteAccountModal && (
+        <DeleteAccountModal
+          onClose={() => setShowDeleteAccountModal(false)}
+          onDelete={() => console.log("delete")}
+        />
+      )}
+
       <div className="mt-5 d-flex flex-wrap gap-5 gap-md-3">
         <div className={`col-12 col-md-6 ${styles.formContainer}`}>
           <div className={`${styles.header}`}>
@@ -380,7 +391,9 @@ const AccountInformations = (user: any) => {
               loose all your requests. If you are Premium member, your plan will
               be canceled. Please be certain.
             </p>
-            <button className={`${styles.dangerButton}`}>
+            <button
+              className={`${styles.dangerButton}`}
+              onClick={() => setShowDeleteAccountModal(true)}>
               Delete your account
             </button>
           </div>
