@@ -3,7 +3,7 @@ import { useState } from "react";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { Link } from "@react-navigation/native";
 // TODO: import toast
-import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
+import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessageComponent";
 
 import HomepageRequestTable from "../../components/HomepageRequestTable/HomepageRequestTable";
 import { CheckUrlMutation, CheckUrlMutationVariables } from "../../gql/graphql";
@@ -12,8 +12,18 @@ import {
   SERVER_IS_KO_ERROR_MESSAGE,
 } from "../../utils/error-messages";
 import { styles } from "./HomeStyle";
-import { View, Text, Button, TextInput } from "react-native";
+import { bootstrap } from "../../style/bootstrapConvert";
+import {
+  View,
+  Text,
+  Button,
+  TextInput,
+  Pressable,
+  Animated,
+  ScrollView,
+} from "react-native";
 import Constants from "expo-constants";
+import { animatedStyle } from "../../style/components";
 
 const REQUEST_TIMEOUT = Constants?.expoConfig?.extra?.REQUEST_TIMEOUT;
 
@@ -101,50 +111,66 @@ const Home = () => {
   };
 
   return (
-    <View>
-      <View style={{}}>
-        <Text style={{ fontSize: 32 }}>
+    <ScrollView>
+      <View
+        style={[
+          bootstrap.dFlex,
+          bootstrap.flexColumn,
+          styles.searchBarContainer,
+        ]}
+      >
+        <Text style={[bootstrap.my5, bootstrap.col10, styles.h1]}>
           Enter a website URL and check its availability
         </Text>
-        <View style={{}}>
-          <Controller
-            control={control}
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                data-testid="url-input"
-                style={{}}
-                onChangeText={(value) => onChange(value)}
-                value={value}
-                placeholder="https://example.com"
-                {...register("url", {
-                  required: "URL is required",
-                  pattern: {
-                    value: URL_REG_EXP,
-                    message: "URL format is invalid",
-                  },
-                })}
-              />
-            )}
-            name="url"
-          />
-          <Button
-            data-testid="url-button"
-            disabled={loading}
-            title="Submit"
-            onPress={handleSubmit(onSubmit)}
-          />
-          <View style={{}}>
+        <View style={[bootstrap.positionRelative, bootstrap.col12]}>
+          <View style={bootstrap.dFlex}>
+            <Controller
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  data-testid="url-input"
+                  style={[{ backgroundColor: "white" }, styles.searchBar]}
+                  onChangeText={(value) => onChange(value)}
+                  value={value}
+                  placeholder="https://example.com"
+                  {...register("url", {
+                    required: "URL is required",
+                    pattern: {
+                      value: URL_REG_EXP,
+                      message: "URL format is invalid",
+                    },
+                  })}
+                />
+              )}
+              name="url"
+            />
+            <Pressable
+              data-testid="url-button"
+              disabled={loading}
+              onPress={handleSubmit(onSubmit)}
+              style={[
+                bootstrap.dFlex,
+                bootstrap.justifyContentCenter,
+                bootstrap.alignItemsCenter,
+                styles.searchButton,
+              ]}
+            >
+              {/* TODO: Remplacer le texte Submit par une icon */}
+              <Text style={styles.btnTextSecondary}>Submit</Text>
+            </Pressable>
+          </View>
+          <View style={[bootstrap.positionAbsolute]}>
             <FormErrorMessage errors={errors} name={"url"} />
           </View>
         </View>
       </View>
 
-      <View style={{}}>
+      <View style={styles.contentContainer}>
         {loading ||
         data ||
         (error && ERROR_MESSAGE_ARRAY.includes(getErrorMessage(error))) ? (
-          <View style={{}}>
-            <Text style={styles.bsPMarginBottom}>
+          <View style={bootstrap.mb5}>
+            <Text style={bootstrap.m0}>
               {loading ? (
                 `We are testing ${url}`
               ) : data || error ? (
@@ -153,9 +179,16 @@ const Home = () => {
                 <></>
               )}
             </Text>
-            <View style={{}}>
+            <View
+              style={[
+                bootstrap.dFlex,
+                bootstrap.justifyContentCenter,
+                bootstrap.alignItemsCenter,
+                styles.requestContainer,
+              ]}
+            >
               {loading ? (
-                <View style={{}}></View>
+                <Animated.View style={[styles.loader, animatedStyle]} />
               ) : data ? (
                 <HomepageRequestTable
                   getIsAvailable={data.checkUrl.getIsAvailable}
@@ -173,17 +206,24 @@ const Home = () => {
           <></>
         )}
 
-        <View style={{}}>
-          <Text style={styles.H2}>How it works</Text>
+        <View style={[bootstrap.mt3, bootstrap.col12]}>
+          <Text style={styles.h2}>How it works</Text>
           <Text style={styles.bsPMarginBottom}>
             HealthCheck allows you to test if a website is operational by
             sending a request and analyzing the response.
           </Text>
         </View>
 
-        <View style={{}}>
-          <View style={{}}>
-            <Text style={styles.H2}>A tool for managing websites</Text>
+        <View
+          style={[
+            bootstrap.dFlex,
+            bootstrap.alignItemsCenter,
+            bootstrap.flexWrap,
+            bootstrap.mt5,
+          ]}
+        >
+          <View style={bootstrap.col12}>
+            <Text style={styles.h2}>A tool for managing websites</Text>
             <Text style={styles.bsPMarginBottom}>
               You can test as many sites as you want. With your account, set the
               testing frequency for each site and be notified automatically if
@@ -191,26 +231,56 @@ const Home = () => {
             </Text>
           </View>
 
-          <Link style={{}} to="/sign-up">
-            <Button title="Create your free account" />
+          <Link
+            style={[
+              bootstrap.m0,
+              bootstrap.col12,
+              bootstrap.dFlex,
+              bootstrap.justifyContentCenter,
+            ]}
+            to="/sign-up"
+          >
+            <Pressable style={[styles.btn, styles.btnPrimary]}>
+              <Text style={styles.btnTextPrimary}>
+                Create your free account
+              </Text>
+            </Pressable>
           </Link>
         </View>
 
-        <View style={{}}>
-          <View style={{}}>
-            <Text style={styles.H2}>Go further with Premium</Text>
+        <View
+          style={[
+            bootstrap.dFlex,
+            bootstrap.alignItemsCenter,
+            bootstrap.flexWrap,
+            bootstrap.mt5,
+            bootstrap.mb3,
+          ]}
+        >
+          <View style={bootstrap.col12}>
+            <Text style={styles.h2}>Go further with Premium</Text>
             <Text style={styles.bsPMarginBottom}>
               Customized alerts only for specific error codes, better management
               of testing frequency, grouped actions to save time and many other
               great features with Premium.
             </Text>
           </View>
-          <Link style={{}} to="/premium">
-            <Button title="Discover Premium" />
+          <Link
+            style={[
+              bootstrap.m0,
+              bootstrap.col12,
+              bootstrap.dFlex,
+              bootstrap.justifyContentCenter,
+            ]}
+            to="/premium"
+          >
+            <Pressable style={[styles.btn, styles.btnSecondary]}>
+              <Text style={styles.btnTextSecondary}>Discover Premium</Text>
+            </Pressable>
           </Link>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

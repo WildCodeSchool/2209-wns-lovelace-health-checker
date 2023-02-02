@@ -1,10 +1,10 @@
 import { Link } from "@react-navigation/native";
 import React from "react";
 import { View, Text, StyleSheet, Button, Pressable } from "react-native";
-import components from "../../components";
+import components from "../../style/components";
 import { styles } from "./NotFoundStyle";
 
-import variables from "../../variables";
+import variables from "../../style/variables";
 
 const NotFoundScreen = () => {
   return (
