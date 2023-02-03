@@ -30,7 +30,7 @@ export default class RequestSettingService extends RequestSettingRepository {
       customPushErrors
     );
 
-    const createdRequestSetting = this.createRequestSetting(
+    const createdRequestSetting = await this.createRequestSetting(
       user,
       url,
       frequency,
@@ -42,13 +42,13 @@ export default class RequestSettingService extends RequestSettingRepository {
     await AlertSettingService.setPushAlerts(
       customPushErrors,
       allErrorsEnabledPush,
-      await createdRequestSetting
+      createdRequestSetting
     );
 
     await AlertSettingService.setEmailAlerts(
       customEmailErrors,
       allErrorsEnabledEmail,
-      await createdRequestSetting
+      createdRequestSetting
     );
 
     return createdRequestSetting;
@@ -65,7 +65,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     await this.checkIfNonPremiumUserHasReachedMaxRequestsCount(user);
     await this.checkIfURLOrNameAreAlreadyUsed(user, url, name);
 
-    let requestSetting: RequestSetting = new RequestSetting(
+    const requestSetting: RequestSetting = new RequestSetting(
       user,
       url,
       frequency,
@@ -73,7 +73,9 @@ export default class RequestSettingService extends RequestSettingRepository {
       name,
       headers
     );
+
     const savedRequestSetting = await this.saveRequestSetting(requestSetting);
+    console.log({ savedRequestSetting });
     return savedRequestSetting;
   }
 

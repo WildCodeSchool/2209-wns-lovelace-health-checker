@@ -62,22 +62,20 @@ const createRequestSetting = () => {
     });
 };
 
-describe("RequestService integration", () => {
-  const userWithUserRole = new User(
-    "John",
-    "Doe",
-    "john.doe@email.com",
-    "password"
-  );
-  userWithUserRole.role = Role.USER;
+const checkIfNonPremiumUserHasReachedMaxRequestsCount = () => {
+  return jest
+    .spyOn(
+      RequestSettingService,
+      "checkIfNonPremiumUserHasReachedMaxRequestsCount"
+    )
+    .mockImplementation((user: User) => {
+      return Promise.resolve(false);
+    });
+};
 
-  const userWithPremiumRole = new User(
-    "John",
-    "Doe",
-    "john.doe@email.com",
-    "password"
-  );
-  userWithPremiumRole.role = Role.PREMIUM;
+describe("RequestService integration", () => {
+  const user = new User("John", "Doe", "john.doe@email.com", "password");
+  user.role = Role.USER;
 
   const url = "https://example.com";
   const frequency = Frequency.ONE_HOUR;
@@ -89,43 +87,6 @@ describe("RequestService integration", () => {
   const customEmailErrors: number[] = [];
   const customPushErrors: number[] = [];
 
-  const checkForErrorsAndCreateRequestForUser = () => {
-    RequestSettingService.checkForErrorsAndCreateRequest(
-      url,
-      frequency,
-      name,
-      headers,
-      isActive,
-      allErrorsEnabledEmail,
-      allErrorsEnabledPush,
-      customEmailErrors,
-      customPushErrors,
-      userWithUserRole
-    );
-  };
-
-  const checkForErrorsAndCreateRequestForPremium = () => {
-    RequestSettingService.checkForErrorsAndCreateRequest(
-      url,
-      Frequency.ONE_MINUTE,
-      name,
-      headers,
-      isActive,
-      allErrorsEnabledEmail,
-      allErrorsEnabledPush,
-      [400],
-      [400],
-      userWithPremiumRole
-    );
-  };
-
-  let setPushAlertsSpy: jest.SpyInstance<Promise<void>>;
-  let setEmailAlertsSpy: jest.SpyInstance<Promise<void>>;
-  let checkIfHeadersAreRightFormattedSpy: jest.SpyInstance<void>;
-  let checkIfNonPremiumUserTryToUsePremiumFrequencySpy: jest.SpyInstance<void>;
-  let checkIfNonPremiumUserTryToUseCustomErrorSpy: jest.SpyInstance<void>;
-  let createRequestSettingSpy: jest.SpyInstance<Promise<RequestSetting>>;
-
   beforeAll(async () => {
     await getDatabase();
     await initializeRepositories();
@@ -133,14 +94,7 @@ describe("RequestService integration", () => {
 
   beforeEach(async () => {
     await truncateAllTables();
-    setPushAlertsSpy = setPushAlerts();
-    setEmailAlertsSpy = setEmailAlerts();
-    checkIfHeadersAreRightFormattedSpy = checkIfHeadersAreRightFormatted();
-    checkIfNonPremiumUserTryToUsePremiumFrequencySpy =
-      checkIfNonPremiumUserTryToUsePremiumFrequency();
-    checkIfNonPremiumUserTryToUseCustomErrorSpy =
-      checkIfNonPremiumUserTryToUseCustomError();
-    createRequestSettingSpy = createRequestSetting();
+    jest.clearAllMocks();
   });
 
   afterAll(async () => {
@@ -148,46 +102,198 @@ describe("RequestService integration", () => {
   });
 
   describe("checkForErrorsAndCreateRequest", () => {
+    // doesn't work with just const checkIfHeadersAreRightFormattedSpy = checkIfHeadersAreRightFormatted(), makes below tests fail
     it("calls checkIfHeadersAreRightFormatted once", async () => {
-      checkForErrorsAndCreateRequestForUser();
+      const checkIfHeadersAreRightFormattedSpy =
+        checkIfHeadersAreRightFormatted();
+      checkIfNonPremiumUserTryToUsePremiumFrequency();
+      checkIfNonPremiumUserTryToUseCustomError();
+      createRequestSetting();
+      setPushAlerts();
+      setEmailAlerts();
+      await RequestSettingService.checkForErrorsAndCreateRequest(
+        url,
+        frequency,
+        name,
+        headers,
+        isActive,
+        allErrorsEnabledEmail,
+        allErrorsEnabledPush,
+        customEmailErrors,
+        customPushErrors,
+        user
+      );
       expect(checkIfHeadersAreRightFormattedSpy).toHaveBeenCalledTimes(1);
     });
-    it("calls checkIfNonPremiumUserTryToUsePremiumFrequency once", () => {
-      checkForErrorsAndCreateRequestForUser();
+    // WORKS BUT NOT WITH ONLY
+    it("calls checkIfNonPremiumUserTryToUsePremiumFrequency once", async () => {
+      const checkIfNonPremiumUserTryToUsePremiumFrequencySpy =
+        checkIfNonPremiumUserTryToUsePremiumFrequency();
+      await RequestSettingService.checkForErrorsAndCreateRequest(
+        url,
+        frequency,
+        name,
+        headers,
+        isActive,
+        allErrorsEnabledEmail,
+        allErrorsEnabledPush,
+        customEmailErrors,
+        customPushErrors,
+        user
+      );
       expect(
         checkIfNonPremiumUserTryToUsePremiumFrequencySpy
       ).toHaveBeenCalledTimes(1);
     });
-    it("calls checkIfNonPremiumUserTryToUseCustomError once", () => {
-      checkForErrorsAndCreateRequestForUser();
+    // WORKS BUT NOT WITH ONLY
+    it("calls checkIfNonPremiumUserTryToUseCustomError once", async () => {
+      const checkIfNonPremiumUserTryToUseCustomErrorSpy =
+        checkIfNonPremiumUserTryToUseCustomError();
+      await RequestSettingService.checkForErrorsAndCreateRequest(
+        url,
+        frequency,
+        name,
+        headers,
+        isActive,
+        allErrorsEnabledEmail,
+        allErrorsEnabledPush,
+        customEmailErrors,
+        customPushErrors,
+        user
+      );
       expect(checkIfNonPremiumUserTryToUseCustomErrorSpy).toHaveBeenCalledTimes(
         1
       );
     });
     describe("if there's no validation error", () => {
-      it("calls createRequestSetting once", () => {
-        checkForErrorsAndCreateRequestForUser();
+      // WORKS BUT NOT WITH ONLY
+      it("calls createRequestSetting once", async () => {
+        const createRequestSettingSpy = createRequestSetting();
+        await RequestSettingService.checkForErrorsAndCreateRequest(
+          url,
+          frequency,
+          name,
+          headers,
+          isActive,
+          allErrorsEnabledEmail,
+          allErrorsEnabledPush,
+          customEmailErrors,
+          customPushErrors,
+          user
+        );
         expect(createRequestSettingSpy).toHaveBeenCalledTimes(1);
       });
-      it("calls setPushAlerts once", () => {
-        checkForErrorsAndCreateRequestForUser();
+      // WORKS BUT NOT WITH ONLY
+      it("calls setPushAlerts once", async () => {
+        const setPushAlertsSpy = setPushAlerts();
+        await RequestSettingService.checkForErrorsAndCreateRequest(
+          url,
+          frequency,
+          name,
+          headers,
+          isActive,
+          allErrorsEnabledEmail,
+          allErrorsEnabledPush,
+          customEmailErrors,
+          customPushErrors,
+          user
+        );
         expect(setPushAlertsSpy).toHaveBeenCalledTimes(1);
       });
-      it("calls setEmailAlerts once", () => {
-        checkForErrorsAndCreateRequestForUser();
+      // WORKS BUT NOT WITH ONLY
+      it("calls setEmailAlerts once", async () => {
+        const setEmailAlertsSpy = setEmailAlerts();
+        await RequestSettingService.checkForErrorsAndCreateRequest(
+          url,
+          frequency,
+          name,
+          headers,
+          isActive,
+          allErrorsEnabledEmail,
+          allErrorsEnabledPush,
+          customEmailErrors,
+          customPushErrors,
+          user
+        );
         expect(setEmailAlertsSpy).toHaveBeenCalledTimes(1);
       });
-      it("returns RequestSetting object", () => {});
+      // DOUBT ??
+      it("returns Promise<RequestSetting> object", async () => {
+        const requestResult =
+          RequestSettingService.checkForErrorsAndCreateRequest(
+            url,
+            frequency,
+            name,
+            headers,
+            isActive,
+            allErrorsEnabledEmail,
+            allErrorsEnabledPush,
+            customEmailErrors,
+            customPushErrors,
+            user
+          );
+        expect(requestResult).toBeInstanceOf(Promise<RequestSetting>);
+      });
     });
   });
 
   describe("createRequestSetting", () => {
-    it("calls checkIfNonPremiumUserHasReachedMaxRequestsCount once", () => {});
-    it("calls checkIfURLOrNameAreAlreadyUsed once", () => {});
+    it("calls checkIfNonPremiumUserHasReachedMaxRequestsCount once", async () => {
+      /*       const spy = checkIfNonPremiumUserHasReachedMaxRequestsCount();
+      RequestSettingService.createRequestSetting(
+        user,
+        url,
+        frequency,
+        isActive,
+        name,
+        headers
+      );
+      expect(spy).toBeCalledTimes(1); */
+    });
+    it("calls checkIfURLOrNameAreAlreadyUsed once", async () => {
+      /*       const spy = jest
+        .spyOn(RequestSettingService, "checkIfURLOrNameAreAlreadyUsed")
+        .mockImplementation((data: any) => {
+          return data;
+        });
+      RequestSettingService.createRequestSetting(
+        user,
+        url,
+        frequency,
+        isActive,
+        name,
+        headers
+      );
+      expect(spy).toBeCalledTimes(1); */
+    });
 
     describe("if there's no validation error", () => {
       it("calls saveRequestSetting once", () => {});
-      it("creates a new request in database", () => {});
+      // NOT WORKS !
+      it("creates a new request in database", async () => {
+        /*         // Not pass into createRequestSetting from service. It seems that it uses a mock which should explain why we get an User instead of RequestSetting
+        const requestSetting = await RequestSettingService.createRequestSetting(
+          user,
+          url,
+          frequency,
+          isActive,
+          name,
+          headers
+        );
+        
+        // gives a User
+        console.log({ requestSetting });
+
+        const existingRequestResult =
+          await RequestSettingService.repository.findOne({
+            where: { id: requestSetting.id },
+          });
+
+        // null
+        console.log(existingRequestResult);
+
+        expect(existingRequestResult?.url).toBe("toto"); */
+      });
     });
 
     describe("non Premium user try to use Premium features", () => {

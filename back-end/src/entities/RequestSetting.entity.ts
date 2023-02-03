@@ -1,9 +1,21 @@
-import { IsBoolean, IsDate, IsNotEmpty, IsString, MinLength } from 'class-validator';
-import { Field, ID, ObjectType } from 'type-graphql';
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  IsBoolean,
+  IsDate,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+} from "class-validator";
+import { Field, ID, ObjectType } from "type-graphql";
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
-import AlertSetting from './AlertSetting.entity';
-import User from './User.entity';
+import AlertSetting from "./AlertSetting.entity";
+import User from "./User.entity";
 
 export enum Frequency {
   THIRTY_DAYS = 2592000,
