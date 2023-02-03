@@ -1,9 +1,13 @@
-import { gql, useMutation } from '@apollo/client';
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { gql, useMutation } from "@apollo/client";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 
-import { ConfirmAccountMutation, ConfirmAccountMutationVariables } from '../../gql/graphql';
-import styles from './AccountConfirmation.module.scss';
+import {
+  ConfirmAccountMutation,
+  ConfirmAccountMutationVariables,
+} from "../../gql/graphql";
+import { SIGN_IN_ROUTE } from "../../routes";
+import styles from "./AccountConfirmation.module.scss";
 
 export const CONFIRM_ACCOUNT = gql`
   mutation confirmAccount($token: String!) {
@@ -59,16 +63,18 @@ const AccountConfirmation = ({ onSuccess }: { onSuccess: () => void }) => {
         <div className="text-center">
           <i
             data-testid="successIcon"
-            className={`bi bi-check-circle ${styles.success}`}></i>
+            className={`bi bi-check-circle ${styles.success}`}
+          ></i>
           <p>
             Your account has been confirmed successfully. You can now{" "}
             <Link
-              to={"/sign-in"}
+              to={SIGN_IN_ROUTE}
               className={`${styles.link}`}
               style={{
                 margin: "0",
                 color: "#195078",
-              }}>
+              }}
+            >
               log in
             </Link>{" "}
             to HealthCheck !
@@ -83,7 +89,8 @@ const AccountConfirmation = ({ onSuccess }: { onSuccess: () => void }) => {
         <div className="text-center">
           <i
             data-testid="errorIcon"
-            className={`bi bi-x-circle ${styles.error}`}></i>
+            className={`bi bi-x-circle ${styles.error}`}
+          ></i>
           <p>
             Your unique confirmation token is invalid or has already been used.
           </p>

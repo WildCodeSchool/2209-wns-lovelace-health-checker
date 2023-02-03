@@ -25,6 +25,7 @@ import {
   URL_PATTERN_ERROR_MESSAGE,
   URL_PLACEHOLDER,
 } from "../../utils/form-validations";
+import { REQUESTS_ROUTE } from "../../routes";
 
 export const CREATE_REQUEST = gql`
   mutation CreateRequestSetting(
@@ -153,7 +154,7 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: 100,
       });
-      navigate("/requests");
+      navigate(REQUESTS_ROUTE);
     },
     onError: (error) => {
       switch (error.message) {
@@ -760,7 +761,7 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
         <div className={`col-12 col-md-6 ${styles.formContainer}`}>
           <button
             type="reset"
-            onClick={() => navigate("/requests")}
+            onClick={() => navigate(REQUESTS_ROUTE)}
             className={`${styles.btn} ${styles.btnSecondary} my-md-4`}
           >
             Cancel

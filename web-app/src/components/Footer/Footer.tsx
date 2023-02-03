@@ -1,3 +1,4 @@
+import { HOMEPAGE_ROUTE } from "../../routes";
 import styles from "./Footer.module.scss";
 
 const Footer = () => {
@@ -7,13 +8,13 @@ const Footer = () => {
     >
       <ul>
         <li>
-          <a href="/">Legals</a>
+          <a href={HOMEPAGE_ROUTE}>Legals</a>
         </li>
         <li>
-          <a href="/">Terms of use</a>
+          <a href={HOMEPAGE_ROUTE}>Terms of use</a>
         </li>
         <li>
-          <a href="/">Sales and refunds</a>
+          <a href={HOMEPAGE_ROUTE}>Sales and refunds</a>
         </li>
       </ul>
       <p className={styles.copyright}>©2022 Health Check</p>

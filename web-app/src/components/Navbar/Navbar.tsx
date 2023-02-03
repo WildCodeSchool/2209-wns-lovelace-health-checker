@@ -1,8 +1,16 @@
-import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
-import logo from '../../assets/images/logo.png';
-import styles from './Navbar.module.scss';
+import logo from "../../assets/images/logo.png";
+import {
+  ACCOUNT_ROUTE,
+  HOMEPAGE_ROUTE,
+  PREMIUM_ROUTE,
+  REQUESTS_ROUTE,
+  SIGN_IN_ROUTE,
+  SIGN_UP_ROUTE,
+} from "../../routes";
+import styles from "./Navbar.module.scss";
 
 const Navbar = (props: any) => {
   const [selectedTab, setSelectedTab] = useState("search");
@@ -11,17 +19,17 @@ const Navbar = (props: any) => {
   const route = useLocation();
 
   useEffect(() => {
-    if (route.pathname === "/") {
+    if (route.pathname === HOMEPAGE_ROUTE) {
       setSelectedTab("search");
-    } else if (route.pathname === "/sign-in") {
+    } else if (route.pathname === SIGN_IN_ROUTE) {
       setSelectedTab("sign-in");
-    } else if (route.pathname === "/sign-up") {
+    } else if (route.pathname === SIGN_UP_ROUTE) {
       setSelectedTab("sign-up");
-    } else if (route.pathname === "/premium") {
+    } else if (route.pathname === PREMIUM_ROUTE) {
       setSelectedTab("premium");
-    } else if (route.pathname === "/requests") {
+    } else if (route.pathname === REQUESTS_ROUTE) {
       setSelectedTab("requests");
-    } else if (route.pathname === "/account") {
+    } else if (route.pathname === ACCOUNT_ROUTE) {
       setSelectedTab("account");
     }
   }, [route]);
@@ -31,20 +39,23 @@ const Navbar = (props: any) => {
     <nav className={`d-flex justify-content-between ${styles.navbar}`}>
       {/* Mobile */}
       <div
-        className={`col-12 d-flex align-items-center ${styles.mobileNavbar}`}>
+        className={`col-12 d-flex align-items-center ${styles.mobileNavbar}`}
+      >
         <div
-          className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}>
+          className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
+        >
           <i className={`bi bi-search ${styles.bi}`}></i>
-          <Link className={styles.navlink} to="/">
+          <Link className={styles.navlink} to={HOMEPAGE_ROUTE}>
             Search
           </Link>
         </div>
 
         {isLogged ? (
           <div
-            className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}>
+            className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
+          >
             <i className={`bi bi-list-ul ${styles.bi}`}></i>
-            <Link className={styles.navlink} to="/requests">
+            <Link className={styles.navlink} to={REQUESTS_ROUTE}>
               Requests
             </Link>
           </div>
@@ -53,18 +64,20 @@ const Navbar = (props: any) => {
         )}
 
         <div
-          className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}>
+          className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
+        >
           <i className={`bi bi-bookmark-check ${styles.biBookmarkCheck}`}></i>
-          <Link className={styles.navlink} to="/premium">
+          <Link className={styles.navlink} to={PREMIUM_ROUTE}>
             Premium
           </Link>
         </div>
 
         {!isLogged ? (
           <div
-            className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}>
+            className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
+          >
             <i className={`bi bi-person-plus ${styles.bi}`}></i>
-            <Link className={styles.navlink} to="/sign-up">
+            <Link className={styles.navlink} to={SIGN_UP_ROUTE}>
               Sign up
             </Link>
           </div>
@@ -74,9 +87,10 @@ const Navbar = (props: any) => {
 
         {!isLogged ? (
           <div
-            className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}>
+            className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
+          >
             <i className={`bi bi-box-arrow-in-right ${styles.bi}`}></i>
-            <Link className={styles.navlink} to="/sign-in">
+            <Link className={styles.navlink} to={SIGN_IN_ROUTE}>
               Sign in
             </Link>
           </div>
@@ -86,9 +100,10 @@ const Navbar = (props: any) => {
 
         {isLogged ? (
           <div
-            className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}>
+            className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
+          >
             <i className={`bi bi-person ${styles.bi}`}></i>
-            <Link className={styles.navlink} to="/account">
+            <Link className={styles.navlink} to={ACCOUNT_ROUTE}>
               Account
             </Link>
           </div>
@@ -99,8 +114,9 @@ const Navbar = (props: any) => {
 
       {/* Desktop */}
       <div
-        className={`col-12 d-flex align-items-center justify-content-between ${styles.desktopNavbar}`}>
-        <Link to="/">
+        className={`col-12 d-flex align-items-center justify-content-between ${styles.desktopNavbar}`}
+      >
+        <Link to={HOMEPAGE_ROUTE}>
           <img className={styles.logo} src={logo} alt="Health Check logo"></img>
         </Link>
 
@@ -108,13 +124,15 @@ const Navbar = (props: any) => {
           <div
             className={`${styles.navElement} ${
               selectedTab === "search" && styles.selectedTab
-            }`}>
+            }`}
+          >
             <Link
               className={`${styles.navlink} ${
                 selectedTab === "search" && styles.selectedLink
               }`}
-              to="/"
-              onClick={() => setSelectedTab("search")}>
+              to={HOMEPAGE_ROUTE}
+              onClick={() => setSelectedTab("search")}
+            >
               Search
             </Link>
           </div>
@@ -123,13 +141,15 @@ const Navbar = (props: any) => {
             <div
               className={`${styles.navElement} ${
                 selectedTab === "requests" && styles.selectedTab
-              } `}>
+              } `}
+            >
               <Link
                 className={`${styles.navlink} ${
                   selectedTab === "requests" && styles.selectedLink
                 }`}
-                to="/requests"
-                onClick={() => setSelectedTab("requests")}>
+                to={REQUESTS_ROUTE}
+                onClick={() => setSelectedTab("requests")}
+              >
                 Requests
               </Link>
             </div>
@@ -140,13 +160,15 @@ const Navbar = (props: any) => {
           <div
             className={`${styles.navElement} ${
               selectedTab === "premium" && styles.selectedTab
-            } `}>
+            } `}
+          >
             <Link
               className={`${styles.navlink} ${
                 selectedTab === "premium" && styles.selectedLink
               }`}
-              to="/premium"
-              onClick={() => setSelectedTab("premium")}>
+              to={PREMIUM_ROUTE}
+              onClick={() => setSelectedTab("premium")}
+            >
               Premium
             </Link>
           </div>
@@ -155,13 +177,15 @@ const Navbar = (props: any) => {
             <div
               className={`${styles.navElement} ${
                 selectedTab === "account" && styles.selectedTab
-              } `}>
+              } `}
+            >
               <Link
                 className={`${styles.navlink} ${
                   selectedTab === "account" && styles.selectedLink
                 }`}
-                to="/account"
-                onClick={() => setSelectedTab("account")}>
+                to={ACCOUNT_ROUTE}
+                onClick={() => setSelectedTab("account")}
+              >
                 Account
               </Link>
             </div>
@@ -173,16 +197,18 @@ const Navbar = (props: any) => {
             <div>
               <Link
                 className={`m-0 ${styles.notLogged}`}
-                to="/sign-up"
-                onClick={() => setSelectedTab("sign-up")}>
+                to={SIGN_UP_ROUTE}
+                onClick={() => setSelectedTab("sign-up")}
+              >
                 <button className={`${styles.btn} ${styles.btnPrimary}`}>
                   Sign up
                 </button>
               </Link>{" "}
               <Link
                 className={`m-0 `}
-                to="/sign-in"
-                onClick={() => setSelectedTab("sign-in")}>
+                to={SIGN_IN_ROUTE}
+                onClick={() => setSelectedTab("sign-in")}
+              >
                 <button className={`${styles.btn} ${styles.btnSecondary}`}>
                   Sign in
                 </button>

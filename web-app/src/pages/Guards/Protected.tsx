@@ -1,5 +1,6 @@
-import { Navigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { Navigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { SIGN_IN_ROUTE } from "../../routes";
 
 type PropsType = {
   isLoggedIn: boolean;
@@ -14,7 +15,7 @@ const Protected = (props: PropsType) => {
       position: toast.POSITION.BOTTOM_RIGHT,
       toastId: "notLoggedIn",
     });
-    return <Navigate to="/sign-in" replace />;
+    return <Navigate to={SIGN_IN_ROUTE} replace />;
   }
   return children;
 };

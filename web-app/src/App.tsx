@@ -26,6 +26,20 @@ import SignUp from "./pages/SignUp/SignUp";
 import Terms from "./pages/Terms/Terms";
 import PreventRequestCreationPageAccessIfLimitHasBeenReached from "./pages/Guards/PreventRequestCreationPageAccessIfLimitHasBeenReached";
 import RequestCreation from "./pages/RequestCreation/RequestCreation";
+import {
+  ACCOUNT_CONFIRMATION_WITH_TOKEN_ROUTE,
+  ACCOUNT_ROUTE,
+  FORGOT_PASSWORD_ROUTE,
+  HOMEPAGE_ROUTE,
+  PREMIUM_ROUTE,
+  REQUESTS_ROUTE,
+  REQUEST_CREATION_ROUTE,
+  RESET_EMAIL_WITH_TOKEN_ROUTE,
+  RESET_PASSWORD_WITH_TOKEN_ROUTE,
+  SIGN_IN_ROUTE,
+  SIGN_UP_ROUTE,
+  TERMS_ROUTE,
+} from "./routes";
 
 function App() {
   const MY_PROFILE = gql`
@@ -65,9 +79,9 @@ function App() {
         <NavLogo />
         <Navbar logged={isLogged} />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path={HOMEPAGE_ROUTE} element={<Home />} />
           <Route
-            path="/sign-up"
+            path={SIGN_UP_ROUTE}
             element={
               <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <SignUp />
@@ -75,7 +89,7 @@ function App() {
             }
           />
           <Route
-            path="/sign-in"
+            path={SIGN_IN_ROUTE}
             element={
               <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <SignIn onSuccess={refetch} />
@@ -83,7 +97,7 @@ function App() {
             }
           />
           <Route
-            path="/requests"
+            path={REQUESTS_ROUTE}
             element={
               <Protected isLoggedIn={isLogged} loading={loading}>
                 <Requests />
@@ -91,7 +105,7 @@ function App() {
             }
           />
           <Route
-            path="/request-creation"
+            path={REQUEST_CREATION_ROUTE}
             element={
               <PreventRequestCreationPageAccessIfLimitHasBeenReached>
                 <RequestCreation role={data?.myProfile.role} />
@@ -99,7 +113,7 @@ function App() {
             }
           />
           <Route
-            path="/premium"
+            path={PREMIUM_ROUTE}
             element={
               <Protected isLoggedIn={isLogged} loading={loading}>
                 <Premium />
@@ -108,7 +122,7 @@ function App() {
           />
 
           <Route
-            path="/account"
+            path={ACCOUNT_ROUTE}
             element={
               <Protected isLoggedIn={isLogged} loading={loading}>
                 <Account
@@ -118,9 +132,9 @@ function App() {
               </Protected>
             }
           />
-          <Route path="/terms" element={<Terms />} />
+          <Route path={TERMS_ROUTE} element={<Terms />} />
           <Route
-            path="/forgot-password"
+            path={FORGOT_PASSWORD_ROUTE}
             element={
               <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <ForgotPassword />
@@ -128,7 +142,7 @@ function App() {
             }
           />
           <Route
-            path="/reset-password/:resetPasswordToken"
+            path={RESET_PASSWORD_WITH_TOKEN_ROUTE}
             element={
               <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <ResetPassword />
@@ -136,7 +150,7 @@ function App() {
             }
           />
           <Route
-            path="/account-confirmation/:confirmationToken"
+            path={ACCOUNT_CONFIRMATION_WITH_TOKEN_ROUTE}
             element={
               <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <AccountConfirmation onSuccess={refetch} />
@@ -144,7 +158,7 @@ function App() {
             }
           />
           <Route
-            path="/reset-email/:confirmationToken"
+            path={RESET_EMAIL_WITH_TOKEN_ROUTE}
             element={<EmailConfirmation onSuccess={refetch} />}
           />
           {/* Always put the wildcard on last position */}

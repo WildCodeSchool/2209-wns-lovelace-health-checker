@@ -1,6 +1,7 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { HOMEPAGE_ROUTE } from "../../routes";
 
 type PropsType = {
   isLoggedIn: boolean;
@@ -13,7 +14,7 @@ const AlreadyLoggedIn = (props: PropsType) => {
       position: toast.POSITION.BOTTOM_RIGHT,
       toastId: "alreadyLoggedIn",
     });
-    return <Navigate to="/" replace />;
+    return <Navigate to={HOMEPAGE_ROUTE} replace />;
   }
   return children;
 };

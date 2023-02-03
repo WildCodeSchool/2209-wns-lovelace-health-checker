@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery } from "../../gql/graphql";
+import { REQUESTS_ROUTE } from "../../routes";
 
 const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
   query CheckIfNonPremiumUserHasReachedMaxRequestsCount {
@@ -33,7 +34,7 @@ const PreventRequestCreationPageAccessIfLimitHasBeenReached = (props: any) => {
   );
 
   if (!canAccessToRequestCreationPage) {
-    return <Navigate to="/requests" replace />;
+    return <Navigate to={REQUESTS_ROUTE} replace />;
   }
   return children;
 };
