@@ -11,11 +11,16 @@ const sharedProperties = StyleSheet.create({
     height: variables.$heightXL,
     borderRadius: variables.$borderRadiusSM,
     textAlign: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
 });
 
 export const components = StyleSheet.create({
+  h1: { fontSize: variables.$fontXL },
+  h2: { fontSize: variables.$fontLG },
+  p: {
+    marginBottom: variables.$marginMD,
+  },
   bold: {
     ...sharedProperties.bold,
   },
@@ -24,7 +29,8 @@ export const components = StyleSheet.create({
   },
   separator: {
     color: variables.$neutral800,
-    margin: `${variables.$marginXL} 0`,
+    marginVertical: variables.$marginXL,
+    marginHorizontal : 0
   },
   btn: {
     ...sharedProperties.btn,
@@ -46,7 +52,7 @@ export const components = StyleSheet.create({
   },
   btnTextPrimary: {
     color: "white",
-    fontSize: 16,
+    fontSize: variables.$fontSM,
   },
   btnSecondary: {
     backgroundColor: "white",
@@ -59,7 +65,7 @@ export const components = StyleSheet.create({
   },
   btnTextSecondary: {
     color: variables.$primary800,
-    fontSize: 16,
+    fontSize: variables.$fontSM,
   },
   clickableText: {
     margin: 0,
@@ -73,7 +79,7 @@ export const components = StyleSheet.create({
     borderBottomColor: "transparent",
     borderRadius: variables.$borderRadiusRound,
     // display: "inlineBlock",
-    display: "flex",
+    // display: "flex",
     boxSizing: "borderBox",
     // animation: "rotation 1s linear infinite",
     // @keyframes rotation : {
