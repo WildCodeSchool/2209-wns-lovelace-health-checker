@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery } from "../../gql/graphql";
+import { REQUEST_CREATION_ROUTE } from "../../routes";
 import styles from "./Requests.module.scss";
 
 const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
@@ -19,7 +20,7 @@ const Requests = () => {
       CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT,
       {
         onCompleted: (data) => {
-          navigate("/request-creation");
+          navigate(REQUEST_CREATION_ROUTE);
         },
         onError: (error) => {
           toast.error(error.message, {

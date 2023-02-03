@@ -7,6 +7,7 @@ import AccountBills from "../../components/AccountBills/AccountBills";
 import AccountInformations from "../../components/AccountInformations/AccountInformations";
 import AccountPremium from "../../components/AccountPremium/AccountPremium";
 import { SignOutMutation } from "../../gql/graphql";
+import { HOMEPAGE_ROUTE } from "../../routes";
 import styles from "./Account.module.scss";
 
 const Account = ({
@@ -33,7 +34,7 @@ const Account = ({
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: "logout-success",
       });
-      navigate("/");
+      navigate(HOMEPAGE_ROUTE);
     },
   });
 

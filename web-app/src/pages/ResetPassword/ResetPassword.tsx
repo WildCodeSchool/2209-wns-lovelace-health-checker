@@ -19,6 +19,7 @@ import {
   PASSWORD_PATTERN_ERROR_MESSAGE,
   PASSWORD_PLACEHOLDER,
 } from "../../utils/form-validations";
+import { SIGN_IN_ROUTE } from "../../routes";
 
 export const RESET_PASSWORD = gql`
   mutation ResetPassword(
@@ -52,7 +53,7 @@ const ResetPassword = () => {
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: 1,
       });
-      navigate("/sign-in");
+      navigate(SIGN_IN_ROUTE);
     },
     onError: (error) => {
       if (error.message.includes("time limit has been exceeded")) {
