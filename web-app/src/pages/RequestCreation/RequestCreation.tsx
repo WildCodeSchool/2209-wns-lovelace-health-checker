@@ -77,7 +77,7 @@ type RequestCreationInputs = {
 };
 
 const RequestCreation = ({ role }: { role: string | undefined }) => {
-  const [requestIsActive, setRequestIsActive] = useState(true);
+  const [isActive, setIsActive] = useState(true);
 
   const [emailSpecificErrors, setEmailSpecificErrors] = useState([]);
   const [emailSpecificErrorsInputValue, setEmailSpecificErrorsInputValue] =
@@ -219,7 +219,7 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
       variables: {
         url: data.url,
         frequency: parseInt(data.frequency),
-        isActive: requestIsActive,
+        isActive: data.isActive === "true" ? true : false,
         allErrorsEnabledEmail:
           data.allErrorsEnabledEmail === "true" ? true : false,
         allErrorsEnabledPush:
@@ -297,7 +297,7 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
           </h2>
           <div className={`${styles.formContent}`}>
             <div className={`${styles.stateInformationMessage} mb-3`}>
-              {requestIsActive ? (
+              {isActive ? (
                 <>
                   <i
                     className={`${styles.activeStateIcon} bi bi-check-circle me-2`}
@@ -315,11 +315,32 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                 </>
               )}
             </div>
-            <div
-              className={`${styles.btn} ${styles.btnSecondary} d-flex justify-content-center align-items-center mt-3 mt`}
-              onClick={() => setRequestIsActive(!requestIsActive)}
-            >
-              {requestIsActive ? "Deactivate" : "Activate"}
+            <div className="form-check mb-2">
+              <input
+                className="form-check-input"
+                type="radio"
+                id="stateActive"
+                value="true"
+                {...register("isActive")}
+                defaultChecked
+                onClick={() => setIsActive(true)}
+              />
+              <label className="form-check-label" htmlFor="stateActive">
+                Active
+              </label>
+            </div>
+            <div className="form-check">
+              <input
+                className="form-check-input"
+                type="radio"
+                id="stateInactive"
+                value="false"
+                {...register("isActive")}
+                onClick={() => setIsActive(false)}
+              />
+              <label className="form-check-label" htmlFor="stateInactive">
+                Inactive
+              </label>
             </div>
           </div>
         </div>
