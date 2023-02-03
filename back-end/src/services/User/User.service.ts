@@ -245,4 +245,15 @@ export default class UserService extends UserRepository {
     await this.saveUser(user);
     return true;
   };
+
+  static deleteCurrentUser = async (
+    user: User,
+    currentPassword: string
+  ): Promise<Boolean> => {
+    if (!compareSync(currentPassword, user.password)) {
+      throw new Error("Incorrect current password");
+    }
+    await this.deleteUser(user);
+    return true;
+  };
 }
