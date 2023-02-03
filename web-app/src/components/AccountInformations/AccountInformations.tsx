@@ -181,10 +181,7 @@ const AccountInformations = (user: any) => {
   return (
     <>
       {showDeleteAccountModal && (
-        <DeleteAccountModal
-          onClose={() => setShowDeleteAccountModal(false)}
-          onDelete={() => console.log("delete")}
-        />
+        <DeleteAccountModal onClose={() => setShowDeleteAccountModal(false)} />
       )}
 
       <div className="mt-5 d-flex flex-wrap gap-5 gap-md-3">

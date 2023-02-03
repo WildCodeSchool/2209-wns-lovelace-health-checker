@@ -1,21 +1,9 @@
-import {
-  IsBoolean,
-  IsDate,
-  IsNotEmpty,
-  IsString,
-  MinLength,
-} from "class-validator";
-import { Field, ID, ObjectType } from "type-graphql";
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from "typeorm";
+import { IsBoolean, IsDate, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { Field, ID, ObjectType } from 'type-graphql';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-import AlertSetting from "./AlertSetting.entity";
-import User from "./User.entity";
+import AlertSetting from './AlertSetting.entity';
+import User from './User.entity';
 
 export enum Frequency {
   THIRTY_DAYS = 2592000,
@@ -69,7 +57,7 @@ export default class RequestSetting {
   @IsDate()
   updatedAt: Date;
 
-  @ManyToOne(() => User, { eager: true })
+  @ManyToOne(() => User, { eager: true, onDelete: "CASCADE" })
   user: User;
 
   @Column()
@@ -103,7 +91,7 @@ export default class RequestSetting {
   @OneToMany(
     () => AlertSetting,
     (alertSetting) => alertSetting.requestSetting,
-    { lazy: true }
+    { lazy: true, onDelete: "CASCADE" }
   )
   @Field(() => [AlertSetting])
   alerts: AlertSetting[];

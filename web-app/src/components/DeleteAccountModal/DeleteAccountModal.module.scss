@@ -22,7 +22,7 @@
       justify-content: flex-start;
       align-items: center;
       background-color: variables.$primary-800;
-      padding: 20px;
+      padding: variables.$padding-xl;
       border-top-right-radius: variables.$border-radius-md;
       border-top-left-radius: variables.$border-radius-md;
       h2 {
@@ -40,13 +40,17 @@
       cursor: pointer;
     }
     .modalBody {
-      padding: variables.$padding-lg;
+      padding: variables.$padding-xl;
       margin-top: variables.$margin-sm;
       .modalText {
         font-size: variables.$font-sm;
+        color: variables.$primary-1000;
       }
       .modalInput {
         margin-top: variables.$margin-xl;
+        .errorMessage {
+          @include errorMessage;
+        }
       }
       .modalButtons {
         display: flex;
