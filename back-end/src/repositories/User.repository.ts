@@ -47,4 +47,8 @@ export default class UserRepository {
   ): Promise<User | null> {
     return this.repository.findOneBy({ confirmationEmailToken: token });
   }
+
+  static async deleteUser(user: User): Promise<void> {
+    await this.repository.remove(user);
+  }
 }

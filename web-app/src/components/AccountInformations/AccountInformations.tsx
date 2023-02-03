@@ -1,15 +1,18 @@
-import { gql, useMutation } from '@apollo/client';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
+import { ApolloQueryResult, gql, useMutation } from "@apollo/client";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 import {
+  MyProfileQuery,
   UpdateEmailMutation,
   UpdateEmailMutationVariables,
   UpdateIdentityMutation,
   UpdateIdentityMutationVariables,
   UpdatePasswordMutation,
   UpdatePasswordMutationVariables,
-} from '../../gql/graphql';
+} from "../../gql/graphql";
+import { disablePageScroll, enablePageScroll } from "../../utils/browser-utils";
 import {
   CURRENT_PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
   EMAIL_IS_REQUIRED_ERROR_MESSAGE,
@@ -32,12 +35,27 @@ import {
   NEW_PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
   PASSWORD_CONFIRMATION_PLACEHOLDER,
   PASSWORD_PATTERN_ERROR_MESSAGE,
-} from '../../utils/form-validations';
-import { PASSWORD_REG_EXP } from '../../utils/regular-expressions';
-import FormErrorMessage from '../ErrorMessage/FormErrorMessage';
-import styles from './AccountInformations.module.scss';
+} from "../../utils/form-validations";
+import { PASSWORD_REG_EXP } from "../../utils/regular-expressions";
+import DeleteAccountModal from "../DeleteAccountModal/DeleteAccountModal";
+import FormErrorMessage from "../ErrorMessage/FormErrorMessage";
+import styles from "./AccountInformations.module.scss";
 
-const AccountInformations = (user: any) => {
+const AccountInformations = ({
+  user,
+  onDeleteSuccess,
+}: {
+  user: any;
+  onDeleteSuccess(): Promise<ApolloQueryResult<MyProfileQuery>>;
+}) => {
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+
+  if (showDeleteAccountModal) {
+    disablePageScroll();
+  } else {
+    enablePageScroll();
+  }
+
   const {
     register: registerIdentity,
     handleSubmit: handleSubmitIdentity,
@@ -176,6 +194,13 @@ const AccountInformations = (user: any) => {
 
   return (
     <>
+      {showDeleteAccountModal && (
+        <DeleteAccountModal
+          onClose={() => setShowDeleteAccountModal(false)}
+          onDeleteSuccess={onDeleteSuccess}
+        />
+      )}
+
       <div className="mt-5 d-flex flex-wrap gap-5 gap-md-3">
         <div className={`col-12 col-md-6 ${styles.formContainer}`}>
           <div className={`${styles.header}`}>
@@ -186,7 +211,7 @@ const AccountInformations = (user: any) => {
               <div className="form-floating mb-2">
                 <input
                   type="text"
-                  defaultValue={user.user.firstname}
+                  defaultValue={user.firstname}
                   className="form-control"
                   {...registerIdentity("firstname", {
                     required: FIRSTNAME_IS_REQUIRED_ERROR_MESSAGE,
@@ -211,7 +236,7 @@ const AccountInformations = (user: any) => {
               <div className="form-floating mb-2 mt-3">
                 <input
                   type="text"
-                  defaultValue={user.user.lastname}
+                  defaultValue={user.lastname}
                   className="form-control"
                   {...registerIdentity("lastname", {
                     required: LASTNAME_IS_REQUIRED_ERROR_MESSAGE,
@@ -248,7 +273,7 @@ const AccountInformations = (user: any) => {
               <div className="form-floating mb-2">
                 <input
                   type="email"
-                  defaultValue={user.user.email}
+                  defaultValue={user.email}
                   className="form-control"
                   {...registerEmail("email", {
                     required: EMAIL_IS_REQUIRED_ERROR_MESSAGE,
@@ -380,7 +405,9 @@ const AccountInformations = (user: any) => {
               loose all your requests. If you are Premium member, your plan will
               be canceled. Please be certain.
             </p>
-            <button className={`${styles.dangerButton}`}>
+            <button
+              className={`${styles.dangerButton}`}
+              onClick={() => setShowDeleteAccountModal(true)}>
               Delete your account
             </button>
           </div>
