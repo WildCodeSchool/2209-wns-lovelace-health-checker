@@ -5,8 +5,8 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: variables.$width-100;
+  height: variables.$height-100;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 100;
   .modalContainer {
@@ -28,16 +28,13 @@
       h2 {
         color: white;
         margin: 0;
-        font-size: variables.$font-sm;
+        font-size: variables.$font-md;
+        font-weight: variables.$font-weight-500;
       }
     }
-    .modalTitle {
-      font-size: 20px;
-      font-weight: bold;
-    }
     .modalCloseButton {
-      font-size: 20px;
-      cursor: pointer;
+      font-size: variables.$font-md;
+      @include clickable;
     }
     .modalBody {
       padding: variables.$padding-xl;

@@ -15,25 +15,25 @@ import AccountConfirmation from "./pages/AccountConfirmation/AccountConfirmation
 import EmailConfirmation from "./pages/EmailConfirmation/EmailConfirmation";
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import AlreadyLoggedIn from "./pages/Guards/AlreadyLoggedIn";
+import PreventRequestCreationPageAccessIfLimitHasBeenReached from "./pages/Guards/PreventRequestCreationPageAccessIfLimitHasBeenReached";
 import Protected from "./pages/Guards/Protected";
 import Home from "./pages/Home/Home";
 import NotFound from "./pages/NotFound/NotFound";
 import Premium from "./pages/Premium/Premium";
+import RequestCreation from "./pages/RequestCreation/RequestCreation";
 import Requests from "./pages/Requests/Requests";
 import ResetPassword from "./pages/ResetPassword/ResetPassword";
 import SignIn from "./pages/SignIn/SignIn";
 import SignUp from "./pages/SignUp/SignUp";
 import Terms from "./pages/Terms/Terms";
-import PreventRequestCreationPageAccessIfLimitHasBeenReached from "./pages/Guards/PreventRequestCreationPageAccessIfLimitHasBeenReached";
-import RequestCreation from "./pages/RequestCreation/RequestCreation";
 import {
   ACCOUNT_CONFIRMATION_WITH_TOKEN_ROUTE,
   ACCOUNT_ROUTE,
   FORGOT_PASSWORD_ROUTE,
   HOMEPAGE_ROUTE,
   PREMIUM_ROUTE,
-  REQUESTS_ROUTE,
   REQUEST_CREATION_ROUTE,
+  REQUESTS_ROUTE,
   RESET_EMAIL_WITH_TOKEN_ROUTE,
   RESET_PASSWORD_WITH_TOKEN_ROUTE,
   SIGN_IN_ROUTE,
@@ -41,18 +41,19 @@ import {
   TERMS_ROUTE,
 } from "./routes";
 
-function App() {
-  const MY_PROFILE = gql`
-    query MyProfile {
-      myProfile {
-        id
-        firstname
-        lastname
-        role
-        email
-      }
+export const MY_PROFILE = gql`
+  query MyProfile {
+    myProfile {
+      id
+      firstname
+      lastname
+      role
+      email
     }
-  `;
+  }
+`;
+
+function App() {
   const [isLogged, setIsLogged] = useState(false);
 
   const { loading, refetch, data } = useQuery<MyProfileQuery>(MY_PROFILE, {
@@ -112,14 +113,7 @@ function App() {
               </PreventRequestCreationPageAccessIfLimitHasBeenReached>
             }
           />
-          <Route
-            path={PREMIUM_ROUTE}
-            element={
-              <Protected isLoggedIn={isLogged} loading={loading}>
-                <Premium />
-              </Protected>
-            }
-          />
+          <Route path={PREMIUM_ROUTE} element={<Premium />} />
 
           <Route
             path={ACCOUNT_ROUTE}
@@ -127,6 +121,7 @@ function App() {
               <Protected isLoggedIn={isLogged} loading={loading}>
                 <Account
                   onLogoutSuccess={refreshMyProfile}
+                  onDeleteSuccess={refetch}
                   user={data?.myProfile}
                 />
               </Protected>

@@ -1,16 +1,18 @@
-import { gql, useMutation } from '@apollo/client';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
+import { ApolloQueryResult, gql, useMutation } from "@apollo/client";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 import {
+  MyProfileQuery,
   UpdateEmailMutation,
   UpdateEmailMutationVariables,
   UpdateIdentityMutation,
   UpdateIdentityMutationVariables,
   UpdatePasswordMutation,
   UpdatePasswordMutationVariables,
-} from '../../gql/graphql';
+} from "../../gql/graphql";
+import { disablePageScroll, enablePageScroll } from "../../utils/browser-utils";
 import {
   CURRENT_PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
   EMAIL_IS_REQUIRED_ERROR_MESSAGE,
@@ -33,14 +35,26 @@ import {
   NEW_PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
   PASSWORD_CONFIRMATION_PLACEHOLDER,
   PASSWORD_PATTERN_ERROR_MESSAGE,
-} from '../../utils/form-validations';
-import { PASSWORD_REG_EXP } from '../../utils/regular-expressions';
-import DeleteAccountModal from '../DeleteAccountModal/DeleteAccountModal';
-import FormErrorMessage from '../ErrorMessage/FormErrorMessage';
-import styles from './AccountInformations.module.scss';
+} from "../../utils/form-validations";
+import { PASSWORD_REG_EXP } from "../../utils/regular-expressions";
+import DeleteAccountModal from "../DeleteAccountModal/DeleteAccountModal";
+import FormErrorMessage from "../ErrorMessage/FormErrorMessage";
+import styles from "./AccountInformations.module.scss";
 
-const AccountInformations = (user: any) => {
+const AccountInformations = ({
+  user,
+  onDeleteSuccess,
+}: {
+  user: any;
+  onDeleteSuccess(): Promise<ApolloQueryResult<MyProfileQuery>>;
+}) => {
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+
+  if (showDeleteAccountModal) {
+    disablePageScroll();
+  } else {
+    enablePageScroll();
+  }
 
   const {
     register: registerIdentity,
@@ -181,7 +195,10 @@ const AccountInformations = (user: any) => {
   return (
     <>
       {showDeleteAccountModal && (
-        <DeleteAccountModal onClose={() => setShowDeleteAccountModal(false)} />
+        <DeleteAccountModal
+          onClose={() => setShowDeleteAccountModal(false)}
+          onDeleteSuccess={onDeleteSuccess}
+        />
       )}
 
       <div className="mt-5 d-flex flex-wrap gap-5 gap-md-3">
@@ -194,7 +211,7 @@ const AccountInformations = (user: any) => {
               <div className="form-floating mb-2">
                 <input
                   type="text"
-                  defaultValue={user.user.firstname}
+                  defaultValue={user.firstname}
                   className="form-control"
                   {...registerIdentity("firstname", {
                     required: FIRSTNAME_IS_REQUIRED_ERROR_MESSAGE,
@@ -219,7 +236,7 @@ const AccountInformations = (user: any) => {
               <div className="form-floating mb-2 mt-3">
                 <input
                   type="text"
-                  defaultValue={user.user.lastname}
+                  defaultValue={user.lastname}
                   className="form-control"
                   {...registerIdentity("lastname", {
                     required: LASTNAME_IS_REQUIRED_ERROR_MESSAGE,
@@ -256,7 +273,7 @@ const AccountInformations = (user: any) => {
               <div className="form-floating mb-2">
                 <input
                   type="email"
-                  defaultValue={user.user.email}
+                  defaultValue={user.email}
                   className="form-control"
                   {...registerEmail("email", {
                     required: EMAIL_IS_REQUIRED_ERROR_MESSAGE,

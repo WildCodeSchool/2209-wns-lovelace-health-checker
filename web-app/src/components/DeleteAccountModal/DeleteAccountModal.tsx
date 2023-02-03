@@ -1,15 +1,24 @@
-import { gql, useMutation } from '@apollo/client';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
+import { ApolloQueryResult, gql, useMutation } from "@apollo/client";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-import { DeleteUserMutation, DeleteUserMutationVariables } from '../../gql/graphql';
-import { CURRENT_PASSWORD_IS_REQUIRED_ERROR_MESSAGE, PASSWORD_PATTERN_ERROR_MESSAGE } from '../../utils/form-validations';
-import { PASSWORD_REG_EXP } from '../../utils/regular-expressions';
-import FormErrorMessage from '../ErrorMessage/FormErrorMessage';
-import styles from './DeleteAccountModal.module.scss';
+import {
+  DeleteUserMutation,
+  DeleteUserMutationVariables,
+  MyProfileQuery,
+} from "../../gql/graphql";
+import {
+  CURRENT_PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
+  PASSWORD_PATTERN_ERROR_MESSAGE,
+} from "../../utils/form-validations";
+import { PASSWORD_REG_EXP } from "../../utils/regular-expressions";
+import FormErrorMessage from "../ErrorMessage/FormErrorMessage";
+import styles from "./DeleteAccountModal.module.scss";
 
 type DeleteAccountModalProps = {
   onClose: () => void;
+  onDeleteSuccess: () => Promise<ApolloQueryResult<MyProfileQuery>>;
 };
 
 const DELETE_ACCOUNT = gql`
@@ -19,6 +28,15 @@ const DELETE_ACCOUNT = gql`
 `;
 
 const DeleteAccountModal = (props: DeleteAccountModalProps) => {
+  const navigate = useNavigate();
+
+  const onDelete = async () => {
+    try {
+      navigate("/");
+      await props.onDeleteSuccess();
+    } catch (error) {}
+  };
+
   const {
     register: registerPassword,
     handleSubmit: handleSubmitPassword,
@@ -31,16 +49,16 @@ const DeleteAccountModal = (props: DeleteAccountModalProps) => {
     DeleteUserMutation,
     DeleteUserMutationVariables
   >(DELETE_ACCOUNT, {
-    onCompleted: (data) => {
-      console.log(data);
-      if (data.deleteUser)
+    onCompleted: async (data) => {
+      if (data.deleteUser) {
+        await onDelete();
         toast.success("Account deleted successfully", {
           position: toast.POSITION.BOTTOM_RIGHT,
           toastId: "deleteAccountSuccess",
         });
+      }
     },
     onError: (error) => {
-      console.log(error);
       toast.error(error.message, {
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: "deleteAccountError",
@@ -60,7 +78,7 @@ const DeleteAccountModal = (props: DeleteAccountModalProps) => {
     <div className={`${styles.fullPage}`}>
       <div className={`${styles.modalContainer}`}>
         <div className={`${styles.modalHeader}`}>
-          <h2 className={`${styles.modalTitle}`}>Delete Account</h2>
+          <h2>Delete Account</h2>
         </div>
         <div className={`${styles.modalBody}`}>
           <p className={`${styles.modalText}`}>
