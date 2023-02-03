@@ -14,7 +14,7 @@ export default class Session {
   })
   id: string;
 
-  @ManyToOne(() => User, { eager: true })
+  @ManyToOne(() => User, { eager: true, onDelete: "CASCADE" })
   user: User;
 
   @BeforeInsert()

@@ -7,6 +7,7 @@ import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
 
 import HomepageRequestTable from "../../components/HomepageRequestTable/HomepageRequestTable";
 import { CheckUrlMutation, CheckUrlMutationVariables } from "../../gql/graphql";
+import { PREMIUM_ROUTE, SIGN_UP_ROUTE } from "../../routes";
 import {
   getErrorMessage,
   SERVER_IS_KO_ERROR_MESSAGE,
@@ -189,7 +190,7 @@ const Home = () => {
 
           <Link
             className="m-0 col-12 col-md-6 d-flex justify-content-center"
-            to="/sign-up"
+            to={SIGN_UP_ROUTE}
           >
             <button className={`${styles.btn} ${styles.btnPrimary}`}>
               Create your free account
@@ -208,7 +209,7 @@ const Home = () => {
           </div>
           <Link
             className="m-0 col-12 col-md-6 d-flex justify-content-center"
-            to="/premium"
+            to={PREMIUM_ROUTE}
           >
             <button className={`${styles.btn} ${styles.btnSecondary}`}>
               Discover Premium

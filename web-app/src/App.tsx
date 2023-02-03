@@ -15,30 +15,45 @@ import AccountConfirmation from "./pages/AccountConfirmation/AccountConfirmation
 import EmailConfirmation from "./pages/EmailConfirmation/EmailConfirmation";
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import AlreadyLoggedIn from "./pages/Guards/AlreadyLoggedIn";
+import PreventRequestCreationPageAccessIfLimitHasBeenReached from "./pages/Guards/PreventRequestCreationPageAccessIfLimitHasBeenReached";
 import Protected from "./pages/Guards/Protected";
 import Home from "./pages/Home/Home";
 import NotFound from "./pages/NotFound/NotFound";
 import Premium from "./pages/Premium/Premium";
+import RequestCreation from "./pages/RequestCreation/RequestCreation";
 import Requests from "./pages/Requests/Requests";
 import ResetPassword from "./pages/ResetPassword/ResetPassword";
 import SignIn from "./pages/SignIn/SignIn";
 import SignUp from "./pages/SignUp/SignUp";
 import Terms from "./pages/Terms/Terms";
-import PreventRequestCreationPageAccessIfLimitHasBeenReached from "./pages/Guards/PreventRequestCreationPageAccessIfLimitHasBeenReached";
-import RequestCreation from "./pages/RequestCreation/RequestCreation";
+import {
+  ACCOUNT_CONFIRMATION_WITH_TOKEN_ROUTE,
+  ACCOUNT_ROUTE,
+  FORGOT_PASSWORD_ROUTE,
+  HOMEPAGE_ROUTE,
+  PREMIUM_ROUTE,
+  REQUEST_CREATION_ROUTE,
+  REQUESTS_ROUTE,
+  RESET_EMAIL_WITH_TOKEN_ROUTE,
+  RESET_PASSWORD_WITH_TOKEN_ROUTE,
+  SIGN_IN_ROUTE,
+  SIGN_UP_ROUTE,
+  TERMS_ROUTE,
+} from "./routes";
+
+export const MY_PROFILE = gql`
+  query MyProfile {
+    myProfile {
+      id
+      firstname
+      lastname
+      role
+      email
+    }
+  }
+`;
 
 function App() {
-  const MY_PROFILE = gql`
-    query MyProfile {
-      myProfile {
-        id
-        firstname
-        lastname
-        role
-        email
-      }
-    }
-  `;
   const [isLogged, setIsLogged] = useState(false);
 
   const { loading, refetch, data } = useQuery<MyProfileQuery>(MY_PROFILE, {
@@ -65,9 +80,9 @@ function App() {
         <NavLogo />
         <Navbar logged={isLogged} />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path={HOMEPAGE_ROUTE} element={<Home />} />
           <Route
-            path="/sign-up"
+            path={SIGN_UP_ROUTE}
             element={
               <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <SignUp />
@@ -75,7 +90,7 @@ function App() {
             }
           />
           <Route
-            path="/sign-in"
+            path={SIGN_IN_ROUTE}
             element={
               <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <SignIn onSuccess={refetch} />
@@ -83,7 +98,7 @@ function App() {
             }
           />
           <Route
-            path="/requests"
+            path={REQUESTS_ROUTE}
             element={
               <Protected isLoggedIn={isLogged} loading={loading}>
                 <Requests />
@@ -91,36 +106,30 @@ function App() {
             }
           />
           <Route
-            path="/request-creation"
+            path={REQUEST_CREATION_ROUTE}
             element={
               <PreventRequestCreationPageAccessIfLimitHasBeenReached>
                 <RequestCreation role={data?.myProfile.role} />
               </PreventRequestCreationPageAccessIfLimitHasBeenReached>
             }
           />
-          <Route
-            path="/premium"
-            element={
-              <Protected isLoggedIn={isLogged} loading={loading}>
-                <Premium />
-              </Protected>
-            }
-          />
+          <Route path={PREMIUM_ROUTE} element={<Premium />} />
 
           <Route
-            path="/account"
+            path={ACCOUNT_ROUTE}
             element={
               <Protected isLoggedIn={isLogged} loading={loading}>
                 <Account
                   onLogoutSuccess={refreshMyProfile}
+                  onDeleteSuccess={refetch}
                   user={data?.myProfile}
                 />
               </Protected>
             }
           />
-          <Route path="/terms" element={<Terms />} />
+          <Route path={TERMS_ROUTE} element={<Terms />} />
           <Route
-            path="/forgot-password"
+            path={FORGOT_PASSWORD_ROUTE}
             element={
               <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <ForgotPassword />
@@ -128,7 +137,7 @@ function App() {
             }
           />
           <Route
-            path="/reset-password/:resetPasswordToken"
+            path={RESET_PASSWORD_WITH_TOKEN_ROUTE}
             element={
               <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <ResetPassword />
@@ -136,7 +145,7 @@ function App() {
             }
           />
           <Route
-            path="/account-confirmation/:confirmationToken"
+            path={ACCOUNT_CONFIRMATION_WITH_TOKEN_ROUTE}
             element={
               <AlreadyLoggedIn isLoggedIn={isLogged}>
                 <AccountConfirmation onSuccess={refetch} />
@@ -144,7 +153,7 @@ function App() {
             }
           />
           <Route
-            path="/reset-email/:confirmationToken"
+            path={RESET_EMAIL_WITH_TOKEN_ROUTE}
             element={<EmailConfirmation onSuccess={refetch} />}
           />
           {/* Always put the wildcard on last position */}

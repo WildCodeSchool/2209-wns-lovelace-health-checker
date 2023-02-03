@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { HOMEPAGE_ROUTE } from "../../routes";
 import styles from "./NotFound.module.scss";
 
 const NotFound = () => {
@@ -10,7 +11,7 @@ const NotFound = () => {
           We can't seem to find the page you're looking for. Try going back to
           the previous page or click the button below to go back to homepage.
         </p>
-        <Link to="/">
+        <Link to={HOMEPAGE_ROUTE}>
           <button className={`${styles.btn} ${styles.btnPrimary}`}>
             Go to homepage
           </button>

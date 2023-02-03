@@ -127,4 +127,13 @@ export default class UserResolver {
   ): Promise<Boolean> {
     return UserService.confirmEmail(confirmationToken);
   }
+
+  @Mutation(() => Boolean)
+  deleteUser(
+    @Arg("currentPassword") currentPassword: string,
+    @Ctx() context: GlobalContext
+  ): Promise<Boolean> {
+    if (!context.user) throw Error("You're not authenticated");
+    return UserService.deleteCurrentUser(context.user, currentPassword);
+  }
 }

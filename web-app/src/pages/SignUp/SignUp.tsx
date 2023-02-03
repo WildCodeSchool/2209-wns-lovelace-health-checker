@@ -1,12 +1,13 @@
-import { gql, useMutation } from '@apollo/client';
-import { useRef, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { gql, useMutation } from "@apollo/client";
+import { useRef, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
-import FormErrorMessage from '../../components/ErrorMessage/FormErrorMessage';
-import { SignUpMutation, SignUpMutationVariables } from '../../gql/graphql';
-import { SERVER_IS_KO_ERROR_MESSAGE } from '../../utils/error-messages';
+import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
+import { SignUpMutation, SignUpMutationVariables } from "../../gql/graphql";
+import { SIGN_IN_ROUTE, TERMS_ROUTE } from "../../routes";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
 import {
   EMAIL_IS_REQUIRED_ERROR_MESSAGE,
   EMAIL_MAX_LENGTH,
@@ -32,9 +33,12 @@ import {
   PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
   PASSWORD_PATTERN_ERROR_MESSAGE,
   PASSWORD_PLACEHOLDER,
-} from '../../utils/form-validations';
-import { FIRSTNAME_AND_LASTNAME_REG_EXP, PASSWORD_REG_EXP } from '../../utils/regular-expressions';
-import styles from './SignUp.module.scss';
+} from "../../utils/form-validations";
+import {
+  FIRSTNAME_AND_LASTNAME_REG_EXP,
+  PASSWORD_REG_EXP,
+} from "../../utils/regular-expressions";
+import styles from "./SignUp.module.scss";
 
 export const SIGN_UP = gql`
   mutation SignUp(
@@ -134,7 +138,8 @@ const SignUp = () => {
         <div className="text-center">
           <i
             data-testid="successIcon"
-            className={`bi bi-check-circle ${styles.success}`}></i>
+            className={`bi bi-check-circle ${styles.success}`}
+          ></i>
           <p>
             Your account has been created successfully. Please, check your inbox
             to confirm your account and start using Health Check !
@@ -145,7 +150,8 @@ const SignUp = () => {
           <form className={styles.signUpForm} onSubmit={handleSubmit(onSubmit)}>
             {loading ? (
               <div
-                className={`${styles.loaderContainer} d-flex justify-content-center align-items-center`}>
+                className={`${styles.loaderContainer} d-flex justify-content-center align-items-center`}
+              >
                 <div className={styles.loader} role="status"></div>
               </div>
             ) : (
@@ -252,12 +258,14 @@ const SignUp = () => {
                   <i
                     data-testid="passwordEye"
                     onClick={() => setPasswordInputType("text")}
-                    className={`bi bi-eye ${styles.eye}`}></i>
+                    className={`bi bi-eye ${styles.eye}`}
+                  ></i>
                 ) : (
                   <i
                     data-testid="passwordEyeSlash"
                     onClick={() => setPasswordInputType("password")}
-                    className={`bi bi-eye-slash ${styles.eye}`}></i>
+                    className={`bi bi-eye-slash ${styles.eye}`}
+                  ></i>
                 )}
               </div>
               <label htmlFor="password">Password</label>
@@ -285,11 +293,13 @@ const SignUp = () => {
                 {passwordConfirmationInputType === "password" ? (
                   <i
                     onClick={() => setConfirmationPasswordInputType("text")}
-                    className={`bi bi-eye ${styles.eye}`}></i>
+                    className={`bi bi-eye ${styles.eye}`}
+                  ></i>
                 ) : (
                   <i
                     onClick={() => setConfirmationPasswordInputType("password")}
-                    className={`bi bi-eye-slash ${styles.eye}`}></i>
+                    className={`bi bi-eye-slash ${styles.eye}`}
+                  ></i>
                 )}
               </div>
 
@@ -312,7 +322,7 @@ const SignUp = () => {
               />
               <label className="form-check-label" htmlFor="agreedTerms">
                 I agree to the{" "}
-                <Link className={styles.navlink} to="/terms">
+                <Link className={styles.navlink} to={TERMS_ROUTE}>
                   terms and conditions
                 </Link>
               </label>
@@ -323,7 +333,8 @@ const SignUp = () => {
 
             <button
               type="submit"
-              className={`${styles.btn} ${styles.btnPrimary} mt-4`}>
+              className={`${styles.btn} ${styles.btnPrimary} mt-4`}
+            >
               Create your account
             </button>
           </form>
@@ -337,7 +348,7 @@ const SignUp = () => {
           <hr className={styles.separator} />
           <p className={styles.alreadyRegistered}>
             Already registered ?{" "}
-            <Link className={styles.navlink} to="/sign-in">
+            <Link className={styles.navlink} to={SIGN_IN_ROUTE}>
               Sign in
             </Link>
           </p>
