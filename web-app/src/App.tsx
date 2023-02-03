@@ -1,29 +1,31 @@
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
-import { gql, useQuery } from '@apollo/client';
-import { useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
+import { gql, useQuery } from "@apollo/client";
+import { useState } from "react";
+import { Route, Routes } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
 
-import styles from './App.module.scss';
-import Footer from './components/Footer/Footer';
-import Navbar from './components/Navbar/Navbar';
-import NavLogo from './components/NavLogo/NavLogo';
-import { MyProfileQuery } from './gql/graphql';
-import Account from './pages/Account/Account';
-import AccountConfirmation from './pages/AccountConfirmation/AccountConfirmation';
-import EmailConfirmation from './pages/EmailConfirmation/EmailConfirmation';
-import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
-import AlreadyLoggedIn from './pages/Guards/AlreadyLoggedIn';
-import Protected from './pages/Guards/Protected';
-import Home from './pages/Home/Home';
-import NotFound from './pages/NotFound/NotFound';
-import Premium from './pages/Premium/Premium';
-import Requests from './pages/Requests/Requests';
-import ResetPassword from './pages/ResetPassword/ResetPassword';
-import SignIn from './pages/SignIn/SignIn';
-import SignUp from './pages/SignUp/SignUp';
-import Terms from './pages/Terms/Terms';
+import styles from "./App.module.scss";
+import Footer from "./components/Footer/Footer";
+import Navbar from "./components/Navbar/Navbar";
+import NavLogo from "./components/NavLogo/NavLogo";
+import { MyProfileQuery } from "./gql/graphql";
+import Account from "./pages/Account/Account";
+import AccountConfirmation from "./pages/AccountConfirmation/AccountConfirmation";
+import EmailConfirmation from "./pages/EmailConfirmation/EmailConfirmation";
+import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
+import AlreadyLoggedIn from "./pages/Guards/AlreadyLoggedIn";
+import Protected from "./pages/Guards/Protected";
+import Home from "./pages/Home/Home";
+import NotFound from "./pages/NotFound/NotFound";
+import Premium from "./pages/Premium/Premium";
+import Requests from "./pages/Requests/Requests";
+import ResetPassword from "./pages/ResetPassword/ResetPassword";
+import SignIn from "./pages/SignIn/SignIn";
+import SignUp from "./pages/SignUp/SignUp";
+import Terms from "./pages/Terms/Terms";
+import PreventRequestCreationPageAccessIfLimitHasBeenReached from "./pages/Guards/PreventRequestCreationPageAccessIfLimitHasBeenReached";
+import RequestCreation from "./pages/RequestCreation/RequestCreation";
 
 function App() {
   const MY_PROFILE = gql`
@@ -86,6 +88,14 @@ function App() {
               <Protected isLoggedIn={isLogged} loading={loading}>
                 <Requests />
               </Protected>
+            }
+          />
+          <Route
+            path="/request-creation"
+            element={
+              <PreventRequestCreationPageAccessIfLimitHasBeenReached>
+                <RequestCreation role={data?.myProfile.role} />
+              </PreventRequestCreationPageAccessIfLimitHasBeenReached>
             }
           />
           <Route

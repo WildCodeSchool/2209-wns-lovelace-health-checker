@@ -1,7 +1,8 @@
 import {
-  ArrayNotEmpty,
+  ArrayUnique,
   IsArray,
   IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   Matches,
@@ -31,6 +32,7 @@ export class CreateRequestSettingArgs {
   @Field()
   @IsNumber()
   @IsNotEmpty()
+  @IsEnum(Frequency)
   frequency: Frequency;
 
   @Field({ nullable: true })
@@ -49,6 +51,11 @@ export class CreateRequestSettingArgs {
   @Field()
   @IsBoolean()
   @IsNotEmpty()
+  isActive: boolean;
+
+  @Field()
+  @IsBoolean()
+  @IsNotEmpty()
   allErrorsEnabledEmail: boolean;
 
   @Field()
@@ -58,11 +65,11 @@ export class CreateRequestSettingArgs {
 
   @Field(() => [Number], { nullable: true })
   @IsArray()
-  @ArrayNotEmpty()
+  @ArrayUnique()
   customEmailErrors?: number[];
 
   @Field(() => [Number], { nullable: true })
   @IsArray()
-  @ArrayNotEmpty()
+  @ArrayUnique()
   customPushErrors?: number[];
 }

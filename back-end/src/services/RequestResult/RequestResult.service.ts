@@ -30,7 +30,8 @@ export default class RequestResultService extends RequestResultRepository {
     const dummyRequestSetting = new RequestSetting(
       new User("", "", "", ""),
       url,
-      0
+      0,
+      false
     );
     try {
       const response = await this.fetchWithTimeout(new URL(url), timeout);
