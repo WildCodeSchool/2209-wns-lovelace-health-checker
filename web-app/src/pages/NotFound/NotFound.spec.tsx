@@ -2,6 +2,7 @@ import { MockedProvider } from "@apollo/client/testing";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { createMemoryHistory, MemoryHistory } from "history";
 import { MemoryRouter, Router } from "react-router-dom";
+import { HOMEPAGE_ROUTE } from "../../routes";
 import NotFound from "./NotFound";
 
 const renderNotFound = (mock?: any) => {
@@ -40,7 +41,7 @@ describe("NotFound", () => {
     renderNotFoundWithHistory(history);
     fireEvent.click(screen.getByRole("button", { name: "Go to homepage" }));
     await waitFor(() => {
-      expect(history.location.pathname).toBe("/");
+      expect(history.location.pathname).toBe(HOMEPAGE_ROUTE);
     });
   });
 });

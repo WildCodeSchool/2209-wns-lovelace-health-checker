@@ -25,6 +25,7 @@ import {
   URL_PATTERN_ERROR_MESSAGE,
   URL_PLACEHOLDER,
 } from "../../utils/form-validations";
+import { REQUESTS_ROUTE } from "../../routes";
 
 export const CREATE_REQUEST = gql`
   mutation CreateRequestSetting(
@@ -153,41 +154,53 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: 100,
       });
-      navigate("/requests");
+      navigate(REQUESTS_ROUTE);
     },
     onError: (error) => {
       switch (error.message) {
+        case "This URL already exists":
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 2,
+          });
+          break;
+        case "This name already exists":
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 3,
+          });
+          break;
         case "Argument Validation Error":
           toast.error(
             "Your form contains one or more errors. Please check your input values",
             {
               position: toast.POSITION.BOTTOM_RIGHT,
-              toastId: 2,
+              toastId: 4,
             }
           );
           break;
         case "This frequency is only useable by Premium users":
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
-            toastId: 3,
+            toastId: 5,
           });
           break;
         case "Non Premium users can't use custom error alerts":
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
-            toastId: 4,
+            toastId: 6,
           });
           break;
         case "Headers format is incorrect":
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
-            toastId: 5,
+            toastId: 7,
           });
           break;
         default:
           toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
             position: toast.POSITION.BOTTOM_RIGHT,
-            toastId: 6,
+            toastId: 8,
           });
       }
     },
@@ -760,7 +773,7 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
         <div className={`col-12 col-md-6 ${styles.formContainer}`}>
           <button
             type="reset"
-            onClick={() => navigate("/requests")}
+            onClick={() => navigate(REQUESTS_ROUTE)}
             className={`${styles.btn} ${styles.btnSecondary} my-md-4`}
           >
             Cancel
