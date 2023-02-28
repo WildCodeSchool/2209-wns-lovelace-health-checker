@@ -1,8 +1,8 @@
-import { Repository } from 'typeorm';
+import { Repository } from "typeorm";
 
-import { getRepository } from '../database/utils';
-import User from '../entities/User.entity';
-import SessionRepository from './Session.repository';
+import { getRepository } from "../database/utils";
+import User from "../entities/User.entity";
+import SessionRepository from "./Session.repository";
 
 export default class UserRepository {
   static repository: Repository<User>;
@@ -51,4 +51,14 @@ export default class UserRepository {
   static async deleteUser(user: User): Promise<void> {
     await this.repository.remove(user);
   }
+
+  static getAllByEmailAwaitingConfirmation = async (
+    email: string
+  ): Promise<User[]> => {
+    return this.repository.find({
+      where: {
+        emailAwaitingConfirmation: email,
+      },
+    });
+  };
 }

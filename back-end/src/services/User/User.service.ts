@@ -1,17 +1,17 @@
-import { ExpressContext } from 'apollo-server-express';
-import { compareSync, hashSync } from 'bcryptjs';
-import { randomBytes } from 'crypto';
+import { ExpressContext } from "apollo-server-express";
+import { compareSync, hashSync } from "bcryptjs";
+import { randomBytes } from "crypto";
 
-import Session from '../../entities/Session.entity';
-import User, { Status } from '../../entities/User.entity';
+import Session from "../../entities/Session.entity";
+import User, { Status } from "../../entities/User.entity";
 import {
   sendMessageOnAccountCreationEmailQueue,
   sendMessageOnResetEmailQueue,
   sendMessageOnResetPasswordEmailQueue,
-} from '../../rabbitmq/providers';
-import UserRepository from '../../repositories/User.repository';
-import { getSessionIdInCookie } from '../../utils/http-cookies';
-import SessionService from '../Session/Session.service';
+} from "../../rabbitmq/providers";
+import UserRepository from "../../repositories/User.repository";
+import { getSessionIdInCookie } from "../../utils/http-cookies";
+import SessionService from "../Session/Session.service";
 
 export default class UserService extends UserRepository {
   static async createUser(
@@ -20,10 +20,22 @@ export default class UserService extends UserRepository {
     email: string,
     password: string
   ): Promise<User> {
-    const user = new User(firstname, lastname, email, hashSync(password));
-
     const userWithDesiredEmail = await UserRepository.findByEmail(email);
     if (userWithDesiredEmail) throw Error("This email is already used");
+
+    const user = new User(firstname, lastname, email, hashSync(password));
+
+    const usersWithSameEmail = await this.getAllByEmailAwaitingConfirmation(
+      email
+    );
+    if (usersWithSameEmail.length) {
+      for (const user of usersWithSameEmail) {
+        user.emailAwaitingConfirmation = null;
+        user.confirmationEmailToken = null;
+        user.confirmationEmailCreatedAt = null;
+        await this.saveUser(user);
+      }
+    }
 
     user.accountConfirmationToken = randomBytes(32).toString("hex");
     user.accountConfirmationTokenCreatedAt = new Date();
@@ -55,13 +67,13 @@ export default class UserService extends UserRepository {
     return message;
   }
 
-  static buildResetPasswordMessageToQueue = (user: User) => {
+  static buildResetPasswordMessageToQueue = async (user: User) => {
     const message = {
       firstname: user.firstname,
       email: user.email,
       resetPasswordToken: user.resetPasswordToken,
     };
-    sendMessageOnResetPasswordEmailQueue(message);
+    await sendMessageOnResetPasswordEmailQueue(message);
     return message;
   };
 
@@ -215,13 +227,13 @@ export default class UserService extends UserRepository {
     return "Your request has been processed successfully. Please, check your inbox to confirm your email !";
   };
 
-  static buildResetEmailMessageToQueue = (user: User) => {
+  static buildResetEmailMessageToQueue = async (user: User) => {
     const message = {
       firstname: user.firstname,
       email: user.emailAwaitingConfirmation,
       resetEmailToken: user.confirmationEmailToken,
     };
-    sendMessageOnResetEmailQueue(message);
+    await sendMessageOnResetEmailQueue(message);
     return message;
   };
 
@@ -242,7 +254,20 @@ export default class UserService extends UserRepository {
     user.confirmationEmailToken = null;
     user.confirmationEmailCreatedAt = null;
     user.updatedAt = new Date();
-    await this.saveUser(user);
+    const savedUser = await this.saveUser(user);
+
+    const usersWithSameEmail = await this.getAllByEmailAwaitingConfirmation(
+      savedUser.email
+    );
+
+    if (usersWithSameEmail.length) {
+      for (const user of usersWithSameEmail) {
+        user.emailAwaitingConfirmation = null;
+        user.confirmationEmailToken = null;
+        user.confirmationEmailCreatedAt = null;
+        await this.saveUser(user);
+      }
+    }
     return true;
   };
 
