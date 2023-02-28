@@ -11,7 +11,7 @@ import {
 } from "../../gql/graphql";
 import { Frequency } from "../../utils/request-frequency.enum";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { URL_REG_EXP } from "../../utils/regular-expressions";
 import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
 import {
@@ -129,12 +129,35 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
     }
   }, [pushSpecificErrors, pushSpecificErrorRadioIsChecked]);
 
+  let { requestId } = useParams();
+
+  useEffect(() => {
+    if (requestId) {
+      /* TODO : if requestId exists in URL (because it's an request update and not request creation), we need to get request values from existing request and use them to set defaultValues in useForm */
+      setIsActive(false); // Pass existing request's isActive value
+    }
+  }, [requestId]);
+
+  /* TODO : if requestId, remove redirection to /requests */
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     control,
   } = useForm<RequestCreationInputs>({
+    defaultValues: {
+      url: requestId ? "https://effired.fr" : "",
+      name: requestId ? "Effired" : "",
+      headers: requestId
+        ? [
+            {
+              property: "content-type",
+              value: "application/json",
+            },
+          ]
+        : [],
+    },
     criteriaMode: "all",
   });
 
@@ -233,10 +256,15 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
   };
 
   return (
-    <div className={`${styles.contentContainer}`}>
-      <h1 className={`${styles.pageTitle}`}>Request creation</h1>
+    <div className={`${styles.contentContainer} ${requestId ? "pt-0" : ""}`}>
+      {requestId ? (
+        <></>
+      ) : (
+        <h1 className={`${styles.pageTitle}`}>Request creation</h1>
+      )}
+
       <form
-        className="mt-5 d-flex flex-wrap gap-5 gap-md-3"
+        className={`${requestId ? "" : "mt-5"} d-flex flex-wrap gap-5 gap-md-3`}
         onSubmit={handleSubmit(onSubmit)}
       >
         {/* General */}
@@ -322,7 +350,7 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                 id="stateActive"
                 value="true"
                 {...register("isActive")}
-                defaultChecked
+                checked={isActive === true}
                 onClick={() => setIsActive(true)}
               />
               <label className="form-check-label" htmlFor="stateActive">
@@ -336,6 +364,7 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                 id="stateInactive"
                 value="false"
                 {...register("isActive")}
+                checked={isActive === false}
                 onClick={() => setIsActive(false)}
               />
               <label className="form-check-label" htmlFor="stateInactive">

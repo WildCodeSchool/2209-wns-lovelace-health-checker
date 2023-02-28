@@ -3,6 +3,7 @@ export const SIGN_UP_ROUTE = "/sign-up";
 export const SIGN_IN_ROUTE = "/sign-in";
 export const REQUESTS_ROUTE = "/requests";
 export const REQUEST_CREATION_ROUTE = "/request-creation";
+export const REQUEST_DETAILS_ROUTE = `${REQUESTS_ROUTE}/:requestId`;
 export const PREMIUM_ROUTE = "/premium";
 export const ACCOUNT_ROUTE = "/account";
 export const TERMS_ROUTE = "/terms";

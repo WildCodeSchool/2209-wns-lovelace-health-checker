@@ -1,0 +1,43 @@
+@use "../../variables.scss";
+@import "../../components.scss";
+
+.contentContainer {
+  @include contentContainer;
+  .pageTitle {
+    color: variables.$primary-1000;
+    font-weight: variables.$font-weight-600;
+    font-size: variables.$font-lg;
+    margin: 0;
+  }
+  .createBtn {
+    @include btn;
+    width: variables.$width-xl;
+    height: variables.$height-lg;
+    @include btnSecondary;
+  }
+  .slider {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: variables.$padding-sm;
+    &:hover {
+      overflow-x: scroll;
+    }
+    .tabContainer {
+      padding: variables.$padding-xxs variables.$padding-lg;
+      width: 119px;
+      border-radius: 50px;
+      text-align: center;
+    }
+    .selectedTab {
+      background-color: variables.$primary-200;
+    }
+    .tabs {
+      color: variables.$primary-1000;
+      font-size: variables.$font-xs;
+      font-weight: variables.$font-weight-600;
+      @include clickable;
+    }
+  }
+}
