@@ -35,7 +35,9 @@ services:
       - rabbitmq
 
   web-app:
-    build: ./web-app
+    build:
+      context: ./web-app
+      target: dev
     environment:
       REACT_APP_REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
       REACT_APP_RESET_PASSWORD_ROUTE: ${RESET_PASSWORD_ROUTE}
