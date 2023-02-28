@@ -2,6 +2,8 @@ import RequestSetting, {
   Frequency,
 } from "../../entities/RequestSetting.entity";
 import User, { Role } from "../../entities/User.entity";
+import RequestSettingWithLastResult from "../../models/RequestSettingWithLastResult";
+import RequestResultRepository from "../../repositories/RequestResult.repository";
 import RequestSettingRepository from "../../repositories/RequestSetting.repository";
 import AlertSettingService from "../AlertSetting/AlertSetting.service";
 
@@ -83,8 +85,9 @@ export default class RequestSettingService extends RequestSettingRepository {
     user: User
   ) => {
     if (user.role === Role.USER) {
-      const userSettingRequests =
-        await RequestSettingRepository.getRequestSettingsByUserId(user.id);
+      const userSettingRequests = await RequestSettingRepository.getByUserId(
+        user.id
+      );
       if (
         userSettingRequests.length ===
         parseInt(process.env.NON_PREMIUM_MAX_AUTHORIZED_REQUESTS!)
@@ -101,8 +104,9 @@ export default class RequestSettingService extends RequestSettingRepository {
     url: string,
     name: string | undefined
   ) {
-    const userSettingRequests =
-      await RequestSettingRepository.getRequestSettingsByUserId(user.id);
+    const userSettingRequests = await RequestSettingRepository.getByUserId(
+      user.id
+    );
 
     const URLAlreadyExists = userSettingRequests.some(
       (request: RequestSetting) => request.url === url
@@ -161,5 +165,22 @@ export default class RequestSettingService extends RequestSettingRepository {
       (customEmailErrors?.length || customPushErrors?.length)
     )
       throw Error("Non Premium users can't use custom error alerts");
+  };
+
+  static getRequestSettingWithLastResultByRequestSettingId = async (
+    id: string
+  ): Promise<RequestSettingWithLastResult | void> => {
+    const requestSetting = await RequestSettingRepository.getById(id);
+    if (!requestSetting) throw Error("Request not found");
+
+    const lastRequestResult =
+      await RequestResultRepository.getMostRecentByRequestSettingId(id);
+
+    if (lastRequestResult)
+      return new RequestSettingWithLastResult(
+        requestSetting,
+        lastRequestResult
+      );
+    else return new RequestSettingWithLastResult(requestSetting, null);
   };
 }

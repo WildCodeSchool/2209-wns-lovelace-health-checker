@@ -20,9 +20,11 @@ export default class RequestSettingRepository {
     await this.repository.delete({});
   }
 
-  static async getRequestSettingsByUserId(
-    id: string
-  ): Promise<RequestSetting[]> {
+  static async getByUserId(id: string): Promise<RequestSetting[]> {
     return this.repository.find({ where: { user: { id: id } } });
+  }
+
+  static async getById(id: string): Promise<RequestSetting | null> {
+    return this.repository.findOneBy({ id: id });
   }
 }

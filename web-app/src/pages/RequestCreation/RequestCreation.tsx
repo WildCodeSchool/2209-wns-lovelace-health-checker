@@ -11,7 +11,7 @@ import {
 } from "../../gql/graphql";
 import { Frequency } from "../../utils/request-frequency.enum";
 import { toast } from "react-toastify";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { URL_REG_EXP } from "../../utils/regular-expressions";
 import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
 import {
@@ -76,7 +76,12 @@ type RequestCreationInputs = {
   headers: { property: string; value: string }[];
 };
 
-const RequestCreation = ({ role }: { role: string | undefined }) => {
+interface RequestProps {
+  role: string | undefined;
+  existingRequest?: any;
+}
+
+const RequestCreation = ({ role, existingRequest }: RequestProps) => {
   const [isActive, setIsActive] = useState(true);
 
   const [emailSpecificErrors, setEmailSpecificErrors] = useState([]);
@@ -129,14 +134,11 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
     }
   }, [pushSpecificErrors, pushSpecificErrorRadioIsChecked]);
 
-  let { requestId } = useParams();
-
   useEffect(() => {
-    if (requestId) {
-      /* TODO : if requestId exists in URL (because it's an request update and not request creation), we need to get request values from existing request and use them to set defaultValues in useForm */
+    if (existingRequest) {
       setIsActive(false); // Pass existing request's isActive value
     }
-  }, [requestId]);
+  }, [existingRequest]);
 
   /* TODO : if requestId, remove redirection to /requests */
 
@@ -147,9 +149,9 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
     control,
   } = useForm<RequestCreationInputs>({
     defaultValues: {
-      url: requestId ? "https://effired.fr" : "",
-      name: requestId ? "Effired" : "",
-      headers: requestId
+      url: existingRequest ? existingRequest?.requestSetting?.url : "",
+      name: existingRequest ? "Effired" : "",
+      headers: existingRequest
         ? [
             {
               property: "content-type",
@@ -256,15 +258,19 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
   };
 
   return (
-    <div className={`${styles.contentContainer} ${requestId ? "pt-0" : ""}`}>
-      {requestId ? (
+    <div
+      className={`${styles.contentContainer} ${existingRequest ? "pt-0" : ""}`}
+    >
+      {existingRequest ? (
         <></>
       ) : (
         <h1 className={`${styles.pageTitle}`}>Request creation</h1>
       )}
 
       <form
-        className={`${requestId ? "" : "mt-5"} d-flex flex-wrap gap-5 gap-md-3`}
+        className={`${
+          existingRequest ? "" : "mt-5"
+        } d-flex flex-wrap gap-5 gap-md-3`}
         onSubmit={handleSubmit(onSubmit)}
       >
         {/* General */}
