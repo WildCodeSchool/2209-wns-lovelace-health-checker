@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  web-app:
+    build: 
+      context: ./web-app
+      target: ci
+    environment:
+      REACT_APP_REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
+      REACT_APP_RESET_PASSWORD_ROUTE: ${RESET_PASSWORD_ROUTE}
+      REACT_APP_ACCOUNT_CONFIRMATION_ROUTE: ${ACCOUNT_CONFIRMATION_ROUTE}
+      REACT_APP_RESET_EMAIL_ROUTE: ${RESET_EMAIL_ROUTE}
