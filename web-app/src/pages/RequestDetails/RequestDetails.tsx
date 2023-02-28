@@ -23,6 +23,10 @@ export const GET_REQUEST_SETTING_BY_ID = gql`
         isActive
         frequency
         headers
+        alerts {
+          httpStatusCode
+          type
+        }
       }
       requestResult {
         id

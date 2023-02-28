@@ -83,6 +83,7 @@ interface RequestProps {
 
 const RequestCreation = ({ role, existingRequest }: RequestProps) => {
   const [isActive, setIsActive] = useState(true);
+  const [frequency, setFrequency] = useState(Frequency.ONE_HOUR);
 
   const [emailSpecificErrors, setEmailSpecificErrors] = useState([]);
   const [emailSpecificErrorsInputValue, setEmailSpecificErrorsInputValue] =
@@ -136,7 +137,9 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
 
   useEffect(() => {
     if (existingRequest) {
-      setIsActive(false); // Pass existing request's isActive value
+      setIsActive(existingRequest?.requestSetting?.isActive);
+      setFrequency(existingRequest?.requestSetting?.frequency);
+      console.log(existingRequest?.requestSetting?.frequency);
     }
   }, [existingRequest]);
 
@@ -150,14 +153,9 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
   } = useForm<RequestCreationInputs>({
     defaultValues: {
       url: existingRequest ? existingRequest?.requestSetting?.url : "",
-      name: existingRequest ? "Effired" : "",
-      headers: existingRequest
-        ? [
-            {
-              property: "content-type",
-              value: "application/json",
-            },
-          ]
+      name: existingRequest ? existingRequest?.requestSetting?.name : "",
+      headers: existingRequest?.requestSetting?.headers
+        ? JSON.parse(existingRequest?.requestSetting?.headers)
         : [],
     },
     criteriaMode: "all",
@@ -396,6 +394,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                   id="day30"
                   value={Frequency.THIRTY_DAYS}
                   {...register("frequency")}
+                  checked={frequency === Frequency.THIRTY_DAYS}
+                  onClick={() => setFrequency(Frequency.THIRTY_DAYS)}
                 />
                 <label className="form-check-label" htmlFor="day30">
                   30 days
@@ -408,6 +408,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                   id="day7"
                   value={Frequency.SEVEN_DAYS}
                   {...register("frequency")}
+                  checked={frequency === Frequency.SEVEN_DAYS}
+                  onClick={() => setFrequency(Frequency.SEVEN_DAYS)}
                 />
                 <label className="form-check-label" htmlFor="day7">
                   7 days
@@ -420,6 +422,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                   id="day1"
                   value={Frequency.ONE_DAY}
                   {...register("frequency")}
+                  checked={frequency === Frequency.ONE_DAY}
+                  onClick={() => setFrequency(Frequency.ONE_DAY)}
                 />
                 <label className="form-check-label" htmlFor="day1">
                   1 day
@@ -437,6 +441,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                   id="hr12"
                   value={Frequency.TWELVE_HOURS}
                   {...register("frequency")}
+                  checked={frequency === Frequency.TWELVE_HOURS}
+                  onClick={() => setFrequency(Frequency.TWELVE_HOURS)}
                 />
                 <label className="form-check-label" htmlFor="hr12">
                   12 hrs
@@ -449,6 +455,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                   id="hr6"
                   value={Frequency.SIX_HOURS}
                   {...register("frequency")}
+                  checked={frequency === Frequency.SIX_HOURS}
+                  onClick={() => setFrequency(Frequency.SIX_HOURS)}
                 />
                 <label className="form-check-label" htmlFor="hr6">
                   6 hrs
@@ -461,7 +469,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                   id="hr1"
                   value={Frequency.ONE_HOUR}
                   {...register("frequency")}
-                  defaultChecked
+                  checked={frequency === Frequency.ONE_HOUR}
+                  onClick={() => setFrequency(Frequency.ONE_HOUR)}
                 />
                 <label className="form-check-label" htmlFor="hr1">
                   1 hr
@@ -494,6 +503,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                   value={Frequency.THIRTY_MINUTES}
                   {...register("frequency")}
                   disabled={role !== "premium"}
+                  checked={frequency === Frequency.THIRTY_MINUTES}
+                  onClick={() => setFrequency(Frequency.THIRTY_MINUTES)}
                 />
                 <label className="form-check-label" htmlFor="mn30">
                   30 mn
@@ -507,6 +518,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                   value={Frequency.FIFTEEN_MINUTES}
                   {...register("frequency")}
                   disabled={role !== "premium"}
+                  checked={frequency === Frequency.FIFTEEN_MINUTES}
+                  onClick={() => setFrequency(Frequency.FIFTEEN_MINUTES)}
                 />
                 <label className="form-check-label" htmlFor="mn15">
                   15 mn
@@ -520,6 +533,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                   value={Frequency.ONE_MINUTE}
                   {...register("frequency")}
                   disabled={role !== "premium"}
+                  checked={frequency === Frequency.ONE_MINUTE}
+                  onClick={() => setFrequency(Frequency.ONE_MINUTE)}
                 />
                 <label className="form-check-label" htmlFor="mn1">
                   1 mn
@@ -552,6 +567,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                   value={Frequency.THIRTY_SECONDS}
                   {...register("frequency")}
                   disabled={role !== "premium"}
+                  checked={frequency === Frequency.THIRTY_SECONDS}
+                  onClick={() => setFrequency(Frequency.THIRTY_SECONDS)}
                 />
                 <label className="form-check-label" htmlFor="sec30">
                   30 sec
@@ -565,6 +582,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                   value={Frequency.FIFTEEN_SECONDS}
                   {...register("frequency")}
                   disabled={role !== "premium"}
+                  checked={frequency === Frequency.FIFTEEN_SECONDS}
+                  onClick={() => setFrequency(Frequency.FIFTEEN_SECONDS)}
                 />
                 <label className="form-check-label" htmlFor="sec15">
                   15 sec
@@ -578,6 +597,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                   value={Frequency.FIVE_SECONDS}
                   {...register("frequency")}
                   disabled={role !== "premium"}
+                  checked={frequency === Frequency.FIVE_SECONDS}
+                  onClick={() => setFrequency(Frequency.FIVE_SECONDS)}
                 />
                 <label className="form-check-label" htmlFor="sec5">
                   5 sec
