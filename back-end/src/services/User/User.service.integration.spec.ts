@@ -1,10 +1,15 @@
-import { closeConnection, getDatabase, initializeRepositories, truncateAllTables } from '../../database/utils';
-import User, { Status } from '../../entities/User.entity';
-import * as provider from '../../rabbitmq/providers';
-import UserRepository from '../../repositories/User.repository';
-import * as HttpCookies from '../../utils/http-cookies';
-import SessionService from '../Session/Session.service';
-import UserService from './User.service';
+import {
+  closeConnection,
+  getDatabase,
+  initializeRepositories,
+  truncateAllTables,
+} from "../../database/utils";
+import User, { Status } from "../../entities/User.entity";
+import * as provider from "../../rabbitmq/providers";
+import UserRepository from "../../repositories/User.repository";
+import * as HttpCookies from "../../utils/http-cookies";
+import SessionService from "../Session/Session.service";
+import UserService from "./User.service";
 
 const sendMessageOnAccountCreationEmailQueue = () => {
   return jest
@@ -363,11 +368,6 @@ describe("UserService integration", () => {
       expect(message.resetPasswordToken).toEqual(user.resetPasswordToken);
     });
     it("should call sendMessageOnResetPasswordEmailQueue once", async () => {
-      const sendMessageOnResetPasswordEmailQueueSpy = jest
-        .spyOn(provider, "sendMessageOnResetPasswordEmailQueue")
-        .mockImplementation((data: any) => {
-          return data;
-        });
       const user = await UserService.createUser(
         "John",
         "Doe",

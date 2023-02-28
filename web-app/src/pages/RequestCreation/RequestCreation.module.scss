@@ -24,7 +24,7 @@
       border-radius: variables.$border-radius-sm;
       .stateInformationMessage {
         @media (min-width: variables.$mobile-breakpoint) {
-          height: 56px;
+          height: 66px;
         }
         .activeStateIcon {
           color: variables.$green-1000;
