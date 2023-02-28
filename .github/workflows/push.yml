@@ -2,6 +2,9 @@ name: build-and-test
 
 on: push
 
+env:
+  RESET_PASSWORD_EXPIRATION_DELAY: 1800000
+
 jobs:
   back-end:
     runs-on: ubuntu-latest
