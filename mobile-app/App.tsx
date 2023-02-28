@@ -7,6 +7,8 @@ import useColorScheme from './hooks/useColorScheme';
 import Navigation from './navigation';
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 
+import Toast from "react-native-toast-message";
+
 const GRAPHQL_API_URL = Constants?.expoConfig?.extra?.GRAPHQL_API_URL;
 
 const client = new ApolloClient({
@@ -25,6 +27,7 @@ export default function App() {
       <SafeAreaProvider>
         <ApolloProvider client={client}>
           <Navigation colorScheme={colorScheme} />
+          <Toast />
           <StatusBar />
         </ApolloProvider>
       </SafeAreaProvider>

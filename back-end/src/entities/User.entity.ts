@@ -1,8 +1,21 @@
-import { IsBoolean, IsDate, IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
-import { Field, ID, ObjectType } from 'type-graphql';
-import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  IsBoolean,
+  IsDate,
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  Length,
+} from "class-validator";
+import { Field, ID, ObjectType } from "type-graphql";
+import {
+  Column,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
-import RequestSetting from './RequestSetting.entity';
+import RequestSetting from "./RequestSetting.entity";
 
 export enum Status {
   PENDING = "pending",

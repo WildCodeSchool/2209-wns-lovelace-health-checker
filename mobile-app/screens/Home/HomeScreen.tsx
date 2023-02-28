@@ -1,29 +1,30 @@
 import { ApolloError, gql, useMutation } from "@apollo/client";
-import { useState } from "react";
+import React, { useState } from "react";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { Link } from "@react-navigation/native";
-// TODO: import toast
+import Toast from "react-native-toast-message";
 import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessageComponent";
 
-import HomepageRequestTable from "../../components/HomepageRequestTable/HomepageRequestTable";
+import HomepageRequestTable from "../../components/HomepageRequestTable/HomepageRequestTableComponent";
 import { CheckUrlMutation, CheckUrlMutationVariables } from "../../gql/graphql";
 import {
   getErrorMessage,
-  SERVER_IS_KO_ERROR_MESSAGE,
+  SERVER_IS_KO_ERROR_MESSAGE_LINE1,
+  SERVER_IS_KO_ERROR_MESSAGE_LINE2,
 } from "../../utils/error-messages";
 import { styles } from "./HomeStyle";
-import { bootstrap } from "../../style/bootstrapConvert";
+import { bootstrap } from "../../styles/bootstrapConvert";
 import {
   View,
   Text,
-  Button,
   TextInput,
   Pressable,
   Animated,
   ScrollView,
 } from "react-native";
 import Constants from "expo-constants";
-import { animatedStyle } from "../../style/components";
+import { animatedStyle } from "../../styles/components";
+import { Ionicons } from "@expo/vector-icons";
 
 const REQUEST_TIMEOUT = Constants?.expoConfig?.extra?.REQUEST_TIMEOUT;
 
@@ -88,11 +89,11 @@ const Home = () => {
         case INVALID_URL_ERROR_MESSAGE:
           break;
         default:
-          console.log(error);
-        // toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
-        //   position: toast.POSITION.BOTTOM_RIGHT,
-        //   toastId: 1,
-        // });
+          Toast.show({
+            type: "error",
+            text1: SERVER_IS_KO_ERROR_MESSAGE_LINE1,
+            text2: SERVER_IS_KO_ERROR_MESSAGE_LINE2,
+          });
       }
     },
   });
@@ -156,7 +157,8 @@ const Home = () => {
               ]}
             >
               {/* TODO: Remplacer le texte Submit par une icon */}
-              <Text style={styles.btnTextSecondary}>Submit</Text>
+              {/* <Text style={styles.btnTextSecondary}>Submit</Text> */}
+              <Ionicons style={{}} name="search" />
             </Pressable>
           </View>
           <View style={[bootstrap.positionAbsolute]}>
@@ -208,7 +210,7 @@ const Home = () => {
 
         <View style={[bootstrap.mt3, bootstrap.col12]}>
           <Text style={styles.h2}>How it works</Text>
-          <Text style={styles.bsPMarginBottom}>
+          <Text style={styles.p}>
             HealthCheck allows you to test if a website is operational by
             sending a request and analyzing the response.
           </Text>
@@ -219,12 +221,12 @@ const Home = () => {
             bootstrap.dFlex,
             bootstrap.alignItemsCenter,
             bootstrap.flexWrap,
-            bootstrap.mt5,
+            bootstrap.mt3,
           ]}
         >
           <View style={bootstrap.col12}>
             <Text style={styles.h2}>A tool for managing websites</Text>
-            <Text style={styles.bsPMarginBottom}>
+            <Text style={styles.p}>
               You can test as many sites as you want. With your account, set the
               testing frequency for each site and be notified automatically if
               any of the ones you monitor are unavailable.
@@ -259,7 +261,7 @@ const Home = () => {
         >
           <View style={bootstrap.col12}>
             <Text style={styles.h2}>Go further with Premium</Text>
-            <Text style={styles.bsPMarginBottom}>
+            <Text style={styles.p}>
               Customized alerts only for specific error codes, better management
               of testing frequency, grouped actions to save time and many other
               great features with Premium.

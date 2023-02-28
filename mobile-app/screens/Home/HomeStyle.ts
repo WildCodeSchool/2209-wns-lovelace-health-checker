@@ -1,8 +1,8 @@
 import { StyleSheet, View, Text, Button, TextInput } from "react-native";
 
-import { components } from "../../style/components";
+import { components } from "../../styles/components";
 
-import { variables } from "../../style/variables";
+import { variables } from "../../styles/variables";
 
 export const styles = StyleSheet.create({
   searchBarContainer: {
@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: variables.$paddingXL,
   },
   h1: {
-    fontSize: 32, // TODO: à mettre dans components
+    ...components.h1,
     color: "#ffffff",
   },
   searchBar: {
@@ -45,15 +45,15 @@ export const styles = StyleSheet.create({
     ...components.loader,
   },
   h2: {
+    ...components.h2,
     marginTop: variables.$marginMD,
-    fontSize: 24,
   },
   btn: {
     ...components.btnMobile,
     marginTop: variables.$marginMD,
   },
-  bsPMarginBottom: {
-    marginBottom: 16,
+  p: {
+    ...components.p,
   },
   btnPrimary: {
     ...components.btnPrimary,

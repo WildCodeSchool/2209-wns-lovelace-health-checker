@@ -30,7 +30,7 @@ Docker and Docker Compose are required on host system.
 Make sure you are located on the same folder as the docker-compose.dev.yml file, and that the line `"exclude": ["**/*.test.ts", "**/*.spec.ts", "**/*.mock.ts"]` is NOT commented on the tsconfig.json file.
 
 ```
-docker compose -f docker-compose.dev.yml exec back-end npm run test
+docker compose -f docker-compose.dev.yml exec back-end npm run test:watch
 ```
 
 ### Run web-app test
