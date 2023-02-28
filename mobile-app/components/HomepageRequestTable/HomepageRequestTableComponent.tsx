@@ -1,4 +1,5 @@
 import { Row, Rows, Table } from "react-native-table-component";
+import { styles } from "./HomepageRequestTableStyle";
 
 const HomepageRequestTable = ({
   statusCode,
@@ -10,10 +11,15 @@ const HomepageRequestTable = ({
   getIsAvailable: boolean;
 }) => {
   return (
-    <Table style={{}}>
-      <Row data={["AVAILABILITY", "STATUS CODE", "DURATION"]} />
+    <Table borderStyle={{ borderWidth: 2, borderColor: "#c8e1ff" }}>
+      <Row
+        data={["AVAILABILITY", "STATUS CODE", "DURATION"]}
+        style={styles.head}
+        textStyle={styles.text}
+      />
       <Rows
         data={[[getIsAvailable ? "OK" : "KO", statusCode, duration + "ms"]]}
+        textStyle={styles.text}
       />
     </Table>
   );
