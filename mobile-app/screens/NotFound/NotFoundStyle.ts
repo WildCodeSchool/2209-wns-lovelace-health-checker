@@ -1,28 +1,31 @@
-import { View, Text, StyleSheet, Button, Pressable } from "react-native";
+import { StyleSheet } from "react-native";
+
+import { components } from "../../styles/components";
+
+import { variables } from "../../styles/variables";
 
 export const styles = StyleSheet.create({
-  bsPMarginBottom: {
-    marginBottom: 16,
-  },
-  bold: {
-    fontWeight: "600", // variabiliser
+  h1: {
+    ...components.h1,
   },
   contentContainer: {
-    padding: 24, // variabiliser
+    ...components.contentContainer,
+  },
+  requestContainer: {
+    width: "100%",
+    height: variables.$heightXXL,
   },
   btn: {
-    height: 60,
-    borderRadius: 5,
-    marginTop: 16,
-    alignItems: "center", // align horizontally
-    justifyContent: "center", // align vertically
-  }, // variabiliser
-  btnPrimary: {
-    backgroundColor: "#195078", // variabiliser
-    border: "none", // variabiliser
+    ...components.btnMobile,
+    marginTop: variables.$marginMD,
   },
-  btnText: {
-    color: "white", // variabiliser
-    fontSize: 16, // trouver où le mettre dans l'app
+  p: {
+    ...components.p
+  },
+  btnPrimary: {
+    ...components.btnPrimary,
+  },
+  btnTextPrimary: {
+    ...components.btnTextPrimary,
   },
 });
