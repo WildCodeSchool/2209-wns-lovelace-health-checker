@@ -51,7 +51,7 @@ services:
   database:
     image: postgres:14.5-alpine
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: password
     volumes:
       - database-content:/var/lib/postgresql/data
     expose:
@@ -60,7 +60,7 @@ services:
   test-database:
     image: postgres:14.5-alpine
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: password
     expose:
       - 5432
 
