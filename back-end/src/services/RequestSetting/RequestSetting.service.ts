@@ -3,8 +3,57 @@ import RequestSetting, {
 } from "../../entities/RequestSetting.entity";
 import User, { Role } from "../../entities/User.entity";
 import RequestSettingRepository from "../../repositories/RequestSetting.repository";
+import AlertSettingService from "../AlertSetting/AlertSetting.service";
 
 export default class RequestSettingService extends RequestSettingRepository {
+  static checkForErrorsAndCreateRequest = async (
+    url: string,
+    frequency: Frequency,
+    name: string | undefined,
+    headers: string | undefined,
+    isActive: boolean,
+    allErrorsEnabledEmail: boolean,
+    allErrorsEnabledPush: boolean,
+    customEmailErrors: number[] | undefined,
+    customPushErrors: number[] | undefined,
+    user: User
+  ): Promise<RequestSetting> => {
+    if (headers) {
+      this.checkIfHeadersAreRightFormatted(headers);
+    }
+
+    this.checkIfNonPremiumUserTryToUsePremiumFrequency(user, frequency);
+
+    this.checkIfNonPremiumUserTryToUseCustomError(
+      user,
+      customEmailErrors,
+      customPushErrors
+    );
+
+    const createdRequestSetting = await this.createRequestSetting(
+      user,
+      url,
+      frequency,
+      isActive,
+      name,
+      headers
+    );
+
+    await AlertSettingService.setPushAlerts(
+      customPushErrors,
+      allErrorsEnabledPush,
+      createdRequestSetting
+    );
+
+    await AlertSettingService.setEmailAlerts(
+      customEmailErrors,
+      allErrorsEnabledEmail,
+      createdRequestSetting
+    );
+
+    return createdRequestSetting;
+  };
+
   static async createRequestSetting(
     user: User,
     url: string,
@@ -16,7 +65,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     await this.checkIfNonPremiumUserHasReachedMaxRequestsCount(user);
     await this.checkIfURLOrNameAreAlreadyUsed(user, url, name);
 
-    let requestSetting: RequestSetting = new RequestSetting(
+    const requestSetting: RequestSetting = new RequestSetting(
       user,
       url,
       frequency,
@@ -24,7 +73,9 @@ export default class RequestSettingService extends RequestSettingRepository {
       name,
       headers
     );
+
     const savedRequestSetting = await this.saveRequestSetting(requestSetting);
+    console.log({ savedRequestSetting });
     return savedRequestSetting;
   }
 

@@ -15,7 +15,7 @@ const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
 const Requests = () => {
   const navigate = useNavigate();
 
-  const [checkUserMaxRequestsBeforeNavigate, { data }] =
+  const [checkUserMaxRequestsBeforeNavigate] =
     useLazyQuery<CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery>(
       CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT,
       {
@@ -35,7 +35,7 @@ const Requests = () => {
     checkUserMaxRequestsBeforeNavigate();
   };
 
-  const [selectedTab, setSelectedTab] = useState("informations");
+  const [selectedTab] = useState("informations");
 
   return (
     <>
