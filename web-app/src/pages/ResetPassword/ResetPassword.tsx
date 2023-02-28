@@ -10,7 +10,7 @@ import {
 } from "../../gql/graphql";
 import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
 import styles from "./ResetPassword.module.scss";
-import { passwordRegExp } from "../../utils/regular-expressions";
+import { PASSWORD_REG_EXP } from "../../utils/regular-expressions";
 import {
   PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE,
   PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE,
@@ -19,6 +19,7 @@ import {
   PASSWORD_PATTERN_ERROR_MESSAGE,
   PASSWORD_PLACEHOLDER,
 } from "../../utils/form-validations";
+import { SIGN_IN_ROUTE } from "../../routes";
 
 export const RESET_PASSWORD = gql`
   mutation ResetPassword(
@@ -52,7 +53,7 @@ const ResetPassword = () => {
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: 1,
       });
-      navigate("/sign-in");
+      navigate(SIGN_IN_ROUTE);
     },
     onError: (error) => {
       if (error.message.includes("time limit has been exceeded")) {
@@ -137,7 +138,7 @@ const ResetPassword = () => {
               {...register("password", {
                 required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                 pattern: {
-                  value: passwordRegExp,
+                  value: PASSWORD_REG_EXP,
                   message: PASSWORD_PATTERN_ERROR_MESSAGE,
                 },
               })}

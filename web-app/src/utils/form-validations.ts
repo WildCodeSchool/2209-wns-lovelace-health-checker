@@ -14,7 +14,7 @@ export const FIRSTNAME_PATTERN_ERROR_MESSAGE =
   "First name must not contain numbers or special characters";
 export const FIRSTNAME_PLACEHOLDER = "John";
 
-// Firstname
+// Lastname
 export const LASTNAME_IS_REQUIRED_ERROR_MESSAGE = "Last name is required";
 export const LASTNAME_MIN_LENGTH = 2;
 export const LASTNAME_MIN_LENGTH_ERROR_MESSAGE = `Last name must have at least ${LASTNAME_MIN_LENGTH} characters`;
@@ -29,10 +29,31 @@ export const PASSWORD_IS_REQUIRED_ERROR_MESSAGE = "Password is required";
 export const PASSWORD_PATTERN_ERROR_MESSAGE =
   "Password must have at least 8 characters, one upper case, one lower case, and one number";
 export const PASSWORD_PLACEHOLDER = "Your password";
+export const CURRENT_PASSWORD_IS_REQUIRED_ERROR_MESSAGE =
+  "Current password is required";
+export const NEW_PASSWORD_IS_REQUIRED_ERROR_MESSAGE =
+  "New password is required";
+export const NEW_PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE =
+  "New password confirmation is required";
 
-// Password
+// Password confirmation
 export const PASSWORD_CONFIRMATION_IS_REQUIRED_ERROR_MESSAGE =
   "Password confirmation is required";
 export const PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE =
   "Passwords don't match";
 export const PASSWORD_CONFIRMATION_PLACEHOLDER = "Your password confirmation";
+
+// URL
+export const URL_IS_REQUIRED_ERROR_MESSAGE = "URL is required";
+export const URL_PATTERN_ERROR_MESSAGE = "URL format is invalid";
+export const URL_PLACEHOLDER = "https://example.com";
+
+// URL name
+export const NAME_MIN_LENGTH = 2;
+export const NAME_MIN_LENGTH_ERROR_MESSAGE = `Name must have at least ${NAME_MIN_LENGTH} characters`;
+export const NAME_MAX_LENGTH = 120;
+export const NAME_MAX_LENGTH_ERROR_MESSAGE = `Name must have maximum ${NAME_MAX_LENGTH} characters`;
+export const NAME_PLACEHOLDER = "My super request";
+
+// URL headers
+export const URL_HEADER_ERROR_MESSAGE = "This field couldn't be empty";

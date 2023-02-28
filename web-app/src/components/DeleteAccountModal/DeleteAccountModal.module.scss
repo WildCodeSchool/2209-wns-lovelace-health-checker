@@ -1,0 +1,71 @@
+@use "../../variables.scss";
+@import "../../components.scss";
+
+.fullPage {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: variables.$width-100;
+  height: variables.$height-100;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  .modalContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    background-color: white;
+    border-radius: variables.$border-radius-md;
+    .modalHeader {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      background-color: variables.$primary-800;
+      padding: variables.$padding-xl;
+      border-top-right-radius: variables.$border-radius-md;
+      border-top-left-radius: variables.$border-radius-md;
+      h2 {
+        color: white;
+        margin: 0;
+        font-size: variables.$font-md;
+        font-weight: variables.$font-weight-500;
+      }
+    }
+    .modalCloseButton {
+      font-size: variables.$font-md;
+      @include clickable;
+    }
+    .modalBody {
+      padding: variables.$padding-xl;
+      margin-top: variables.$margin-sm;
+      .modalText {
+        font-size: variables.$font-sm;
+        color: variables.$primary-1000;
+      }
+      .modalInput {
+        margin-top: variables.$margin-xl;
+        .errorMessage {
+          @include errorMessage;
+        }
+      }
+      .modalButtons {
+        display: flex;
+        justify-content: flex-end;
+        gap: variables.$margin-md;
+        margin-top: 30px;
+        .modalButton {
+          @include btn;
+          height: 40px;
+          width: 35%;
+        }
+        .cancelButton {
+          @include btnSecondary;
+        }
+        .deleteButton {
+          @include btnPrimary;
+        }
+      }
+    }
+  }
+}

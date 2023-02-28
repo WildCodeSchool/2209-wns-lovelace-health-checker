@@ -1,9 +1,10 @@
 import {
   resendConfirmationEmail,
   sendConfirmationEmail,
+  sendResetEmail,
   sendResetPasswordEmail,
-} from "../services/nodemailer.service";
-import { channel } from "./config";
+} from '../services/nodemailer/nodemailer.service';
+import { channel } from './config';
 
 export const onMessageOnAccountCreationEmailQueue = async () => {
   console.log(
@@ -52,6 +53,21 @@ export const onMessageOnResetPasswordEmailQueue = async () => {
       parsedMessage.firstname,
       parsedMessage.email,
       parsedMessage.resetPasswordToken
+    );
+    channel.ack(message);
+  });
+};
+
+export const onMessageOnResetEmailQueue = async () => {
+  channel.consume("reset-email", (message: any) => {
+    console.log("Start consuming message on queue reset-email.");
+    let parsedMessage = JSON.parse(
+      String.fromCharCode.apply(String, message.content)
+    );
+    sendResetEmail(
+      parsedMessage.firstname,
+      parsedMessage.email,
+      parsedMessage.resetEmailToken
     );
     channel.ack(message);
   });

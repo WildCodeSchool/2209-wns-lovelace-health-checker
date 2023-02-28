@@ -1,0 +1,89 @@
+@use "../../variables.scss";
+@import "../../components.scss";
+
+.contentContainer {
+  @include contentContainer;
+  .pageTitle {
+    color: variables.$primary-1000;
+    font-weight: variables.$font-weight-600;
+    font-size: variables.$font-lg;
+  }
+  .formContainer {
+    .header {
+      display: flex;
+      gap: 1rem;
+      margin-left: variables.$margin-xs;
+      color: variables.$primary-1000;
+      font-size: variables.$font-md;
+      font-weight: variables.$font-weight-500;
+    }
+    .formContent {
+      padding: variables.$padding-md;
+      margin-top: variables.$margin-md;
+      background-color: variables.$primary-100;
+      border-radius: variables.$border-radius-sm;
+      .stateInformationMessage {
+        @media (min-width: variables.$mobile-breakpoint) {
+          height: 66px;
+        }
+        .activeStateIcon {
+          color: variables.$green-1000;
+        }
+        .inactiveStateIcon {
+          color: variables.$red-1000;
+        }
+      }
+      .checkLabel {
+        color: variables.$primary-1000;
+      }
+      .frequencyLabel {
+        color: variables.$primary-800;
+      }
+      .emailSpecificErrors {
+        margin-bottom: 44px;
+      }
+      .premiumIcon {
+        color: variables.$yellow-1000;
+      }
+      .inline {
+        display: inline;
+      }
+    }
+    .removeHeaderIcon {
+      @include clickable;
+      font-size: variables.$font-md;
+      &:hover {
+        color: variables.$red-1000;
+      }
+      display: none !important;
+      @media (min-width: 767px) {
+        display: flex !important;
+      }
+    }
+    .deleteHeaderText {
+      display: none;
+      @include clickableText;
+      color: variables.$red-1000;
+      @media (max-width: 767px) {
+        display: block;
+      }
+    }
+    .errorMessage {
+      @include errorMessage;
+    }
+    .addHeaderBtn {
+      @include clickable;
+      @include clickableText;
+    }
+    .btn {
+      @include btn;
+      width: variables.$width-100;
+    }
+    .btnPrimary {
+      @include btnPrimary;
+    }
+    .btnSecondary {
+      @include btnSecondary;
+    }
+  }
+}

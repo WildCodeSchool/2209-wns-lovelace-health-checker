@@ -1,12 +1,9 @@
-import { Args, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Args, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 
-import { GlobalContext } from "../..";
-import User from "../../entities/User.entity";
-import {
-  deleteSessionIdInCookie,
-  setSessionIdInCookie,
-} from "../../utils/http-cookies";
-import UserService from "../../services/User.service";
+import { GlobalContext } from '../..';
+import User from '../../entities/User.entity';
+import UserService from '../../services/User/User.service';
+import { deleteSessionIdInCookie, setSessionIdInCookie } from '../../utils/http-cookies';
 import {
   AskForNewPasswordArgs,
   ConfirmAccountArgs,
@@ -14,7 +11,9 @@ import {
   ResetPasswordArgs,
   SignInArgs,
   SignUpArgs,
-} from "./User.input";
+  UpdateIdentityArgs,
+  UpdatePasswordArgs,
+} from './User.input';
 
 @Resolver(User)
 export default class UserResolver {
@@ -66,7 +65,6 @@ export default class UserResolver {
   @Authorized()
   @Mutation(() => String)
   async signOut(@Ctx() context: GlobalContext): Promise<string> {
-    console.log("context", context);
     await UserService.logout(context);
     deleteSessionIdInCookie(context);
     return "You've been signed out securely";
@@ -76,5 +74,66 @@ export default class UserResolver {
   @Query(() => User)
   async myProfile(@Ctx() context: GlobalContext): Promise<User> {
     return context.user as User;
+  }
+
+  @Authorized()
+  @Mutation(() => User)
+  async updateIdentity(
+    @Args() { firstname, lastname }: UpdateIdentityArgs,
+    @Ctx() context: GlobalContext
+  ): Promise<User> {
+    if (!context.user) throw Error("You're not authenticated");
+    return UserService.updateUserIdentity(context.user, firstname, lastname);
+  }
+
+  @Authorized()
+  @Mutation(() => String)
+  async updatePassword(
+    @Args()
+    {
+      currentPassword,
+      newPassword,
+      newPasswordConfirmation,
+      disconnectMe,
+    }: UpdatePasswordArgs,
+    @Ctx() context: GlobalContext
+  ): Promise<string> {
+    if (!context.user) throw Error("You're not authenticated");
+    const currentSessionId = context.sessionId;
+    if (!currentSessionId) throw Error("You're not authenticated");
+    return UserService.updateUserPassword(
+      context.user,
+      currentPassword,
+      newPassword,
+      disconnectMe,
+      currentSessionId
+    );
+  }
+
+  @Authorized()
+  @Mutation(() => String)
+  async updateEmail(
+    @Arg("newEmail") newEmail: string,
+
+    @Ctx() context: GlobalContext
+  ): Promise<string> {
+    if (!context.user) throw Error("You're not authenticated");
+    return UserService.updateUserEmail(context.user, newEmail);
+  }
+
+  @Mutation(() => Boolean)
+  confirmEmail(
+    @Arg("confirmationToken") confirmationToken: string
+  ): Promise<Boolean> {
+    return UserService.confirmEmail(confirmationToken);
+  }
+
+  @Mutation(() => Boolean)
+  deleteUser(
+    @Arg("currentPassword") currentPassword: string,
+    @Ctx() context: GlobalContext
+  ): Promise<Boolean> {
+    if (!context.user) throw Error("You're not authenticated");
+    return UserService.deleteCurrentUser(context.user, currentPassword);
   }
 }

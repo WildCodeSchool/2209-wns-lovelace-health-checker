@@ -5,8 +5,8 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
-
 import { SignUpMutation, SignUpMutationVariables } from "../../gql/graphql";
+import { SIGN_IN_ROUTE, TERMS_ROUTE } from "../../routes";
 import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
 import {
   EMAIL_IS_REQUIRED_ERROR_MESSAGE,
@@ -35,8 +35,8 @@ import {
   PASSWORD_PLACEHOLDER,
 } from "../../utils/form-validations";
 import {
-  firstNameAndLastNameRegExp,
-  passwordRegExp,
+  FIRSTNAME_AND_LASTNAME_REG_EXP,
+  PASSWORD_REG_EXP,
 } from "../../utils/regular-expressions";
 import styles from "./SignUp.module.scss";
 
@@ -195,7 +195,7 @@ const SignUp = () => {
                     message: FIRSTNAME_MAX_LENGTH_ERROR_MESSAGE,
                   },
                   pattern: {
-                    value: firstNameAndLastNameRegExp,
+                    value: FIRSTNAME_AND_LASTNAME_REG_EXP,
                     message: FIRSTNAME_PATTERN_ERROR_MESSAGE,
                   },
                 })}
@@ -203,9 +203,9 @@ const SignUp = () => {
                 placeholder={FIRSTNAME_PLACEHOLDER}
               />
               <label htmlFor="firstname">Firstname</label>
-            </div>
-            <div className={styles.errorMessage}>
-              <FormErrorMessage errors={errors} name={"firstname"} />
+              <div className={styles.errorMessage}>
+                <FormErrorMessage errors={errors} name={"firstname"} />
+              </div>
             </div>
 
             <div className="form-floating mb-2 mt-3">
@@ -224,7 +224,7 @@ const SignUp = () => {
                     message: LASTNAME_MAX_LENGTH_ERROR_MESSAGE,
                   },
                   pattern: {
-                    value: firstNameAndLastNameRegExp,
+                    value: FIRSTNAME_AND_LASTNAME_REG_EXP,
                     message: LASTNAME_PATTERN_ERROR_MESSAGE,
                   },
                 })}
@@ -246,7 +246,7 @@ const SignUp = () => {
                 {...register("password", {
                   required: PASSWORD_IS_REQUIRED_ERROR_MESSAGE,
                   pattern: {
-                    value: passwordRegExp,
+                    value: PASSWORD_REG_EXP,
                     message: PASSWORD_PATTERN_ERROR_MESSAGE,
                   },
                 })}
@@ -322,7 +322,7 @@ const SignUp = () => {
               />
               <label className="form-check-label" htmlFor="agreedTerms">
                 I agree to the{" "}
-                <Link className={styles.navlink} to="/terms">
+                <Link className={styles.navlink} to={TERMS_ROUTE}>
                   terms and conditions
                 </Link>
               </label>
@@ -348,7 +348,7 @@ const SignUp = () => {
           <hr className={styles.separator} />
           <p className={styles.alreadyRegistered}>
             Already registered ?{" "}
-            <Link className={styles.navlink} to="/sign-in">
+            <Link className={styles.navlink} to={SIGN_IN_ROUTE}>
               Sign in
             </Link>
           </p>

@@ -9,17 +9,23 @@ services:
       - 15672:15672
 
   back-end:
-    build: ./back-end
+    build: 
+      context: ./back-end
+      target: dev
     environment:
-      DATABASE_URL: ${DATABASE_URL}
-      TEST_DATABASE_URL: ${TEST_DATABASE_URL}
+      DATABASE_URL: postgres://postgres:password@database:5432/postgres
+      TEST_DATABASE_URL: postgres://postgres:password@test-database:5432/postgres
       SERVER_PORT: ${SERVER_PORT}
       RABBIT_AMQP_URL: ${RABBIT_AMQP_URL}
       NODEMAILER_USER: ${NODEMAILER_USER}
       NODEMAILER_PASS: ${NODEMAILER_PASS}
       FRONT_END_URL: ${FRONT_END_URL}
+      RESET_PASSWORD_ROUTE: ${RESET_PASSWORD_ROUTE}
+      ACCOUNT_CONFIRMATION_ROUTE: ${ACCOUNT_CONFIRMATION_ROUTE}
+      RESET_EMAIL_ROUTE: ${RESET_EMAIL_ROUTE}
       REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
       RESET_PASSWORD_EXPIRATION_DELAY: ${RESET_PASSWORD_EXPIRATION_DELAY}
+      NON_PREMIUM_MAX_AUTHORIZED_REQUESTS: ${NON_PREMIUM_MAX_AUTHORIZED_REQUESTS}
     ports:
       - 4069:4069
     volumes:
@@ -29,9 +35,14 @@ services:
       - rabbitmq
 
   web-app:
-    build: ./web-app
+    build:
+      context: ./web-app
+      target: dev
     environment:
       REACT_APP_REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
+      REACT_APP_RESET_PASSWORD_ROUTE: ${RESET_PASSWORD_ROUTE}
+      REACT_APP_ACCOUNT_CONFIRMATION_ROUTE: ${ACCOUNT_CONFIRMATION_ROUTE}
+      REACT_APP_RESET_EMAIL_ROUTE: ${RESET_EMAIL_ROUTE}
     ports:
       - 3000:3000
     volumes:
@@ -42,7 +53,7 @@ services:
   database:
     image: postgres:14.5-alpine
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: password
     volumes:
       - database-content:/var/lib/postgresql/data
     expose:
@@ -51,7 +62,7 @@ services:
   test-database:
     image: postgres:14.5-alpine
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: password
     expose:
       - 5432
 

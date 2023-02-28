@@ -1,24 +1,26 @@
 /* eslint-disable testing-library/no-unnecessary-act */
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
 
-import { MockedProvider, MockedResponse } from '@apollo/client/testing';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { createMemoryHistory, MemoryHistory } from 'history';
-import { act } from 'react-dom/test-utils';
-import { MemoryRouter, Router } from 'react-router-dom';
-import * as toastify from 'react-toastify';
+import { MockedProvider, MockedResponse } from "@apollo/client/testing";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { createMemoryHistory, MemoryHistory } from "history";
+import { act } from "react-dom/test-utils";
+import { MemoryRouter, Router } from "react-router-dom";
+import * as toastify from "react-toastify";
 
-import { SignInMutation } from '../../gql/graphql';
-import { SERVER_IS_KO_ERROR_MESSAGE } from '../../utils/error-messages';
-import SignIn, { SIGN_IN } from './SignIn';
+import { SignInMutation } from "../../gql/graphql";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import SignIn, { SIGN_IN } from "./SignIn";
+import { HOMEPAGE_ROUTE } from "../../routes";
 
 jest.mock("react-toastify");
+const mockRefetch = jest.fn();
 
 const renderSignIn = (mock?: any) => {
   render(
     <MockedProvider mocks={mock}>
       <MemoryRouter>
-        <SignIn />
+        <SignIn onSuccess={mockRefetch} />
       </MemoryRouter>
     </MockedProvider>
   );
@@ -28,7 +30,7 @@ const renderSignInWithHistory = (history: MemoryHistory, mock?: any) => {
   render(
     <MockedProvider mocks={mock}>
       <Router location={history.location} navigator={history}>
-        <SignIn />
+        <SignIn onSuccess={mockRefetch} />
       </Router>
     </MockedProvider>
   );
@@ -119,7 +121,7 @@ describe("SignIn", () => {
 
         await act(async () => {
           await waitFor(() => {
-            expect(history.location.pathname).toBe("/");
+            expect(history.location.pathname).toBe(HOMEPAGE_ROUTE);
           });
         });
       });

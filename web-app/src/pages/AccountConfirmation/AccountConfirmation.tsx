@@ -1,9 +1,13 @@
-import { gql, useMutation } from '@apollo/client';
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { gql, useMutation } from "@apollo/client";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 
-import { ConfirmAccountMutation, ConfirmAccountMutationVariables } from '../../gql/graphql';
-import styles from './AccountConfirmation.module.scss';
+import {
+  ConfirmAccountMutation,
+  ConfirmAccountMutationVariables,
+} from "../../gql/graphql";
+import { SIGN_IN_ROUTE } from "../../routes";
+import styles from "./AccountConfirmation.module.scss";
 
 export const CONFIRM_ACCOUNT = gql`
   mutation confirmAccount($token: String!) {
@@ -11,41 +15,35 @@ export const CONFIRM_ACCOUNT = gql`
   }
 `;
 
-const AccountConfirmation = () => {
+const AccountConfirmation = ({ onSuccess }: { onSuccess: () => void }) => {
   const [success, setSuccess] = useState<boolean>(false);
 
   const [confirmAccount, { loading }] = useMutation<
     ConfirmAccountMutation,
     ConfirmAccountMutationVariables
-  >(CONFIRM_ACCOUNT);
+  >(CONFIRM_ACCOUNT, {
+    onCompleted: (data) => {
+      if (data.confirmAccount) {
+        setSuccess(true);
+        onSuccess();
+      }
+    },
+    onError: (error) => {
+      if (error.message === "Invalid confirmation token") {
+        setSuccess(false);
+      }
+    },
+  });
 
   let { confirmationToken } = useParams();
-  const validateAccount = async () => {
-    try {
-      const result = await confirmAccount({
-        variables: { token: confirmationToken as string },
-      });
-
-      if (result.data?.confirmAccount) {
-        setSuccess(true);
-      } else if (result.errors) {
-        if (
-          result.errors?.length > 0 &&
-          result.errors[0].message === "Invalid confirmation token"
-        ) {
-          setSuccess(false);
-        }
-      }
-    } catch (e) {
-      setSuccess(false);
-    }
-  };
 
   useEffect(() => {
-    if (confirmationToken) {
-      validateAccount();
-    }
-  }, [confirmationToken]);
+    confirmAccount({
+      variables: {
+        token: confirmationToken as string,
+      },
+    });
+  }, [confirmAccount, confirmationToken]);
 
   if (loading)
     return (
@@ -65,16 +63,18 @@ const AccountConfirmation = () => {
         <div className="text-center">
           <i
             data-testid="successIcon"
-            className={`bi bi-check-circle ${styles.success}`}></i>
+            className={`bi bi-check-circle ${styles.success}`}
+          ></i>
           <p>
             Your account has been confirmed successfully. You can now{" "}
             <Link
-              to={"/sign-in"}
+              to={SIGN_IN_ROUTE}
               className={`${styles.link}`}
               style={{
                 margin: "0",
                 color: "#195078",
-              }}>
+              }}
+            >
               log in
             </Link>{" "}
             to HealthCheck !
@@ -89,7 +89,8 @@ const AccountConfirmation = () => {
         <div className="text-center">
           <i
             data-testid="errorIcon"
-            className={`bi bi-x-circle ${styles.error}`}></i>
+            className={`bi bi-x-circle ${styles.error}`}
+          ></i>
           <p>
             Your unique confirmation token is invalid or has already been used.
           </p>

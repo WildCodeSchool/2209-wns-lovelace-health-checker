@@ -5,15 +5,19 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import AccountConfirmation, { CONFIRM_ACCOUNT } from "./AccountConfirmation";
+import {
+  ACCOUNT_CONFIRMATION_ROUTE,
+  ACCOUNT_CONFIRMATION_WITH_TOKEN_ROUTE,
+} from "../../routes";
 
 const renderAccountConfirmation = (token: string, mock?: any) => {
   render(
     <MockedProvider mocks={mock}>
-      <MemoryRouter initialEntries={[`/account-confirmation/${token}`]}>
+      <MemoryRouter initialEntries={[`${ACCOUNT_CONFIRMATION_ROUTE}/${token}`]}>
         <Routes>
           <Route
-            path="/account-confirmation/:confirmationToken"
-            element={<AccountConfirmation />}
+            path={ACCOUNT_CONFIRMATION_WITH_TOKEN_ROUTE}
+            element={<AccountConfirmation onSuccess={() => {}} />}
           />
         </Routes>
       </MemoryRouter>

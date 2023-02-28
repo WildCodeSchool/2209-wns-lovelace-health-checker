@@ -2,7 +2,7 @@
 
 .navbar {
   height: variables.$height-lg;
-  width: 100%;
+  width: variables.$width-100;
   border-top: 1px solid #ebf5ff31;
   position: fixed;
   bottom: 0;
@@ -27,6 +27,15 @@
     display: none !important;
     @media (min-width: variables.$mobile-breakpoint) {
       display: flex !important;
+    }
+    .navElement {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      padding: 0 16px;
+      &.selectedTab {
+        background-color: variables.$primary-200;
+      }
     }
     .btnPrimary {
       width: 80px;
@@ -76,4 +85,11 @@
   @media (min-width: variables.$mobile-breakpoint) {
     font-size: 14px;
   }
+  &.selectedLink {
+    color: variables.$primary-1000;
+  }
+}
+
+.notLogged {
+  padding: 0 15px;
 }

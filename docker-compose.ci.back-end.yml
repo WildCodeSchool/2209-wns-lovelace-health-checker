@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  back-end:
+    build:
+      context: ./back-end
+      target: ci
+    environment:
+      DATABASE_URL: postgres://postgres:password@database:5432/postgres
+      TEST_DATABASE_URL: postgres://postgres:password@test-database:5432/postgres
+      SERVER_PORT: ${SERVER_PORT}
+      RABBIT_AMQP_URL: ${RABBIT_AMQP_URL}
+      NODEMAILER_USER: ${NODEMAILER_USER}
+      NODEMAILER_PASS: ${NODEMAILER_PASS}
+      FRONT_END_URL: ${FRONT_END_URL}
+      RESET_PASSWORD_ROUTE: ${RESET_PASSWORD_ROUTE}
+      ACCOUNT_CONFIRMATION_ROUTE: ${ACCOUNT_CONFIRMATION_ROUTE}
+      RESET_EMAIL_ROUTE: ${RESET_EMAIL_ROUTE}
+      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
+      RESET_PASSWORD_EXPIRATION_DELAY: ${RESET_PASSWORD_EXPIRATION_DELAY}
+      NON_PREMIUM_MAX_AUTHORIZED_REQUESTS: ${NON_PREMIUM_MAX_AUTHORIZED_REQUESTS}
+    depends_on:
+      - rabbitmq
+
+  test-database:
+    image: postgres:14.5-alpine
+    environment:
+      POSTGRES_PASSWORD: password
+    expose:
+      - 5432

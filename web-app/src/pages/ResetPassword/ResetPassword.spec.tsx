@@ -9,6 +9,11 @@ import * as router from "react-router";
 import { ResetPasswordMutation } from "../../gql/graphql";
 import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
 import ResetPassword, { RESET_PASSWORD } from "./ResetPassword";
+import {
+  RESET_PASSWORD_ROUTE,
+  RESET_PASSWORD_WITH_TOKEN_ROUTE,
+  SIGN_IN_ROUTE,
+} from "../../routes";
 
 jest.mock("react-toastify");
 const navigate = jest.fn();
@@ -16,10 +21,10 @@ const navigate = jest.fn();
 const renderResetPassword = (token: string, mock?: any) => {
   render(
     <MockedProvider mocks={mock}>
-      <MemoryRouter initialEntries={[`/reset-password/${token}`]}>
+      <MemoryRouter initialEntries={[`${RESET_PASSWORD_ROUTE}/${token}`]}>
         <Routes>
           <Route
-            path="/reset-password/:resetPasswordToken"
+            path={RESET_PASSWORD_WITH_TOKEN_ROUTE}
             element={<ResetPassword />}
           />
         </Routes>
@@ -109,7 +114,7 @@ describe("ResetPassword", () => {
         renderResetPassword(VALID_TOKEN, [RESET_PASSWORD_SUCCESS]);
         submitForm("Vianney13", "Vianney13");
         await waitFor(() => {
-          expect(navigate).toHaveBeenCalledWith("/sign-in");
+          expect(navigate).toHaveBeenCalledWith(SIGN_IN_ROUTE);
         });
       });
     });
