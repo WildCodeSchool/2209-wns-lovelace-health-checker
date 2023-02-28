@@ -15,4 +15,4 @@ export const ACCOUNT_CONFIRMATION_ROUTE = `${process.env.REACT_APP_ACCOUNT_CONFI
 export const ACCOUNT_CONFIRMATION_WITH_TOKEN_ROUTE = `${ACCOUNT_CONFIRMATION_ROUTE}/:confirmationToken`;
 
 export const RESET_EMAIL_ROUTE = `${process.env.REACT_APP_RESET_EMAIL_ROUTE}`;
-export const RESET_EMAIL_WITH_TOKEN_ROUTE = `${ACCOUNT_CONFIRMATION_ROUTE}/:confirmationToken`;
+export const RESET_EMAIL_WITH_TOKEN_ROUTE = `${RESET_EMAIL_ROUTE}/:confirmationToken`;

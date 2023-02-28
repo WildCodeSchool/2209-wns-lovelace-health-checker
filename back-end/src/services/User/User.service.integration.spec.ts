@@ -1,10 +1,16 @@
-import { closeConnection, getDatabase, initializeRepositories, truncateAllTables } from '../../database/utils';
-import User, { Status } from '../../entities/User.entity';
-import * as provider from '../../rabbitmq/providers';
-import UserRepository from '../../repositories/User.repository';
-import * as HttpCookies from '../../utils/http-cookies';
-import SessionService from '../Session/Session.service';
-import UserService from './User.service';
+import { compareSync, hashSync } from "bcryptjs";
+import {
+  closeConnection,
+  getDatabase,
+  initializeRepositories,
+  truncateAllTables,
+} from "../../database/utils";
+import User, { Status } from "../../entities/User.entity";
+import * as provider from "../../rabbitmq/providers";
+import UserRepository from "../../repositories/User.repository";
+import * as HttpCookies from "../../utils/http-cookies";
+import SessionService from "../Session/Session.service";
+import UserService from "./User.service";
 
 const sendMessageOnAccountCreationEmailQueue = () => {
   return jest
@@ -22,12 +28,21 @@ const sendMessageOnResetPasswordEmailQueue = () => {
     });
 };
 
+const sendMessageOnResetEmailQueue = () => {
+  return jest
+    .spyOn(provider, "sendMessageOnResetEmailQueue")
+    .mockImplementation((data: any) => {
+      return data;
+    });
+};
+
 describe("UserService integration", () => {
   const emailAddress = "unknown@user.com";
   let sendMessageOnAccountCreationEmailQueueSpy: jest.SpyInstance<
     Promise<void>
   >;
   let sendMessageOnResetPasswordEmailQueueSpy: jest.SpyInstance<Promise<void>>;
+  let sendMessageOnResetEmailQueueSpy: jest.SpyInstance<Promise<void>>;
 
   beforeAll(async () => {
     await getDatabase();
@@ -40,6 +55,7 @@ describe("UserService integration", () => {
       sendMessageOnAccountCreationEmailQueue();
     sendMessageOnResetPasswordEmailQueueSpy =
       sendMessageOnResetPasswordEmailQueue();
+    sendMessageOnResetEmailQueueSpy = sendMessageOnResetEmailQueue();
   });
 
   afterAll(async () => {
@@ -357,17 +373,14 @@ describe("UserService integration", () => {
       );
       user.resetPasswordToken =
         "7b99c8e5e2dce5db4f30c69cc4886dd17abbf4fde0dd983ee5c4f54331817754";
-      const message: any = UserService.buildResetPasswordMessageToQueue(user);
+      const message: any = await UserService.buildResetPasswordMessageToQueue(
+        user
+      );
       expect(message.firstname).toEqual(user.firstname);
       expect(message.email).toEqual(user.email);
       expect(message.resetPasswordToken).toEqual(user.resetPasswordToken);
     });
     it("should call sendMessageOnResetPasswordEmailQueue once", async () => {
-      const sendMessageOnResetPasswordEmailQueueSpy = jest
-        .spyOn(provider, "sendMessageOnResetPasswordEmailQueue")
-        .mockImplementation((data: any) => {
-          return data;
-        });
       const user = await UserService.createUser(
         "John",
         "Doe",
@@ -525,6 +538,273 @@ describe("UserService integration", () => {
         await expect(UserService.logout(context)).rejects.toThrowError(
           "You're not signed in"
         );
+      });
+    });
+  });
+
+  describe("updateUserIdentity", () => {
+    describe('when "firstname" is not provided', () => {
+      it('only updates "lastname"', async () => {
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          "password"
+        );
+        const updatedUser = await UserService.updateUserIdentity(
+          user,
+          undefined,
+          "Williams"
+        );
+        expect(updatedUser.firstname).toBe("John");
+        expect(updatedUser.lastname).toBe("Williams");
+      });
+    });
+    describe('when "lastname" is not provided', () => {
+      it('only updates "firstname"', async () => {
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          "password"
+        );
+        const updatedUser = await UserService.updateUserIdentity(user, "James");
+        expect(updatedUser.firstname).toBe("James");
+        expect(updatedUser.lastname).toBe("Doe");
+      });
+    });
+    describe('when "firstname" and "lastname" are provided', () => {
+      it('updates "firstname" and "lastname"', async () => {
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          "password"
+        );
+        const updatedUser = await UserService.updateUserIdentity(
+          user,
+          "James",
+          "Williams"
+        );
+        expect(updatedUser.firstname).toBe("James");
+        expect(updatedUser.lastname).toBe("Williams");
+      });
+    });
+  });
+
+  describe("updateUserPassword", () => {
+    describe('when "currentPassword" is incorrect', () => {
+      it('throws "Incorrect current password" error message', async () => {
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          "password"
+        );
+        await expect(
+          UserService.updateUserPassword(
+            user,
+            "wrongPassword",
+            "newPassword",
+            false,
+            ""
+          )
+        ).rejects.toThrowError("Incorrect current password");
+      });
+    });
+    describe("when currentPassword is correct and disconnectMe is false", () => {
+      it("updates password", async () => {
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          "password"
+        );
+        const result = await UserService.updateUserPassword(
+          user,
+          "password",
+          "newPassword",
+          false,
+          ""
+        );
+        const updatedUser = await UserRepository.findByEmail(emailAddress);
+        expect(compareSync("newPassword", updatedUser?.password!)).toBe(true);
+        expect(compareSync("password", updatedUser?.password!)).toBe(false);
+        expect(result).toBe("Your password has been updated successfully");
+      });
+    });
+    describe("when currentPassword is correct and disconnectMe is true", () => {
+      it("updates password and call deleteAllSessionsButNotCurrentOne", async () => {
+        const CURRENT_PASSWORD = "password";
+        const NEW_PASSWORD = "newPassword";
+        const spy = jest.spyOn(
+          SessionService,
+          "deleteAllSessionsButNotCurrentOne"
+        );
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          CURRENT_PASSWORD
+        );
+        const result = await UserService.updateUserPassword(
+          user,
+          CURRENT_PASSWORD,
+          NEW_PASSWORD,
+          true,
+          "sessionId"
+        );
+        const updatedUser = await UserRepository.findByEmail(emailAddress);
+        expect(compareSync(NEW_PASSWORD, updatedUser?.password!)).toBe(true);
+        expect(compareSync(CURRENT_PASSWORD, updatedUser?.password!)).toBe(
+          false
+        );
+        expect(result).toBe(
+          "Your password has been updated successfully. You have been disconnected from all your other devices"
+        );
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe("updateUserEmail", () => {
+    describe("when email is already in use", () => {
+      it("throws 'This email is already used' error message", async () => {
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          "password"
+        );
+        await expect(
+          UserService.updateUserEmail(user, emailAddress)
+        ).rejects.toThrowError("This email is already used");
+      });
+    });
+    describe("when email is not already in use", () => {
+      it("should set desiredEmail as emailAwaitingConfirmation property on user ", async () => {
+        const newEmailAddress = "newEmailAddress@test.fr";
+        jest
+          .spyOn(UserService, "buildResetEmailMessageToQueue")
+          .mockImplementation((data: any) => {
+            return data;
+          });
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          "password"
+        );
+        const result = await UserService.updateUserEmail(user, newEmailAddress);
+        expect(result).toBe(
+          "Your request has been processed successfully. Please, check your inbox to confirm your email !"
+        );
+        const updatedUser = await UserRepository.findByEmail(emailAddress);
+        expect(updatedUser?.emailAwaitingConfirmation).toBe(newEmailAddress);
+        expect(updatedUser?.confirmationEmailToken).not.toBeNull();
+      });
+      it('should call "buildResetEmailMessageToQueue" with correct parameters', async () => {
+        const buildResetEmailMessageToQueue = () => {
+          return jest
+            .spyOn(UserService, "buildResetEmailMessageToQueue")
+            .mockImplementation((data: any) => {
+              return data;
+            });
+        };
+        const spy = buildResetEmailMessageToQueue();
+        const newEmailAddress = "newEmailAddress@test.fr";
+        const user = await UserService.createUser(
+          "John",
+          "Doe",
+          emailAddress,
+          "password"
+        );
+        await UserService.updateUserEmail(user, newEmailAddress);
+        await UserRepository.findByEmail(emailAddress);
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  // TODO: fix this test
+  // describe("buildResetEmailMessageToQueue", () => {
+  //   it("should call sendMessageOnResetEmailQueue once", async () => {
+  //     const user = await UserService.createUser(
+  //       "John",
+  //       "Doe",
+  //       emailAddress,
+  //       "password"
+  //     );
+  //     await UserService.buildResetEmailMessageToQueue(user);
+  //     expect(sendMessageOnResetEmailQueueSpy).toHaveBeenCalledTimes(1);
+  //   });
+  // });
+
+  describe("confirmEmail", () => {
+    describe("when confirmationEmailToken doesn't exist", () => {
+      it("throws 'Invalid email confirmation token' error message", async () => {
+        await expect(UserService.confirmEmail("token")).rejects.toThrowError(
+          "Invalid email confirmation token"
+        );
+      });
+    });
+    describe("when confirmationEmailToken exists", () => {
+      // describe("when email has already been used by another user", () => {
+      //   it.only("throws 'Invalid email confirmation token' error message", async () => {
+      //     const newEmailAddress = "newEmailAddress@test.fr";
+      //     const user = await UserService.createUser(
+      //       "John",
+      //       "Doe",
+      //       emailAddress,
+      //       "password"
+      //     );
+      //     await UserService.updateUserEmail(user, newEmailAddress);
+      //     const updatedFirstUser = await UserRepository.findByEmail(
+      //       emailAddress
+      //     );
+      //     console.log(updatedFirstUser?.confirmationEmailToken);
+      //     await UserService.createUser(
+      //       "John",
+      //       "Doe",
+      //       newEmailAddress,
+      //       "password"
+      //     );
+
+      //     await expect(
+      //       UserService.confirmEmail(updatedFirstUser?.confirmationEmailToken!)
+      //     ).rejects.toThrowError("This email is already used");
+      //   });
+      // });
+      describe("when email has already been validated by another user", () => {
+        it("throws 'Invalid email confirmation token' error message", async () => {
+          const newEmailAddress = "newEmailAddress@test.fr";
+          const user = await UserService.createUser(
+            "John",
+            "Doe",
+            emailAddress,
+            "password"
+          );
+          await UserService.updateUserEmail(user, newEmailAddress);
+          const user2 = await UserService.createUser(
+            "John",
+            "Doe",
+            "test@test.fr",
+            "password"
+          );
+          await UserService.updateUserEmail(user2, newEmailAddress);
+          const updatedFirstUser = await UserRepository.findByEmail(
+            emailAddress
+          );
+          const updatedSecondUser = await UserRepository.findByEmail(
+            "test@test.fr"
+          );
+          await UserService.confirmEmail(
+            updatedFirstUser?.confirmationEmailToken!
+          );
+          await expect(
+            UserService.confirmEmail(updatedSecondUser?.confirmationEmailToken!)
+          ).rejects.toThrowError("Invalid email confirmation token");
+        });
       });
     });
   });
