@@ -11,7 +11,7 @@ import {
 import { GlobalContext } from "../..";
 import RequestSetting from "../../entities/RequestSetting.entity";
 import User from "../../entities/User.entity";
-import PageOfRequestSetting from "../../models/PageOfRequestSetting";
+import PageOfRequestSettingWithLastResult from "../../models/PageOfRequestSettingWithLastResult";
 import RequestSettingWithLastResult from "../../models/RequestSettingWithLastResult";
 import RequestSettingService from "../../services/RequestSetting/RequestSetting.service";
 
@@ -67,18 +67,18 @@ export default class RequestSettingResolver {
     );
   }
 
-  @Query(() => PageOfRequestSetting)
-  requestSettings(
+  @Query(() => PageOfRequestSettingWithLastResult)
+  getPageOfRequestSettingWithLastResult(
     @Arg("pageNumber", () => Int) pageNumber: number,
-    // @Ctx() context: GlobalContext
-    @Arg("userId", () => String) userId: string
-  ): Promise<PageOfRequestSetting> {
-    // if (!context.user) throw Error("Unable to find user from global context");
-    return RequestSettingService.getRequestSettings(
+    @Ctx() context: GlobalContext
+    // @Arg("userId", () => String) userId: string
+  ): Promise<PageOfRequestSettingWithLastResult> {
+    if (!context.user) throw Error("Unable to find user from global context");
+    return RequestSettingService.getPageOfRequestSettingWithLastResult(
       PAGE_SIZE,
       pageNumber,
-      userId
-      // context.user?.id
+      // userId
+      context.user?.id
     );
   }
 

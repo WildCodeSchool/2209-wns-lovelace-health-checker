@@ -2,7 +2,7 @@ import RequestSetting, {
   Frequency,
 } from "../../entities/RequestSetting.entity";
 import User, { Role } from "../../entities/User.entity";
-import PageOfRequestSetting from "../../models/PageOfRequestSetting";
+import PageOfRequestSettingWithLastResult from "../../models/PageOfRequestSettingWithLastResult";
 import RequestSettingWithLastResult from "../../models/RequestSettingWithLastResult";
 import RequestResultRepository from "../../repositories/RequestResult.repository";
 import RequestSettingRepository from "../../repositories/RequestSetting.repository";
@@ -168,11 +168,11 @@ export default class RequestSettingService extends RequestSettingRepository {
       throw Error("Non Premium users can't use custom error alerts");
   };
 
-  static getRequestSettings = async (
+  static getPageOfRequestSettingWithLastResult = async (
     pageSize: number,
     pageNumber: number,
     userId: string
-  ): Promise<PageOfRequestSetting> => {
+  ): Promise<PageOfRequestSettingWithLastResult> => {
     const [requestSettings, totalCount] = await this.repository.findAndCount({
       where: { user: { id: userId } },
       take: pageSize,
@@ -183,12 +183,28 @@ export default class RequestSettingService extends RequestSettingRepository {
     });
 
     const numberOfRemainingItems = totalCount - pageNumber * pageSize;
+    const requestSettingsWithLastResult = await Promise.all(
+      requestSettings.map(async (requestSetting) => {
+        const lastRequestResult =
+          await RequestResultRepository.getMostRecentByRequestSettingId(
+            requestSetting.id
+          );
+        if (lastRequestResult)
+          return new RequestSettingWithLastResult(
+            requestSetting,
+            lastRequestResult
+          );
+        else return new RequestSettingWithLastResult(requestSetting, null);
+      })
+    );
+
     return {
       totalCount,
       nextPageNumber: numberOfRemainingItems > 0 ? pageNumber + 1 : null,
-      requestSettings,
+      requestSettingsWithLastResult,
     };
   };
+
   static getRequestSettingWithLastResultByRequestSettingId = async (
     id: string
   ): Promise<RequestSettingWithLastResult | void> => {
