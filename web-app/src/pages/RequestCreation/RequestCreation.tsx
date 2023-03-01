@@ -142,55 +142,61 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
     if (existingRequest) {
       setIsActive(existingRequest?.requestSetting?.isActive);
       setFrequency(existingRequest?.requestSetting?.frequency);
-      getAlertsAndSetValues(existingRequest?.requestSetting?.alerts);
+      setExistingRequestErrors(existingRequest?.requestSetting?.alerts);
     }
   }, [existingRequest]);
 
-  const getAlertsAndSetValues = (requestAlerts: any[]) => {
-    let emailAlerts = [];
-    let pushAlerts = [];
+  const setExistingRequestErrors = (requestAlerts: any[]) => {
+    let emailAlerts = getSpecificErrorsByType("email", requestAlerts);
+    let pushAlerts = getSpecificErrorsByType("push", requestAlerts);
 
-    emailAlerts = requestAlerts.filter((alert: any) => {
-      return alert.type === "email";
+    setCorrectStateForError("email", emailAlerts);
+    setCorrectStateForError("push", pushAlerts);
+  };
+
+  const getSpecificErrorsByType = (
+    type: "email" | "push",
+    requestAlerts: any[]
+  ) => {
+    return requestAlerts.filter((alert: any) => {
+      return alert.type === type;
     });
+  };
 
-    pushAlerts = requestAlerts.filter((alert: any) => {
-      return alert.type === "push";
-    });
+  const setCorrectStateForError = (type: "email" | "push", alerts: any[]) => {
+    const typeIsEmail = type === "email";
 
-    // Test if all or any alerts are set
-    if (emailAlerts.length === HTTP_ERROR_STATUS_CODES.length) {
-      setEmailAlerts("all");
-    } else if (!emailAlerts.length) {
-      setEmailAlerts([]);
-    } else {
-      let specificEmailAlerts: any = [];
-      emailAlerts.forEach((alert: any) => {
-        specificEmailAlerts.push({
-          value: alert.httpStatusCode,
-          label: alert.httpStatusCode.toString(),
-        });
-      });
-      onEmailSpecificErrorChange(specificEmailAlerts); // Simulate OnChange trigger and pass alerts values from existing request
+    // Case with no selected errors
+    if (alerts.length === HTTP_ERROR_STATUS_CODES.length) {
+      if (typeIsEmail) setEmailAlerts("all");
+      else setPushAlerts("all");
     }
-
-    if (pushAlerts.length === HTTP_ERROR_STATUS_CODES.length) {
-      setPushAlerts("all");
-    } else if (!pushAlerts.length) {
-      setPushAlerts([]);
-    } else {
-      let specificPushAlerts: any = [];
-      pushAlerts.forEach((alert: any) => {
-        specificPushAlerts.push({
-          value: alert.httpStatusCode,
-          label: alert.httpStatusCode.toString(),
-        });
-      });
-      onPushSpecificErrorChange(specificPushAlerts); // Simulate OnChange trigger and pass alerts values from existing request
+    // Case with all selected errors
+    else if (!alerts.length) {
+      if (typeIsEmail) setEmailAlerts([]);
+      else setPushAlerts([]);
+    }
+    // Case with specific errors
+    else {
+      if (typeIsEmail) setEmailAlerts("specific");
+      else setPushAlerts("specific");
+      let existingSpecificErrors = retrieveExistingSpecificErrors(alerts);
+      // Simulate OnChange trigger and set existing specific errors
+      if (typeIsEmail) onEmailSpecificErrorChange(existingSpecificErrors);
+      else onPushSpecificErrorChange(existingSpecificErrors);
     }
   };
 
-  /* TODO : if requestId, remove redirection to /requests */
+  const retrieveExistingSpecificErrors = (alerts: any[]) => {
+    let errors: any[] = [];
+    alerts.forEach((alert: any) => {
+      errors.push({
+        value: alert.httpStatusCode,
+        label: alert.httpStatusCode.toString(),
+      });
+    });
+    return errors;
+  };
 
   const {
     register,
@@ -321,7 +327,7 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
         {/* General */}
         <div className={`col-12 col-md-6 ${styles.formContainer}`}>
           <h2 className={`${styles.header} mt-md-3`}>
-            <i className="bi bi-info-circle"></i> General
+            <i className="bi bi-info-circle"></i>General
           </h2>
           <div className={`${styles.formContent}`}>
             <div className="form-floating mb-2">
@@ -673,8 +679,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                 id="flexRadioDefault1"
                 checked={typeof emailAlerts !== "string" && !emailAlerts.length}
                 onClick={() => {
-                  setEmailAlerts([]);
                   clearMultiSelectAndEmptyEmailErrorValues();
+                  setEmailAlerts([]);
                 }}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault1">
@@ -709,12 +715,15 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                 {...register("allErrorsEnabledEmail")}
                 id="flexRadioDefault2"
                 disabled={role !== "premium"}
-                checked={emailSpecificErrorRadioIsChecked}
-                onChange={() =>
+                checked={
+                  emailSpecificErrorRadioIsChecked || emailAlerts === "specific"
+                }
+                onChange={() => {
                   setEmailSpecificErrorRadioIsChecked(
                     !emailSpecificErrorRadioIsChecked
-                  )
-                }
+                  );
+                  setEmailAlerts("specific");
+                }}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault2">
                 Receive email on specific error(s)
@@ -738,9 +747,10 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
               options={HTTP_ERROR_STATUS_CODES}
               className={`${styles.emailSpecificErrors} basic-multi-select`}
               classNamePrefix="select"
-              onChange={(selectedErrors) =>
-                onEmailSpecificErrorChange(selectedErrors)
-              }
+              onChange={(selectedErrors) => {
+                onEmailSpecificErrorChange(selectedErrors);
+                setEmailAlerts("specific");
+              }}
             />
 
             {/* Push */}
@@ -791,12 +801,15 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                 {...register("allErrorsEnabledPush")}
                 id="flexRadioDefault2"
                 disabled={role !== "premium"}
-                checked={pushSpecificErrorRadioIsChecked}
-                onChange={() =>
+                checked={
+                  pushSpecificErrorRadioIsChecked || pushAlerts === "specific"
+                }
+                onChange={() => {
                   setPushSpecificErrorRadioIsChecked(
                     !pushSpecificErrorRadioIsChecked
-                  )
-                }
+                  );
+                  setPushAlerts("specific");
+                }}
               />
 
               <label
@@ -824,9 +837,10 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
               options={HTTP_ERROR_STATUS_CODES}
               className="basic-multi-select"
               classNamePrefix="select"
-              onChange={(selectedErrors) =>
-                onPushSpecificErrorChange(selectedErrors)
-              }
+              onChange={(selectedErrors) => {
+                onPushSpecificErrorChange(selectedErrors);
+                setPushAlerts("specific");
+              }}
             />
           </div>
         </div>
