@@ -2,6 +2,7 @@ import RequestSetting, {
   Frequency,
 } from "../../entities/RequestSetting.entity";
 import User, { Role } from "../../entities/User.entity";
+import PageOfRequestSetting from "../../models/PageOfRequestSetting";
 import RequestSettingRepository from "../../repositories/RequestSetting.repository";
 import AlertSettingService from "../AlertSetting/AlertSetting.service";
 
@@ -161,5 +162,27 @@ export default class RequestSettingService extends RequestSettingRepository {
       (customEmailErrors?.length || customPushErrors?.length)
     )
       throw Error("Non Premium users can't use custom error alerts");
+  };
+
+  static getRequestSettings = async (
+    pageSize: number,
+    pageNumber: number,
+    userId: string
+  ): Promise<PageOfRequestSetting> => {
+    const [requestSettings, totalCount] = await this.repository.findAndCount({
+      where: { user: { id: userId } },
+      take: pageSize,
+      skip: (pageNumber - 1) * pageSize,
+      order: {
+        createdAt: "DESC",
+      },
+    });
+
+    const numberOfRemainingItems = totalCount - pageNumber * pageSize;
+    return {
+      totalCount,
+      nextPageNumber: numberOfRemainingItems > 0 ? pageNumber + 1 : null,
+      requestSettings,
+    };
   };
 }

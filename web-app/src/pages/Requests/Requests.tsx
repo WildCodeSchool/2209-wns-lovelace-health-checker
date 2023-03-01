@@ -2,6 +2,7 @@ import { gql, useLazyQuery } from "@apollo/client";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import DataTable from "../../components/DataTable/DataTable";
 import { CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery } from "../../gql/graphql";
 import { REQUEST_CREATION_ROUTE } from "../../routes";
 import styles from "./Requests.module.scss";
@@ -44,8 +45,7 @@ const Requests = () => {
           <h1 className={`${styles.pageTitle}`}>Requests</h1>
           <button
             className={`${styles.createBtn}`}
-            onClick={navigateToRequestCreationPage}
-          >
+            onClick={navigateToRequestCreationPage}>
             Create
           </button>
         </div>
@@ -53,26 +53,25 @@ const Requests = () => {
           <div
             className={`${
               selectedTab === "informations" && styles.selectedTab
-            }  ${styles.tabContainer}`}
-          >
+            }  ${styles.tabContainer}`}>
             <span className={`${styles.tabs} `}>All</span>
           </div>
           <div
             className={`${selectedTab === "premium" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}
-          >
+            }`}>
             <span className={`${styles.tabs} `}>Active</span>
           </div>
           <div
             className={`${selectedTab === "bills" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}
-          >
+            }`}>
             <span className={`${styles.tabs} `}>Inactive</span>
           </div>
         </div>
-        <div>{/* Insert table here */}</div>
+        <div>
+          <DataTable />
+        </div>
       </div>
     </>
   );
