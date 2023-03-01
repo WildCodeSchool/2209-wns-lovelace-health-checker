@@ -1,10 +1,10 @@
 name: fix-formatting
 
 on:
-  push:
+  pull_request:
     branches:
-      - main
       - dev
+      - master
 
 jobs:
   fix-formatting:
