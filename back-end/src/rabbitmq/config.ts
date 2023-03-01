@@ -1,10 +1,10 @@
-import amqp = require('amqplib');
+import amqp = require("amqplib");
 
 import {
   onMessageOnAccountCreationEmailQueue,
   onMessageOnResetEmailQueue,
   onMessageOnResetPasswordEmailQueue,
-} from './consumers';
+} from "./consumers";
 
 export let channel: any;
 export let connection: any;

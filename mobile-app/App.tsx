@@ -1,11 +1,11 @@
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from "expo-status-bar";
 import Constants from "expo-constants";
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import useCachedResources from './hooks/useCachedResources';
-import useColorScheme from './hooks/useColorScheme';
-import Navigation from './navigation';
-import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
+import useCachedResources from "./hooks/useCachedResources";
+import useColorScheme from "./hooks/useColorScheme";
+import Navigation from "./navigation";
+import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 
 import Toast from "react-native-toast-message";
 

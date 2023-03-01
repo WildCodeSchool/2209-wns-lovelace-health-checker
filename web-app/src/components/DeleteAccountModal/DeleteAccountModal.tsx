@@ -87,7 +87,8 @@ const DeleteAccountModal = (props: DeleteAccountModalProps) => {
           </p>
           <form
             className={`${styles.modalInput}`}
-            onSubmit={handleSubmitPassword(onSubmitPassword)}>
+            onSubmit={handleSubmitPassword(onSubmitPassword)}
+          >
             <div className="form-floating mb-2">
               <input
                 type="password"
@@ -114,12 +115,14 @@ const DeleteAccountModal = (props: DeleteAccountModalProps) => {
               <button
                 className={`${styles.modalButton} ${styles.cancelButton}`}
                 onClick={props.onClose}
-                type="button">
+                type="button"
+              >
                 Cancel
               </button>
               <button
                 className={`${styles.modalButton} ${styles.deleteButton}`}
-                type="submit">
+                type="submit"
+              >
                 Delete
               </button>
             </div>

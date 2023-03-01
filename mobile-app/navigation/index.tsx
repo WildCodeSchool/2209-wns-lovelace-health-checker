@@ -68,7 +68,7 @@ function RootNavigator() {
           headerStyle: {
             backgroundColor: variables.$primary800,
           },
-          headerTitle: () => <HeaderLogo></HeaderLogo>,      
+          headerTitle: () => <HeaderLogo></HeaderLogo>,
         }}
       />
       <Stack.Group screenOptions={{ presentation: "modal" }}>

@@ -1,4 +1,4 @@
-import styles from './HomepageRequestTable.module.scss';
+import styles from "./HomepageRequestTable.module.scss";
 
 const HomepageRequestTable = ({
   statusCode,

@@ -1,8 +1,8 @@
-import { IsBoolean, IsDate, IsNotEmpty, IsString } from 'class-validator';
-import { Field, ID, ObjectType } from 'type-graphql';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { IsBoolean, IsDate, IsNotEmpty, IsString } from "class-validator";
+import { Field, ID, ObjectType } from "type-graphql";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-import RequestResult from './RequestResult.entity';
+import RequestResult from "./RequestResult.entity";
 
 @Entity()
 @ObjectType()

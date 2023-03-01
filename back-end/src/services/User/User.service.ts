@@ -1,17 +1,17 @@
-import { ExpressContext } from 'apollo-server-express';
-import { compareSync, hashSync } from 'bcryptjs';
-import { randomBytes } from 'crypto';
+import { ExpressContext } from "apollo-server-express";
+import { compareSync, hashSync } from "bcryptjs";
+import { randomBytes } from "crypto";
 
-import Session from '../../entities/Session.entity';
-import User, { Status } from '../../entities/User.entity';
+import Session from "../../entities/Session.entity";
+import User, { Status } from "../../entities/User.entity";
 import {
   sendMessageOnAccountCreationEmailQueue,
   sendMessageOnResetEmailQueue,
   sendMessageOnResetPasswordEmailQueue,
-} from '../../rabbitmq/providers';
-import UserRepository from '../../repositories/User.repository';
-import { getSessionIdInCookie } from '../../utils/http-cookies';
-import SessionService from '../Session/Session.service';
+} from "../../rabbitmq/providers";
+import UserRepository from "../../repositories/User.repository";
+import { getSessionIdInCookie } from "../../utils/http-cookies";
+import SessionService from "../Session/Session.service";
 
 export default class UserService extends UserRepository {
   static async createUser(
