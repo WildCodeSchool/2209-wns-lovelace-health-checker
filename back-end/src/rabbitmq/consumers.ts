@@ -72,3 +72,19 @@ export const onMessageOnResetEmailQueue = async () => {
     channel.ack(message);
   });
 };
+
+export const onMessageOnAutomatedRequestQueue = async () => {
+  channel.consume("automated-request", (message: any) => {
+    console.log("Start consuming message on queue automated-request.");
+    let parsedMessage = JSON.parse(
+      String.fromCharCode.apply(String, message.content)
+    );
+    // TODO: mettre en place la méthode à effectuer
+    // sendResetEmail(
+    //   parsedMessage.firstname,
+    //   parsedMessage.email,
+    //   parsedMessage.resetEmailToken
+    // );
+    channel.ack(message);
+  });
+}

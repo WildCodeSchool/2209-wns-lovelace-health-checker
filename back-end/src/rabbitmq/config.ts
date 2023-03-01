@@ -4,7 +4,8 @@ import {
   onMessageOnAccountCreationEmailQueue,
   onMessageOnResetEmailQueue,
   onMessageOnResetPasswordEmailQueue,
-} from './consumers';
+  // onMessageOnAutomatedRequestQueue,
+} from "./consumers";
 
 export let channel: any;
 export let connection: any;
@@ -17,10 +18,13 @@ export const connectionToRabbitMQ = async () => {
     await channel.assertQueue("account-creation-email");
     await channel.assertQueue("reset-password-email");
     await channel.assertQueue("reset-email");
+    await channel.assertQueue("automated-request");
     console.log("Successfully connected to RabbitMQ.");
     onMessageOnAccountCreationEmailQueue();
     onMessageOnResetPasswordEmailQueue();
     onMessageOnResetEmailQueue();
+    // TODO: décommenter
+    // onMessageOnAutomatedRequestQueue();
   } catch (error) {
     console.log(error);
   }
