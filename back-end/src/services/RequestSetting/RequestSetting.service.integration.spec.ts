@@ -319,7 +319,7 @@ describe("RequestService integration", () => {
   });
 
   describe("checkIfURLOrNameAreAlreadyUsed", () => {
-    it("calls getRequestSettingsByUserId once", () => {});
+    it("calls getByUserId once", () => {});
     describe("URL is already used", () => {
       it("displays 'This URL already exists' error message", () => {});
     });

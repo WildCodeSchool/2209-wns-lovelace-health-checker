@@ -5,3 +5,5 @@ export function getErrorMessage(error: unknown) {
 
 export const SERVER_IS_KO_ERROR_MESSAGE =
   "Oops, it seems that something went wrong. Please try again";
+
+export const REQUEST_DOESNT_EXIST = "Request doesn't exist";

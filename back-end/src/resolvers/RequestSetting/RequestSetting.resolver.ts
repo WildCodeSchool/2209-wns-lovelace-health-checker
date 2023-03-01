@@ -12,9 +12,13 @@ import { GlobalContext } from "../..";
 import RequestSetting from "../../entities/RequestSetting.entity";
 import User from "../../entities/User.entity";
 import PageOfRequestSetting from "../../models/PageOfRequestSetting";
+import RequestSettingWithLastResult from "../../models/RequestSettingWithLastResult";
 import RequestSettingService from "../../services/RequestSetting/RequestSetting.service";
 
-import { CreateRequestSettingArgs } from "./RequestSetting.input";
+import {
+  CreateRequestSettingArgs,
+  GetRequestSettingByIdArgs,
+} from "./RequestSetting.input";
 
 const PAGE_SIZE = 10;
 @Resolver(RequestSetting)
@@ -76,5 +80,22 @@ export default class RequestSettingResolver {
       userId
       // context.user?.id
     );
+  }
+
+  @Authorized()
+  @Query(() => RequestSettingWithLastResult)
+  async getRequestSettingById(
+    @Args() { id }: GetRequestSettingByIdArgs,
+    @Ctx() context: GlobalContext
+  ) {
+    const user = context.user as User;
+    const result =
+      await RequestSettingService.getRequestSettingWithLastResultByRequestSettingId(
+        id
+      );
+
+    if (result && result.requestSetting.user.id != user.id)
+      throw Error("Request doesn't exist");
+    else return result;
   }
 }

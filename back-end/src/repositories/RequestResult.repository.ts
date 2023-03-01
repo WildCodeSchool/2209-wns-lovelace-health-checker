@@ -19,4 +19,17 @@ export default class RequestResultRepository {
   static async clearRepository(): Promise<void> {
     await this.repository.delete({});
   }
+
+  static async getMostRecentByRequestSettingId(
+    requestSettingId: string
+  ): Promise<RequestResult | null> {
+    const results = await this.repository.find({
+      where: { requestSetting: { id: requestSettingId } },
+      order: { createdAt: "DESC" },
+      take: 1,
+    });
+
+    if (results.length != 0) return results[0];
+    else return null;
+  }
 }
