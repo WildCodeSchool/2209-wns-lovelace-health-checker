@@ -1,4 +1,6 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Row, Rows, Table } from "react-native-table-component";
+import { styles } from "./HomepageRequestTableStyle";
 
 const HomepageRequestTable = ({
   statusCode,
@@ -10,10 +12,35 @@ const HomepageRequestTable = ({
   getIsAvailable: boolean;
 }) => {
   return (
-    <Table style={{}}>
-      <Row data={["AVAILABILITY", "STATUS CODE", "DURATION"]} />
+    <Table
+      style={styles.table}
+      borderStyle={{ borderWidth: 2, borderColor: "#dee2e6" }}
+    >
+      <Row
+        data={["AVAILABILITY", "STATUS CODE", "DURATION"]}
+        style={styles.head}
+        textStyle={[styles.text, styles.headText]}
+      />
       <Rows
-        data={[[getIsAvailable ? "OK" : "KO", statusCode, duration + "ms"]]}
+        data={[
+          [
+            getIsAvailable ? (
+              <Ionicons
+                style={styles.available}
+                name="checkmark-circle-outline"
+              />
+            ) : (
+              <Ionicons
+                style={styles.notAvailable}
+                name="close-circle-outline"
+              />
+            ),
+            statusCode,
+            duration + "ms",
+          ],
+        ]}
+        style={styles.datas}
+        textStyle={styles.text}
       />
     </Table>
   );
