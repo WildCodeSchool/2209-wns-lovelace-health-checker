@@ -84,12 +84,14 @@ interface RequestProps {
 const RequestCreation = ({ role, existingRequest }: RequestProps) => {
   const [isActive, setIsActive] = useState(true);
   const [frequency, setFrequency] = useState(Frequency.ONE_HOUR);
+  const [emailAlerts, setEmailAlerts] = useState<any[] | string>([]);
+  const [pushAlerts, setPushAlerts] = useState<any[] | string>([]);
 
-  const [emailSpecificErrors, setEmailSpecificErrors] = useState([]);
+  const [emailSpecificErrors, setEmailSpecificErrors] = useState<number[]>([]);
   const [emailSpecificErrorsInputValue, setEmailSpecificErrorsInputValue] =
     useState(null);
 
-  const [pushSpecificErrors, setPushSpecificErrors] = useState([]);
+  const [pushSpecificErrors, setPushSpecificErrors] = useState<number[]>([]);
   const [pushSpecificErrorsInputValue, setPushSpecificErrorsInputValue] =
     useState(null);
 
@@ -139,9 +141,53 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
     if (existingRequest) {
       setIsActive(existingRequest?.requestSetting?.isActive);
       setFrequency(existingRequest?.requestSetting?.frequency);
-      console.log(existingRequest?.requestSetting?.frequency);
+      getAlertsAndSetValues(existingRequest?.requestSetting?.alerts);
     }
   }, [existingRequest]);
+
+  const getAlertsAndSetValues = (requestAlerts: any[]) => {
+    let emailAlerts = [];
+    let pushAlerts = [];
+
+    emailAlerts = requestAlerts.filter((alert: any) => {
+      return alert.type === "email";
+    });
+
+    pushAlerts = requestAlerts.filter((alert: any) => {
+      return alert.type === "push";
+    });
+
+    // Test if all or any alerts are set
+    if (emailAlerts.length === HTTP_ERROR_STATUS_CODES.length) {
+      setEmailAlerts("all");
+    } else if (!emailAlerts.length) {
+      setEmailAlerts([]);
+    } else {
+      let specificEmailAlerts: any = [];
+      emailAlerts.forEach((alert: any) => {
+        specificEmailAlerts.push({
+          value: alert.httpStatusCode,
+          label: alert.httpStatusCode.toString(),
+        });
+      });
+      onEmailSpecificErrorChange(specificEmailAlerts); // Simulate OnChange trigger and pass alerts values from existing request
+    }
+
+    if (pushAlerts.length === HTTP_ERROR_STATUS_CODES.length) {
+      setPushAlerts("all");
+    } else if (!pushAlerts.length) {
+      setPushAlerts([]);
+    } else {
+      let specificPushAlerts: any = [];
+      pushAlerts.forEach((alert: any) => {
+        specificPushAlerts.push({
+          value: alert.httpStatusCode,
+          label: alert.httpStatusCode.toString(),
+        });
+      });
+      onPushSpecificErrorChange(specificPushAlerts); // Simulate OnChange trigger and pass alerts values from existing request
+    }
+  };
 
   /* TODO : if requestId, remove redirection to /requests */
 
@@ -249,7 +295,7 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
           data.allErrorsEnabledPush === "true" ? true : false,
         customEmailErrors: getSpecificErrorsValues(emailSpecificErrors),
         customPushErrors: getSpecificErrorsValues(pushSpecificErrors),
-        name: data.name.length ? data.name : undefined,
+        name: data.name?.length ? data.name : undefined,
         headers: data.headers.length ? JSON.stringify(data.headers) : undefined,
       },
     });
@@ -615,6 +661,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
           </h2>
           <div className={`${styles.formContent}`}>
             {/* Email */}
+
+            {/* No email */}
             <div className="form-check mb-2">
               <input
                 className="form-check-input"
@@ -622,13 +670,18 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                 value="false"
                 {...register("allErrorsEnabledEmail")}
                 id="flexRadioDefault1"
-                defaultChecked
-                onClick={clearMultiSelectAndEmptyEmailErrorValues}
+                checked={typeof emailAlerts !== "string" && !emailAlerts.length}
+                onClick={() => {
+                  setEmailAlerts([]);
+                  clearMultiSelectAndEmptyEmailErrorValues();
+                }}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault1">
                 No email alert
               </label>
             </div>
+
+            {/* All email */}
             <div className="form-check mb-2">
               <input
                 className="form-check-input"
@@ -636,12 +689,18 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                 value="true"
                 {...register("allErrorsEnabledEmail")}
                 id="flexRadioDefault1"
-                onChange={clearMultiSelectAndEmptyEmailErrorValues}
+                onChange={() => {
+                  clearMultiSelectAndEmptyEmailErrorValues();
+                  setEmailAlerts("all");
+                }}
+                checked={emailAlerts === "all"}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault1">
                 Receive email on error 4XX and 5XX
               </label>
             </div>
+
+            {/* Specific email */}
             <div className="form-check mb-2">
               <input
                 className="form-check-input"
@@ -684,6 +743,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
             />
 
             {/* Push */}
+
+            {/* No push */}
             <div className="form-check mb-2">
               <input
                 className="form-check-input"
@@ -691,13 +752,18 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                 value="false"
                 {...register("allErrorsEnabledPush")}
                 id="flexRadioDefault1"
-                defaultChecked
-                onClick={clearMultiSelectAndEmptyPushErrorValues}
+                checked={typeof pushAlerts !== "string" && !pushAlerts.length}
+                onClick={() => {
+                  setPushAlerts([]);
+                  clearMultiSelectAndEmptyPushErrorValues();
+                }}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault1">
                 No push notification
               </label>
             </div>
+
+            {/* All push */}
             <div className="form-check mb-2">
               <input
                 className="form-check-input"
@@ -705,12 +771,18 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                 value="true"
                 {...register("allErrorsEnabledPush")}
                 id="flexRadioDefault1"
-                onChange={clearMultiSelectAndEmptyPushErrorValues}
+                onChange={() => {
+                  setPushAlerts("all");
+                  clearMultiSelectAndEmptyPushErrorValues();
+                }}
+                checked={pushAlerts === "all"}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault1">
                 Push notification on error 4XX and 5XX
               </label>
             </div>
+
+            {/* Specific push */}
             <div className="form-check mb-2">
               <input
                 className="form-check-input"
@@ -725,6 +797,7 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                   )
                 }
               />
+
               <label
                 className={` ${styles.inline} form-check-label`}
                 htmlFor="flexRadioDefault2"
