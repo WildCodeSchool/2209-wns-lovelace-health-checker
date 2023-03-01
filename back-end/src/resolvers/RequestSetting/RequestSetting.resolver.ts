@@ -8,6 +8,7 @@ import RequestSettingService from "../../services/RequestSetting/RequestSetting.
 import {
   CreateRequestSettingArgs,
   GetRequestSettingByIdArgs,
+  UpdateRequestSettingArgs,
 } from "./RequestSetting.input";
 
 @Resolver(RequestSetting)
@@ -57,12 +58,54 @@ export default class RequestSettingResolver {
   }
 
   @Authorized()
+  @Mutation(() => RequestSetting)
+  async updateRequestSetting(
+    @Args()
+    {
+      id,
+      url,
+      frequency,
+      name,
+      headers,
+      isActive,
+      allErrorsEnabledEmail,
+      allErrorsEnabledPush,
+      customEmailErrors,
+      customPushErrors,
+    }: UpdateRequestSettingArgs,
+    @Ctx() context: GlobalContext
+  ): Promise<RequestSetting> {
+    const user = context.user as User;
+    if (!user) throw Error("Unable to find user from global context");
+
+    const toUpdateRequestSetting = await RequestSettingService.getById(id);
+    if (toUpdateRequestSetting?.user.id !== user.id)
+      throw Error("Unauthorized");
+
+    return await RequestSettingService.checkForErrorsAndUpdateRequest(
+      id,
+      url,
+      frequency,
+      name,
+      headers,
+      isActive,
+      allErrorsEnabledEmail,
+      allErrorsEnabledPush,
+      customEmailErrors,
+      customPushErrors,
+      user
+    );
+  }
+
+  @Authorized()
   @Query(() => RequestSettingWithLastResult)
   async getRequestSettingById(
     @Args() { id }: GetRequestSettingByIdArgs,
     @Ctx() context: GlobalContext
   ) {
     const user = context.user as User;
+    if (!user) throw Error("Unable to find user from global context");
+
     const result =
       await RequestSettingService.getRequestSettingWithLastResultByRequestSettingId(
         id

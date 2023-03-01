@@ -8,6 +8,8 @@ import { gql, useMutation } from "@apollo/client";
 import {
   CreateRequestSettingMutation,
   CreateRequestSettingMutationVariables,
+  UpdateRequestSettingMutation,
+  UpdateRequestSettingMutationVariables,
 } from "../../gql/graphql";
 
 import { Frequency } from "../../utils/request-frequency.enum";
@@ -27,6 +29,7 @@ import {
   URL_PLACEHOLDER,
 } from "../../utils/form-validations";
 import { REQUESTS_ROUTE } from "../../routes";
+import { AlertType } from "../../utils/alert-types.enum";
 
 export const CREATE_REQUEST = gql`
   mutation CreateRequestSetting(
@@ -60,6 +63,48 @@ export const CREATE_REQUEST = gql`
       alerts {
         type
         httpStatusCode
+      }
+    }
+  }
+`;
+
+export const UPDATE_REQUEST = gql`
+  mutation UpdateRequestSetting(
+    $updateRequestSettingId: String!
+    $url: String!
+    $frequency: Float!
+    $name: String
+    $headers: String
+    $isActive: Boolean!
+    $allErrorsEnabledEmail: Boolean!
+    $allErrorsEnabledPush: Boolean!
+    $customEmailErrors: [Float!]
+    $customPushErrors: [Float!]
+  ) {
+    updateRequestSetting(
+      id: $updateRequestSettingId
+      url: $url
+      frequency: $frequency
+      name: $name
+      headers: $headers
+      isActive: $isActive
+      allErrorsEnabledEmail: $allErrorsEnabledEmail
+      allErrorsEnabledPush: $allErrorsEnabledPush
+      customEmailErrors: $customEmailErrors
+      customPushErrors: $customPushErrors
+    ) {
+      id
+      url
+      name
+      isActive
+      createdAt
+      updatedAt
+      frequency
+      headers
+      alerts {
+        id
+        httpStatusCode
+        type
       }
     }
   }
@@ -147,24 +192,21 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
   }, [existingRequest]);
 
   const setExistingRequestErrors = (requestAlerts: any[]) => {
-    let emailAlerts = getSpecificErrorsByType("email", requestAlerts);
-    let pushAlerts = getSpecificErrorsByType("push", requestAlerts);
+    let emailAlerts = getSpecificErrorsByType(AlertType.EMAIL, requestAlerts);
+    let pushAlerts = getSpecificErrorsByType(AlertType.PUSH, requestAlerts);
 
-    setCorrectStateForError("email", emailAlerts);
-    setCorrectStateForError("push", pushAlerts);
+    setCorrectStateForError(AlertType.EMAIL, emailAlerts);
+    setCorrectStateForError(AlertType.PUSH, pushAlerts);
   };
 
-  const getSpecificErrorsByType = (
-    type: "email" | "push",
-    requestAlerts: any[]
-  ) => {
+  const getSpecificErrorsByType = (type: AlertType, requestAlerts: any[]) => {
     return requestAlerts.filter((alert: any) => {
       return alert.type === type;
     });
   };
 
-  const setCorrectStateForError = (type: "email" | "push", alerts: any[]) => {
-    const typeIsEmail = type === "email";
+  const setCorrectStateForError = (type: AlertType, alerts: any[]) => {
+    const typeIsEmail = type === AlertType.EMAIL;
 
     // Case with no selected errors
     if (alerts.length === HTTP_ERROR_STATUS_CODES.length) {
@@ -207,9 +249,11 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
     defaultValues: {
       url: existingRequest ? existingRequest?.requestSetting?.url : "",
       name: existingRequest ? existingRequest?.requestSetting?.name : "",
-      headers: existingRequest?.requestSetting?.headers
-        ? JSON.parse(existingRequest?.requestSetting?.headers)
-        : [],
+      headers:
+        existingRequest?.requestSetting?.headers &&
+        existingRequest?.requestSetting?.headers?.length
+          ? JSON.parse(existingRequest?.requestSetting?.headers)
+          : [],
     },
     criteriaMode: "all",
   });
@@ -282,6 +326,67 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
     },
   });
 
+  const [update] = useMutation<
+    UpdateRequestSettingMutation,
+    UpdateRequestSettingMutationVariables
+  >(UPDATE_REQUEST, {
+    onCompleted: () => {
+      toast.success("Request updated successfully !", {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        toastId: 100,
+      });
+      navigate(REQUESTS_ROUTE);
+    },
+    onError: (error) => {
+      switch (error.message) {
+        case "This URL already exists":
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 2,
+          });
+          break;
+        case "This name already exists":
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 3,
+          });
+          break;
+        case "Argument Validation Error":
+          toast.error(
+            "Your form contains one or more errors. Please check your input values",
+            {
+              position: toast.POSITION.BOTTOM_RIGHT,
+              toastId: 4,
+            }
+          );
+          break;
+        case "This frequency is only useable by Premium users":
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 5,
+          });
+          break;
+        case "Non Premium users can't use custom error alerts":
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 6,
+          });
+          break;
+        case "Headers format is incorrect":
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 7,
+          });
+          break;
+        default:
+          toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 8,
+          });
+      }
+    },
+  });
+
   const getSpecificErrorsValues = (errors: any[]): number[] => {
     const values: number[] = [];
     errors.forEach((element: any) => {
@@ -291,21 +396,62 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
   };
 
   const onSubmit: SubmitHandler<any> = async (data: any) => {
-    await create({
-      variables: {
-        url: data.url,
-        frequency: parseInt(data.frequency),
-        isActive: data.isActive === "true" ? true : false,
-        allErrorsEnabledEmail:
-          data.allErrorsEnabledEmail === "true" ? true : false,
-        allErrorsEnabledPush:
-          data.allErrorsEnabledPush === "true" ? true : false,
-        customEmailErrors: getSpecificErrorsValues(emailSpecificErrors),
-        customPushErrors: getSpecificErrorsValues(pushSpecificErrors),
-        name: data.name?.length ? data.name : undefined,
-        headers: data.headers.length ? JSON.stringify(data.headers) : undefined,
-      },
-    });
+    if (existingRequest) {
+      console.log({
+        variables: {
+          updateRequestSettingId: existingRequest?.requestSetting?.id,
+          url: data.url,
+          frequency: parseInt(data.frequency),
+          isActive: data.isActive === "true" ? true : false,
+          allErrorsEnabledEmail:
+            data.allErrorsEnabledEmail === "true" ? true : false,
+          allErrorsEnabledPush:
+            data.allErrorsEnabledPush === "true" ? true : false,
+          customEmailErrors: getSpecificErrorsValues(emailSpecificErrors),
+          customPushErrors: getSpecificErrorsValues(pushSpecificErrors),
+          name: data.name?.length ? data.name : undefined,
+          headers: data.headers.length
+            ? JSON.stringify(data.headers)
+            : undefined,
+        },
+      });
+      await update({
+        variables: {
+          updateRequestSettingId: existingRequest?.requestSetting?.id,
+          url: data.url,
+          frequency: parseInt(data.frequency),
+          isActive: data.isActive === "true" ? true : false,
+          allErrorsEnabledEmail:
+            data.allErrorsEnabledEmail === "true" ? true : false,
+          allErrorsEnabledPush:
+            data.allErrorsEnabledPush === "true" ? true : false,
+          customEmailErrors: getSpecificErrorsValues(emailSpecificErrors),
+          customPushErrors: getSpecificErrorsValues(pushSpecificErrors),
+          name: data.name?.length ? data.name : undefined,
+          headers: data.headers.length
+            ? JSON.stringify(data.headers)
+            : undefined,
+        },
+      });
+    } else {
+      await create({
+        variables: {
+          url: data.url,
+          frequency: parseInt(data.frequency),
+          isActive: data.isActive === "true" ? true : false,
+          allErrorsEnabledEmail:
+            data.allErrorsEnabledEmail === "true" ? true : false,
+          allErrorsEnabledPush:
+            data.allErrorsEnabledPush === "true" ? true : false,
+          customEmailErrors: getSpecificErrorsValues(emailSpecificErrors),
+          customPushErrors: getSpecificErrorsValues(pushSpecificErrors),
+          name: data.name?.length ? data.name : undefined,
+          headers: data.headers.length
+            ? JSON.stringify(data.headers)
+            : undefined,
+        },
+      });
+    }
   };
 
   return (

@@ -76,6 +76,14 @@ export class CreateRequestSettingArgs {
 }
 
 @ArgsType()
+export class UpdateRequestSettingArgs extends CreateRequestSettingArgs {
+  @Field()
+  @IsNotEmpty()
+  @IsString()
+  id: string;
+}
+
+@ArgsType()
 export class GetRequestSettingByIdArgs {
   @Field()
   @IsString()

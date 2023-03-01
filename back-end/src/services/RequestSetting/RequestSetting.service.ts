@@ -56,6 +56,68 @@ export default class RequestSettingService extends RequestSettingRepository {
     return createdRequestSetting;
   };
 
+  static checkForRequestErrors = (
+    headers: string | undefined,
+    user: User,
+    frequency: Frequency,
+    customEmailErrors: number[] | undefined,
+    customPushErrors: number[] | undefined
+  ) => {
+    if (headers) {
+      this.checkIfHeadersAreRightFormatted(headers);
+    }
+
+    this.checkIfNonPremiumUserTryToUsePremiumFrequency(user, frequency);
+
+    this.checkIfNonPremiumUserTryToUseCustomError(
+      user,
+      customEmailErrors,
+      customPushErrors
+    );
+  };
+
+  static checkForErrorsAndUpdateRequest = async (
+    id: string,
+    url: string,
+    frequency: Frequency,
+    name: string | undefined,
+    headers: string | undefined,
+    isActive: boolean,
+    allErrorsEnabledEmail: boolean,
+    allErrorsEnabledPush: boolean,
+    customEmailErrors: number[] | undefined,
+    customPushErrors: number[] | undefined,
+    user: User
+  ): Promise<RequestSetting> => {
+    this.checkForRequestErrors(
+      headers,
+      user,
+      frequency,
+      customEmailErrors,
+      customPushErrors
+    );
+
+    const updatedRequestSetting = await this.updateRequestSetting(
+      id,
+      user,
+      url,
+      frequency,
+      isActive,
+      name,
+      headers
+    );
+
+    await AlertSettingService.updateAlerts(
+      updatedRequestSetting,
+      customEmailErrors,
+      customPushErrors,
+      allErrorsEnabledEmail,
+      allErrorsEnabledPush
+    );
+
+    return updatedRequestSetting;
+  };
+
   static async createRequestSetting(
     user: User,
     url: string,
@@ -77,9 +139,38 @@ export default class RequestSettingService extends RequestSettingRepository {
     );
 
     const savedRequestSetting = await this.saveRequestSetting(requestSetting);
-    console.log({ savedRequestSetting });
     return savedRequestSetting;
   }
+
+  static updateRequestSetting = async (
+    id: string,
+    user: User,
+    url: string,
+    frequency: Frequency,
+    isActive: boolean,
+    name?: string,
+    headers?: string
+  ): Promise<RequestSetting> => {
+    await this.checkIfNonPremiumUserHasReachedMaxRequestsCount(user);
+    await this.checkIfURLOrNameAreAlreadyUsed(user, url, name, id);
+
+    let existingRequestSetting = await this.repository.findOneBy({ id: id });
+    if (!existingRequestSetting) throw Error("Request doesn't exist");
+
+    existingRequestSetting.url = url;
+    existingRequestSetting.frequency = frequency;
+    existingRequestSetting.isActive = isActive;
+    existingRequestSetting.name = name;
+    if (headers === undefined) {
+      existingRequestSetting.headers = "";
+    } else existingRequestSetting.headers = headers;
+    existingRequestSetting.updatedAt = new Date();
+
+    const updatedRequestSetting = await this.saveRequestSetting(
+      existingRequestSetting
+    );
+    return updatedRequestSetting;
+  };
 
   static checkIfNonPremiumUserHasReachedMaxRequestsCount = async (
     user: User
@@ -102,21 +193,26 @@ export default class RequestSettingService extends RequestSettingRepository {
   static async checkIfURLOrNameAreAlreadyUsed(
     user: User,
     url: string,
-    name: string | undefined
+    name: string | undefined,
+    id?: string
   ) {
     const userSettingRequests = await RequestSettingRepository.getByUserId(
       user.id
     );
 
-    const URLAlreadyExists = userSettingRequests.some(
-      (request: RequestSetting) => request.url === url
-    );
+    // For request update case, we exclude current request
+    const URLAlreadyExists = userSettingRequests
+      .filter((request) => request.id !== id)
+      .some((request: RequestSetting) => request.url === url);
     if (URLAlreadyExists) throw Error("This URL already exists");
 
-    const nameAlreadyExists = userSettingRequests.some(
-      (request: RequestSetting) =>
-        request.name === name && request.name !== null
-    );
+    // For request update case, we exclude current request
+    const nameAlreadyExists = userSettingRequests
+      .filter((request) => request.id !== id)
+      .some(
+        (request: RequestSetting) =>
+          request.name === name && request.name !== null
+      );
     if (nameAlreadyExists) throw Error("This name already exists");
   }
 
