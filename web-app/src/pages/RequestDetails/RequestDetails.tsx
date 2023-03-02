@@ -2,7 +2,11 @@ import { gql, useQuery } from "@apollo/client";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { GetRequestSettingByIdQuery } from "../../gql/graphql";
+import RequestDetailsInformations from "../../components/RequestDetailsInformations/RequestDetailsInformations";
+import {
+  GetRequestSettingByIdQuery,
+  GetRequestSettingByIdQueryVariables,
+} from "../../gql/graphql";
 import { REQUESTS_ROUTE } from "../../routes";
 import {
   REQUEST_DOESNT_EXIST,
@@ -45,40 +49,48 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
 
   let { requestId } = useParams();
 
-  const { data } = useQuery<GetRequestSettingByIdQuery>(
-    GET_REQUEST_SETTING_BY_ID,
-    {
-      variables: { id: requestId },
-      onError: (error) => {
-        if (error.message.includes("invalid input syntax for type uuid"))
-          toast.error(REQUEST_DOESNT_EXIST, {
-            position: toast.POSITION.BOTTOM_RIGHT,
-            toastId: "RDE",
-          });
-        else {
-          switch (error.message) {
-            case REQUEST_DOESNT_EXIST:
-              toast.error(error.message, {
-                position: toast.POSITION.BOTTOM_RIGHT,
-                toastId: 1,
-              });
-              break;
-            default:
-              toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
-                position: toast.POSITION.BOTTOM_RIGHT,
-                toastId: 2,
-              });
-          }
+  const { data } = useQuery<
+    GetRequestSettingByIdQuery,
+    GetRequestSettingByIdQueryVariables
+  >(GET_REQUEST_SETTING_BY_ID, {
+    variables: { id: requestId! },
+    onCompleted: (data) => {
+      console.log({ data });
+    },
+    onError: (error) => {
+      if (error.message.includes("invalid input syntax for type uuid"))
+        toast.error(REQUEST_DOESNT_EXIST, {
+          position: toast.POSITION.BOTTOM_RIGHT,
+          toastId: "RDE",
+        });
+      else {
+        switch (error.message) {
+          case REQUEST_DOESNT_EXIST:
+            toast.error(error.message, {
+              position: toast.POSITION.BOTTOM_RIGHT,
+              toastId: 1,
+            });
+            break;
+          default:
+            toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
+              position: toast.POSITION.BOTTOM_RIGHT,
+              toastId: 2,
+            });
         }
-        navigate(REQUESTS_ROUTE);
-      },
-    }
-  );
+      }
+      navigate(REQUESTS_ROUTE);
+    },
+  });
 
   return (
     <>
       <div className={`${styles.contentContainer}`}>
-        <div className="d-flex align-items-center justify-content-between">
+        <div className="d-flex align-items-center">
+          <i
+            onClick={() => navigate(REQUESTS_ROUTE)}
+            title="Go back to request list"
+            className={`${styles.previousIcon} bi bi-arrow-left me-3`}
+          ></i>
           <h1 className={`${styles.pageTitle}`}>Request details</h1>
         </div>
         <div className={`${styles.slider} gap-4 mt-5`}>
@@ -120,7 +132,11 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
           </div>
         </div>
       </div>
-      {selectedTab === "informations" && <div>informations</div>}
+      {selectedTab === "informations" && (
+        <RequestDetailsInformations
+          existingRequest={data?.getRequestSettingById}
+        />
+      )}
       {selectedTab === "settings" && (
         <RequestCreation
           role={role}

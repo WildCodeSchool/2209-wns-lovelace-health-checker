@@ -54,7 +54,7 @@ const Account = ({
             Log out
           </span>
         </div>
-        <div className="d-flex gap-4 mt-5">
+        <div className="d-flex gap-5 mt-5">
           <div
             className={`${
               selectedTab === "informations" && styles.selectedTab
