@@ -3,8 +3,8 @@ import {
   sendConfirmationEmail,
   sendResetEmail,
   sendResetPasswordEmail,
-} from '../services/nodemailer/nodemailer.service';
-import { channel } from './config';
+} from "../services/nodemailer/nodemailer.service";
+import { channel } from "./config";
 
 export const onMessageOnAccountCreationEmailQueue = async () => {
   console.log(

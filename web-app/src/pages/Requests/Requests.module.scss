@@ -22,7 +22,7 @@
     @include clickable;
   }
   .tabContainer {
-    padding: 3px 5px;
+    padding: variables.$padding-xxs variables.$padding-lg;
     width: 119px;
     border-radius: 50px;
     text-align: center;

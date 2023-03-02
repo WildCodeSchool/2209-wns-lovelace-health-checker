@@ -30,7 +30,7 @@ export const components = StyleSheet.create({
   separator: {
     color: variables.$neutral800,
     marginVertical: variables.$marginXL,
-    marginHorizontal : 0
+    marginHorizontal: 0,
   },
   btn: {
     ...sharedProperties.btn,

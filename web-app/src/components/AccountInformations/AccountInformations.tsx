@@ -385,7 +385,8 @@ const AccountInformations = ({
                 />
                 <label
                   className={`form-check-label ${styles.checkLabel}`}
-                  htmlFor="disconnectMe">
+                  htmlFor="disconnectMe"
+                >
                   Disconnect me from all my other devices
                 </label>
               </div>
@@ -407,7 +408,8 @@ const AccountInformations = ({
             </p>
             <button
               className={`${styles.dangerButton}`}
-              onClick={() => setShowDeleteAccountModal(true)}>
+              onClick={() => setShowDeleteAccountModal(true)}
+            >
               Delete your account
             </button>
           </div>

@@ -1,8 +1,8 @@
-import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Field, ID, ObjectType } from 'type-graphql';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { Field, ID, ObjectType } from "type-graphql";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-import User from './User.entity';
+import User from "./User.entity";
 
 @Entity()
 @ObjectType()
