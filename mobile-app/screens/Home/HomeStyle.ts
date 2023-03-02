@@ -36,6 +36,7 @@ export const styles = StyleSheet.create({
   },
   contentContainer: {
     ...components.contentContainer,
+    backgroundColor: "white",
   },
   requestContainer: {
     width: "100%",

@@ -25,6 +25,7 @@ import {
 import Constants from "expo-constants";
 import { animatedStyle } from "../../styles/components";
 import { Ionicons } from "@expo/vector-icons";
+import Footer from "../../components/Footer/FooterComponent";
 
 const REQUEST_TIMEOUT = Constants?.expoConfig?.extra?.REQUEST_TIMEOUT;
 
@@ -156,8 +157,6 @@ const Home = () => {
                 styles.searchButton,
               ]}
             >
-              {/* TODO: Remplacer le texte Submit par une icon */}
-              {/* <Text style={styles.btnTextSecondary}>Submit</Text> */}
               <Ionicons style={{}} name="search" />
             </Pressable>
           </View>
@@ -171,7 +170,7 @@ const Home = () => {
         {loading ||
         data ||
         (error && ERROR_MESSAGE_ARRAY.includes(getErrorMessage(error))) ? (
-          <View style={bootstrap.mb5}>
+          <View style={bootstrap.mb3}>
             <Text style={bootstrap.m0}>
               {loading ? (
                 `We are testing ${url}`
@@ -282,6 +281,7 @@ const Home = () => {
           </Link>
         </View>
       </View>
+      <Footer></Footer>
     </ScrollView>
   );
 };

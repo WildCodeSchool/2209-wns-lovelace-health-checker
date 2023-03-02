@@ -51,4 +51,14 @@ export default class UserRepository {
   static async deleteUser(user: User): Promise<void> {
     await this.repository.remove(user);
   }
+
+  static getAllByEmailAwaitingConfirmation = async (
+    email: string
+  ): Promise<User[]> => {
+    return this.repository.find({
+      where: {
+        emailAwaitingConfirmation: email,
+      },
+    });
+  };
 }

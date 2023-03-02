@@ -53,4 +53,8 @@ export const bootstrap = StyleSheet.create({
   alignItemsCenter: {
     alignItems: "center",
   },
+  // Was padding in bootstrap, but we have to use margin for react-native-table-component
+  table: {
+    margin: 8,
+  },
 });
