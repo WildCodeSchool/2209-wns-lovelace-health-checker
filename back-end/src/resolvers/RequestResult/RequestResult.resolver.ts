@@ -12,6 +12,6 @@ export default class RequestResultResolver {
     @Args()
     { url }: checkUrlArgs
   ): Promise<RequestResult> {
-    return await RequestResultService.checkUrl(url);
+    return await RequestResultService.checkUrlForHomepage(url);
   }
 }

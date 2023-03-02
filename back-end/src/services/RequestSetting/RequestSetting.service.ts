@@ -54,14 +54,14 @@ export default class RequestSettingService extends RequestSettingRepository {
     return createdRequestSetting;
   };
 
-  static async createRequestSetting(
+  static createRequestSetting = async (
     user: User,
     url: string,
     frequency: Frequency,
     isActive: boolean,
     name?: string,
     headers?: string
-  ): Promise<RequestSetting> {
+  ): Promise<RequestSetting> => {
     await this.checkIfNonPremiumUserHasReachedMaxRequestsCount(user);
     await this.checkIfURLOrNameAreAlreadyUsed(user, url, name);
 
@@ -77,7 +77,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     const savedRequestSetting = await this.saveRequestSetting(requestSetting);
     console.log({ savedRequestSetting });
     return savedRequestSetting;
-  }
+  };
 
   static checkIfNonPremiumUserHasReachedMaxRequestsCount = async (
     user: User
@@ -96,11 +96,11 @@ export default class RequestSettingService extends RequestSettingRepository {
     return false;
   };
 
-  static async checkIfURLOrNameAreAlreadyUsed(
+  static checkIfURLOrNameAreAlreadyUsed = async (
     user: User,
     url: string,
     name: string | undefined
-  ) {
+  ) => {
     const userSettingRequests =
       await RequestSettingRepository.getRequestSettingsByUserId(user.id);
 
@@ -114,7 +114,7 @@ export default class RequestSettingService extends RequestSettingRepository {
         request.name === name && request.name !== null
     );
     if (nameAlreadyExists) throw Error("This name already exists");
-  }
+  };
 
   static checkIfGivenFrequencyIsPremiumFrequency = (
     frequency: number
@@ -161,5 +161,19 @@ export default class RequestSettingService extends RequestSettingRepository {
       (customEmailErrors?.length || customPushErrors?.length)
     )
       throw Error("Non Premium users can't use custom error alerts");
+  };
+
+  public static getRequestSettingsByFrequency = async (
+    frequency: Frequency
+  ): Promise<RequestSetting[]> => {
+    return await RequestSettingRepository.getRequestSettingsByFrequency(
+      frequency
+    );
+  };
+
+  public static getRequestSettingById = async (
+    id: string
+  ): Promise<RequestSetting | null> => {
+    return await RequestSettingRepository.getRequestSettingById(id);
   };
 }

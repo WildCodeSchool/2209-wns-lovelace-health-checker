@@ -1,10 +1,12 @@
+import RequestSetting from "../entities/RequestSetting.entity";
 import {
   resendConfirmationEmail,
   sendConfirmationEmail,
   sendResetEmail,
   sendResetPasswordEmail,
-} from '../services/nodemailer/nodemailer.service';
-import { channel } from './config';
+} from "../services/nodemailer/nodemailer.service";
+import RequestResultService from "../services/RequestResult/RequestResult.service";
+import { channel } from "./config";
 
 export const onMessageOnAccountCreationEmailQueue = async () => {
   console.log(
@@ -74,17 +76,14 @@ export const onMessageOnResetEmailQueue = async () => {
 };
 
 export const onMessageOnAutomatedRequestQueue = async () => {
-  channel.consume("automated-request", (message: any) => {
+  channel.consume("automated-request", async (message: any) => {
     console.log("Start consuming message on queue automated-request.");
     let parsedMessage = JSON.parse(
       String.fromCharCode.apply(String, message.content)
     );
-    // TODO: mettre en place la méthode à effectuer
-    // sendResetEmail(
-    //   parsedMessage.firstname,
-    //   parsedMessage.email,
-    //   parsedMessage.resetEmailToken
-    // );
+    const requestSettingToCheck: RequestSetting =
+      parsedMessage as RequestSetting;
+    await RequestResultService.checkUrlOfRequestSetting(requestSettingToCheck);
     channel.ack(message);
   });
-}
+};

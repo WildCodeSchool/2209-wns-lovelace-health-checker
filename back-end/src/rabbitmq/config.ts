@@ -2,9 +2,9 @@ import amqp = require('amqplib');
 
 import {
   onMessageOnAccountCreationEmailQueue,
+  onMessageOnAutomatedRequestQueue,
   onMessageOnResetEmailQueue,
   onMessageOnResetPasswordEmailQueue,
-  // onMessageOnAutomatedRequestQueue,
 } from "./consumers";
 
 export let channel: any;
@@ -23,8 +23,7 @@ export const connectionToRabbitMQ = async () => {
     onMessageOnAccountCreationEmailQueue();
     onMessageOnResetPasswordEmailQueue();
     onMessageOnResetEmailQueue();
-    // TODO: décommenter
-    // onMessageOnAutomatedRequestQueue();
+    onMessageOnAutomatedRequestQueue();
   } catch (error) {
     console.log(error);
   }
