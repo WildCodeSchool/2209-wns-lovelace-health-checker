@@ -70,7 +70,6 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
-  // TODO : refactor code by trying to create reusable methods
   static updateAlerts = async (
     updatedRequestSetting: RequestSetting,
     customEmailErrors: number[] | undefined,
@@ -83,115 +82,75 @@ export default class AlertSettingService extends AlertSettingRepository {
         updatedRequestSetting.id
       );
 
+    // In case there's existing alerts for the given request
     if (existingAlerts.length > 0) {
       const emailAlerts = existingAlerts.filter((alert) => {
-        return alert.type === "email";
+        return alert.type === AlertType.EMAIL;
       });
 
       const pushAlerts = existingAlerts.filter((alert) => {
-        return alert.type === "push";
+        return alert.type === AlertType.PUSH;
       });
 
-      let customEmailErrorsToAdd: number[] = [];
-      let customEmailErrorsToDelete: AlertSetting[] = [];
-      let customPushErrorsToAdd: any[] = [];
-      let customPushErrorsToDelete: any[] = [];
-
-      /* EMAIL */
-      // Builds list of error codes to add to database
-      customEmailErrors?.forEach((customEmailError: number) => {
-        let isAlertSettingFound = emailAlerts.find(
-          (alertSetting: AlertSetting) =>
-            alertSetting.httpStatusCode === customEmailError
-        );
-        if (!isAlertSettingFound) customEmailErrorsToAdd.push(customEmailError);
-      });
-
-      // Build list or error codes to delete from database
-      emailAlerts?.forEach((alertSetting: AlertSetting) => {
-        let customEmailErrorsFound = customEmailErrors?.find(
-          (customEmailError: number) =>
-            customEmailError === alertSetting.httpStatusCode
-        );
-        if (!customEmailErrorsFound)
-          customEmailErrorsToDelete.push(alertSetting);
-      });
-
-      // Delete and set again all error codes if allErrorEnablesEmail equals true
+      // We check if user wants to activate all alerts by type
       if (allErrorsEnabledEmail) {
-        for (const emailAlert of emailAlerts) {
-          await AlertSettingRepository.deleteById(emailAlert.id);
-        }
-        await AlertSettingService.setAllAlerts(
+        await this.removeAllAlertsAndSetAgain(
           AlertType.EMAIL,
+          emailAlerts,
           updatedRequestSetting
         );
       }
 
-      // Add error codes to database
-      if (customEmailErrorsToAdd.length > 0) {
-        for (const customEmailErrorToAdd of customEmailErrorsToAdd) {
-          await AlertSettingService.createAlertSetting(
-            customEmailErrorToAdd,
-            updatedRequestSetting,
-            AlertType.EMAIL
-          );
-        }
-      }
-
-      // Remove error codes to database (TODO : pass an array instead of many objects)
-      if (customEmailErrorsToDelete.length > 0) {
-        for (const customEmailErrorToDelete of customEmailErrorsToDelete) {
-          await AlertSettingRepository.deleteById(customEmailErrorToDelete.id);
-        }
-      }
-
-      /* PUSH */
-      // Builds list of error codes to add to database
-      customPushErrors?.forEach((customPushError: number) => {
-        let isAlertSettingFound = pushAlerts.find(
-          (alertSetting: AlertSetting) =>
-            alertSetting.httpStatusCode === customPushError
-        );
-        if (!isAlertSettingFound) customPushErrorsToAdd.push(customPushError);
-      });
-
-      // Build list or error codes to delete from database
-      pushAlerts?.forEach((alertSetting: AlertSetting) => {
-        let customPushErrorsFound = customPushErrors?.find(
-          (customPushError: number) =>
-            customPushError === alertSetting.httpStatusCode
-        );
-        if (!customPushErrorsFound) customPushErrorsToDelete.push(alertSetting);
-      });
-
-      // Delete and set again all error codes if allErrorEnablesPush equals true
       if (allErrorsEnabledPush) {
-        for (const pushAlert of pushAlerts) {
-          await AlertSettingRepository.deleteById(pushAlert.id);
-        }
-        await AlertSettingService.setAllAlerts(
+        await this.removeAllAlertsAndSetAgain(
           AlertType.PUSH,
+          pushAlerts,
           updatedRequestSetting
         );
       }
 
-      // Add error codes to database
-      if (customPushErrorsToAdd.length > 0) {
-        for (const customPushErrorToAdd of customPushErrorsToAdd) {
-          await AlertSettingService.createAlertSetting(
-            customPushErrorToAdd,
-            updatedRequestSetting,
-            AlertType.PUSH
-          );
-        }
+      // Then, we check if custom errors are given and we split them into toAdd/toRemove errors by type.
+      let customEmailErrorsToAdd = this.getErrorCodesToAdd(
+        customEmailErrors,
+        emailAlerts
+      );
+      let customEmailErrorsToDelete = this.getErrorCodesToRemove(
+        customEmailErrors,
+        emailAlerts
+      );
+      let customPushErrorsToAdd = this.getErrorCodesToAdd(
+        customPushErrors,
+        pushAlerts
+      );
+      let customPushErrorsToDelete = this.getErrorCodesToRemove(
+        customPushErrors,
+        pushAlerts
+      );
+
+      // Then, we add custom errors
+      if (customEmailErrorsToAdd.length > 0) {
+        await this.addErrorCodes(
+          AlertType.EMAIL,
+          customEmailErrorsToAdd,
+          updatedRequestSetting
+        );
       }
 
-      // Remove error codes to database (TODO : pass an array instead of many objects)
+      if (customPushErrorsToAdd.length > 0) {
+        await this.addErrorCodes(
+          AlertType.PUSH,
+          customPushErrorsToAdd,
+          updatedRequestSetting
+        );
+      }
+
+      // And to conclude, we remove expected errors
+      if (customEmailErrorsToDelete.length > 0) {
+        await AlertSettingRepository.remove(customEmailErrorsToDelete);
+      }
+
       if (customPushErrorsToDelete.length > 0) {
-        for (const customPushErrorToDelete of customPushErrorsToDelete) {
-          await AlertSettingRepository.deleteById(customPushErrorToDelete.id);
-        }
+        await AlertSettingRepository.remove(customPushErrorsToDelete);
       }
     }
     // If there's no existing alerts for updated request, just use same methods than request creation
@@ -206,6 +165,63 @@ export default class AlertSettingService extends AlertSettingRepository {
         customEmailErrors,
         allErrorsEnabledEmail,
         updatedRequestSetting
+      );
+    }
+  };
+
+  static getErrorCodesToAdd = (
+    incomingCustomErrors: number[] | undefined,
+    existingCustomErrors: AlertSetting[]
+  ): number[] => {
+    let errorCodesToAdd: number[] = [];
+
+    incomingCustomErrors?.forEach((incomingCustomError: number) => {
+      let isAlertSettingFound = existingCustomErrors.find(
+        (alertSetting: AlertSetting) =>
+          alertSetting.httpStatusCode === incomingCustomError
+      );
+      if (!isAlertSettingFound) errorCodesToAdd.push(incomingCustomError);
+    });
+    return errorCodesToAdd;
+  };
+
+  static getErrorCodesToRemove = (
+    incomingCustomErrors: number[] | undefined,
+    existingCustomErrors: AlertSetting[]
+  ): AlertSetting[] => {
+    let errorCodesToDelete: AlertSetting[] = [];
+
+    existingCustomErrors?.forEach((alertSetting: AlertSetting) => {
+      let customErrorFound = incomingCustomErrors?.find(
+        (incomingCustomError: number) =>
+          incomingCustomError === alertSetting.httpStatusCode
+      );
+      if (!customErrorFound) errorCodesToDelete.push(alertSetting);
+    });
+    return errorCodesToDelete;
+  };
+
+  static removeAllAlertsAndSetAgain = async (
+    type: AlertType,
+    existingAlerts: AlertSetting[],
+    requestSetting: RequestSetting
+  ) => {
+    for (const existingAlert of existingAlerts) {
+      await AlertSettingRepository.deleteById(existingAlert.id);
+    }
+    await AlertSettingService.setAllAlerts(type, requestSetting);
+  };
+
+  static addErrorCodes = async (
+    type: AlertType,
+    errorCodesToAdd: number[],
+    requestSetting: RequestSetting
+  ) => {
+    for (const errorCodeToAdd of errorCodesToAdd) {
+      await AlertSettingService.createAlertSetting(
+        errorCodeToAdd,
+        requestSetting,
+        type
       );
     }
   };

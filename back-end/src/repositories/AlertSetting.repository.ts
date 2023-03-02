@@ -24,6 +24,10 @@ export default class AlertSettingRepository {
     await this.repository.delete({ id: id });
   }
 
+  static async remove(alertSettings: AlertSetting[]): Promise<void> {
+    await this.repository.remove(alertSettings);
+  }
+
   static async getAlertsByRequestSettingId(
     id: string
   ): Promise<AlertSetting[]> {

@@ -127,6 +127,11 @@ interface RequestProps {
   existingRequest?: any;
 }
 
+enum AlertChoices {
+  ALL = "all",
+  SPECIFIC = "specific",
+}
+
 const RequestCreation = ({ role, existingRequest }: RequestProps) => {
   const [isActive, setIsActive] = useState(true);
   const [frequency, setFrequency] = useState(Frequency.ONE_HOUR);
@@ -210,8 +215,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
 
     // Case with no selected errors
     if (alerts.length === HTTP_ERROR_STATUS_CODES.length) {
-      if (typeIsEmail) setEmailAlerts("all");
-      else setPushAlerts("all");
+      if (typeIsEmail) setEmailAlerts(AlertChoices.ALL);
+      else setPushAlerts(AlertChoices.ALL);
     }
     // Case with all selected errors
     else if (!alerts.length) {
@@ -220,8 +225,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
     }
     // Case with specific errors
     else {
-      if (typeIsEmail) setEmailAlerts("specific");
-      else setPushAlerts("specific");
+      if (typeIsEmail) setEmailAlerts(AlertChoices.SPECIFIC);
+      else setPushAlerts(AlertChoices.SPECIFIC);
       let existingSpecificErrors = retrieveExistingSpecificErrors(alerts);
       // Simulate OnChange trigger and set existing specific errors
       if (typeIsEmail) onEmailSpecificErrorChange(existingSpecificErrors);
@@ -397,24 +402,6 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
 
   const onSubmit: SubmitHandler<any> = async (data: any) => {
     if (existingRequest) {
-      console.log({
-        variables: {
-          updateRequestSettingId: existingRequest?.requestSetting?.id,
-          url: data.url,
-          frequency: parseInt(data.frequency),
-          isActive: data.isActive === "true" ? true : false,
-          allErrorsEnabledEmail:
-            data.allErrorsEnabledEmail === "true" ? true : false,
-          allErrorsEnabledPush:
-            data.allErrorsEnabledPush === "true" ? true : false,
-          customEmailErrors: getSpecificErrorsValues(emailSpecificErrors),
-          customPushErrors: getSpecificErrorsValues(pushSpecificErrors),
-          name: data.name?.length ? data.name : undefined,
-          headers: data.headers.length
-            ? JSON.stringify(data.headers)
-            : undefined,
-        },
-      });
       await update({
         variables: {
           updateRequestSettingId: existingRequest?.requestSetting?.id,
@@ -422,9 +409,8 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
           frequency: parseInt(data.frequency),
           isActive: data.isActive === "true" ? true : false,
           allErrorsEnabledEmail:
-            data.allErrorsEnabledEmail === "true" ? true : false,
-          allErrorsEnabledPush:
-            data.allErrorsEnabledPush === "true" ? true : false,
+            emailAlerts === AlertChoices.ALL ? true : false,
+          allErrorsEnabledPush: pushAlerts === AlertChoices.ALL ? true : false,
           customEmailErrors: getSpecificErrorsValues(emailSpecificErrors),
           customPushErrors: getSpecificErrorsValues(pushSpecificErrors),
           name: data.name?.length ? data.name : undefined,
@@ -844,9 +830,9 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                 id="flexRadioDefault1"
                 onChange={() => {
                   clearMultiSelectAndEmptyEmailErrorValues();
-                  setEmailAlerts("all");
+                  setEmailAlerts(AlertChoices.ALL);
                 }}
-                checked={emailAlerts === "all"}
+                checked={emailAlerts === AlertChoices.ALL}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault1">
                 Receive email on error 4XX and 5XX
@@ -862,13 +848,14 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                 id="flexRadioDefault2"
                 disabled={role !== "premium"}
                 checked={
-                  emailSpecificErrorRadioIsChecked || emailAlerts === "specific"
+                  emailSpecificErrorRadioIsChecked ||
+                  emailAlerts === AlertChoices.SPECIFIC
                 }
                 onChange={() => {
                   setEmailSpecificErrorRadioIsChecked(
                     !emailSpecificErrorRadioIsChecked
                   );
-                  setEmailAlerts("specific");
+                  setEmailAlerts(AlertChoices.SPECIFIC);
                 }}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault2">
@@ -895,7 +882,7 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
               classNamePrefix="select"
               onChange={(selectedErrors) => {
                 onEmailSpecificErrorChange(selectedErrors);
-                setEmailAlerts("specific");
+                setEmailAlerts(AlertChoices.SPECIFIC);
               }}
             />
 
@@ -929,10 +916,10 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                 {...register("allErrorsEnabledPush")}
                 id="flexRadioDefault1"
                 onChange={() => {
-                  setPushAlerts("all");
+                  setPushAlerts(AlertChoices.ALL);
                   clearMultiSelectAndEmptyPushErrorValues();
                 }}
-                checked={pushAlerts === "all"}
+                checked={pushAlerts === AlertChoices.ALL}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault1">
                 Push notification on error 4XX and 5XX
@@ -948,13 +935,14 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
                 id="flexRadioDefault2"
                 disabled={role !== "premium"}
                 checked={
-                  pushSpecificErrorRadioIsChecked || pushAlerts === "specific"
+                  pushSpecificErrorRadioIsChecked ||
+                  pushAlerts === AlertChoices.SPECIFIC
                 }
                 onChange={() => {
                   setPushSpecificErrorRadioIsChecked(
                     !pushSpecificErrorRadioIsChecked
                   );
-                  setPushAlerts("specific");
+                  setPushAlerts(AlertChoices.SPECIFIC);
                 }}
               />
 
@@ -985,7 +973,7 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
               classNamePrefix="select"
               onChange={(selectedErrors) => {
                 onPushSpecificErrorChange(selectedErrors);
-                setPushAlerts("specific");
+                setPushAlerts(AlertChoices.SPECIFIC);
               }}
             />
           </div>
