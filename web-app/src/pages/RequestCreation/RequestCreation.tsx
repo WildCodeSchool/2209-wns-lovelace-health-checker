@@ -16,7 +16,18 @@ import { Frequency } from "../../utils/request-frequency.enum";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { URL_REG_EXP } from "../../utils/regular-expressions";
-import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import {
+  ALERTS_ONLY_FOR_PREMIUM_USERS,
+  ARGUMENT_VALIDATION_ERROR,
+  FORM_CONTAINS_ERRORS,
+  FREQUENCY_ONLY_FOR_PREMIUM_USERS,
+  INCORRECT_HEADER_FORMAT,
+  NAME_ALREADY_EXISTS,
+  REQUEST_DOESNT_EXIST,
+  SERVER_IS_KO_ERROR_MESSAGE,
+  UNAUTHORIZED,
+  URL_ALREADY_EXISTS,
+} from "../../utils/error-messages";
 import {
   NAME_MAX_LENGTH,
   NAME_MAX_LENGTH_ERROR_MESSAGE,
@@ -283,40 +294,37 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
     },
     onError: (error) => {
       switch (error.message) {
-        case "This URL already exists":
+        case URL_ALREADY_EXISTS:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 2,
           });
           break;
-        case "This name already exists":
+        case NAME_ALREADY_EXISTS:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 3,
           });
           break;
-        case "Argument Validation Error":
-          toast.error(
-            "Your form contains one or more errors. Please check your input values",
-            {
-              position: toast.POSITION.BOTTOM_RIGHT,
-              toastId: 4,
-            }
-          );
+        case ARGUMENT_VALIDATION_ERROR:
+          toast.error(FORM_CONTAINS_ERRORS, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 4,
+          });
           break;
-        case "This frequency is only useable by Premium users":
+        case FREQUENCY_ONLY_FOR_PREMIUM_USERS:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 5,
           });
           break;
-        case "Non Premium users can't use custom error alerts":
+        case ALERTS_ONLY_FOR_PREMIUM_USERS:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 6,
           });
           break;
-        case "Headers format is incorrect":
+        case INCORRECT_HEADER_FORMAT:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 7,
@@ -338,55 +346,64 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
     onCompleted: () => {
       toast.success("Request updated successfully !", {
         position: toast.POSITION.BOTTOM_RIGHT,
-        toastId: 100,
+        toastId: 101,
       });
       navigate(REQUESTS_ROUTE);
     },
     onError: (error) => {
       switch (error.message) {
-        case "This URL already exists":
+        case URL_ALREADY_EXISTS:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 2,
           });
           break;
-        case "This name already exists":
+        case NAME_ALREADY_EXISTS:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 3,
           });
           break;
-        case "Argument Validation Error":
-          toast.error(
-            "Your form contains one or more errors. Please check your input values",
-            {
-              position: toast.POSITION.BOTTOM_RIGHT,
-              toastId: 4,
-            }
-          );
+        case ARGUMENT_VALIDATION_ERROR:
+          toast.error(FORM_CONTAINS_ERRORS, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 4,
+          });
           break;
-        case "This frequency is only useable by Premium users":
+        case FREQUENCY_ONLY_FOR_PREMIUM_USERS:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 5,
           });
           break;
-        case "Non Premium users can't use custom error alerts":
+        case ALERTS_ONLY_FOR_PREMIUM_USERS:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 6,
           });
           break;
-        case "Headers format is incorrect":
+        case INCORRECT_HEADER_FORMAT:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 7,
           });
           break;
+        case REQUEST_DOESNT_EXIST:
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 8,
+          });
+          break;
+        case UNAUTHORIZED:
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 9,
+          });
+          break;
         default:
           toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
             position: toast.POSITION.BOTTOM_RIGHT,
-            toastId: 8,
+            toastId: 10,
           });
       }
     },
