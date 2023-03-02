@@ -1,9 +1,14 @@
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql, useLazyQuery, useQuery } from "@apollo/client";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import DataTable from "../../components/DataTable/DataTable";
-import { CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery } from "../../gql/graphql";
+import RequestsTable from "../../components/RequestsTable/RequestsTable";
+
+import {
+  CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery,
+  GetPageOfRequestSettingWithLastResultQuery,
+  GetPageOfRequestSettingWithLastResultQueryVariables,
+} from "../../gql/graphql";
 import { REQUEST_CREATION_ROUTE } from "../../routes";
 import styles from "./Requests.module.scss";
 
@@ -13,7 +18,30 @@ const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
   }
 `;
 
+const GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT = gql`
+  query GetPageOfRequestSettingWithLastResult($pageNumber: Int!) {
+    getPageOfRequestSettingWithLastResult(pageNumber: $pageNumber) {
+      totalCount
+      nextPageNumber
+      requestSettingsWithLastResult {
+        requestSetting {
+          id
+          name
+          url
+          frequency
+        }
+        requestResult {
+          getIsAvailable
+          statusCode
+          createdAt
+        }
+      }
+    }
+  }
+`;
+
 const Requests = () => {
+  const [pageNumber, setPageNumber] = useState(1);
   const navigate = useNavigate();
 
   const [checkUserMaxRequestsBeforeNavigate] =
@@ -31,6 +59,18 @@ const Requests = () => {
         },
       }
     );
+
+  const { data, loading, error, refetch } = useQuery<
+    GetPageOfRequestSettingWithLastResultQuery,
+    GetPageOfRequestSettingWithLastResultQueryVariables
+  >(GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT, {
+    variables: {
+      pageNumber: pageNumber,
+    },
+    fetchPolicy: "cache-and-network",
+  });
+
+  if (!loading) console.log(data);
 
   const navigateToRequestCreationPage = () => {
     checkUserMaxRequestsBeforeNavigate();
@@ -69,8 +109,13 @@ const Requests = () => {
             <span className={`${styles.tabs} `}>Inactive</span>
           </div>
         </div>
-        <div>
-          <DataTable />
+        <div className={`${styles.tableContainer}`}>
+          <RequestsTable
+            requests={data}
+            loading={loading}
+            pageNumber={pageNumber}
+            setPageNumber={setPageNumber}
+          />
         </div>
       </div>
     </>
