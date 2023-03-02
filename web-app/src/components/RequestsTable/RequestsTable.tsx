@@ -20,21 +20,21 @@ const formatDateString = (dateString: string): string => {
   return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
 };
 
-const formatDuration = (duration: number): string => {
-  if (duration >= 2592000) {
-    const numMonths = Math.round(duration / 2592000);
+const formatFrequency = (frequency: number): string => {
+  if (frequency >= 2592000) {
+    const numMonths = Math.round(frequency / 2592000);
     return `${numMonths} ${numMonths > 1 ? "months" : "month"}`;
-  } else if (duration >= 86400) {
-    const numDays = Math.round(duration / 86400);
+  } else if (frequency >= 86400) {
+    const numDays = Math.round(frequency / 86400);
     return `${numDays} ${numDays > 1 ? "days" : "day"}`;
-  } else if (duration >= 3600) {
-    const numHours = Math.round(duration / 3600);
+  } else if (frequency >= 3600) {
+    const numHours = Math.round(frequency / 3600);
     return `${numHours} ${numHours > 1 ? "hrs" : "hr"}`;
-  } else if (duration >= 60) {
-    const numMinutes = Math.round(duration / 60);
+  } else if (frequency >= 60) {
+    const numMinutes = Math.round(frequency / 60);
     return `${numMinutes} ${numMinutes > 1 ? "mins" : "min"}`;
   } else {
-    return `${duration} ${duration > 1 ? "secs" : "sec"}`;
+    return `${frequency} ${frequency > 1 ? "secs" : "sec"}`;
   }
 };
 
@@ -87,7 +87,7 @@ const RequestsTable = (
                     : "-"}
                 </td>
                 <td className="col-1 text-center">
-                  {formatDuration(request.requestSetting.frequency)}
+                  {formatFrequency(request.requestSetting.frequency)}
                 </td>
                 <td className="col-1 text-center">
                   <i className="bi bi-gear"></i>

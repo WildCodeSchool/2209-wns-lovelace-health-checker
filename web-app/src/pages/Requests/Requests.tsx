@@ -1,7 +1,9 @@
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { DataTable } from "primereact/datatable";
 import { toast } from "react-toastify";
+import DataTableComponent from "../../components/DataTable/DataTableComponent";
 import RequestsTable from "../../components/RequestsTable/RequestsTable";
 
 import {
@@ -11,6 +13,7 @@ import {
 } from "../../gql/graphql";
 import { REQUEST_CREATION_ROUTE } from "../../routes";
 import styles from "./Requests.module.scss";
+import { Column } from "primereact/column";
 
 const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
   query CheckIfNonPremiumUserHasReachedMaxRequestsCount {
@@ -42,6 +45,7 @@ const GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT = gql`
 
 const Requests = () => {
   const [pageNumber, setPageNumber] = useState(1);
+  const [formattedData, setFormattedData] = useState<any>([]);
   const navigate = useNavigate();
 
   const [checkUserMaxRequestsBeforeNavigate] =
@@ -76,6 +80,21 @@ const Requests = () => {
     checkUserMaxRequestsBeforeNavigate();
   };
 
+  useEffect(() => {
+    setFormattedData(
+      data?.getPageOfRequestSettingWithLastResult.requestSettingsWithLastResult.map(
+        (item) => {
+          return {
+            ...item.requestSetting,
+            isAvailable: item.requestResult?.getIsAvailable,
+            statusCode: item.requestResult?.statusCode,
+            createdAt: item.requestResult?.createdAt,
+          };
+        }
+      )
+    );
+  }, [data]);
+
   const [selectedTab] = useState("informations");
 
   return (
@@ -89,7 +108,7 @@ const Requests = () => {
             Create
           </button>
         </div>
-        <div className="d-flex gap-4 mt-5">
+        <div className="d-flex gap-5 mt-5">
           <div
             className={`${
               selectedTab === "informations" && styles.selectedTab
@@ -110,8 +129,14 @@ const Requests = () => {
           </div>
         </div>
         <div className={`${styles.tableContainer}`}>
-          <RequestsTable
+          {/* <RequestsTable
             requests={data}
+            loading={loading}
+            pageNumber={pageNumber}
+            setPageNumber={setPageNumber}
+          /> */}
+          <DataTableComponent
+            requests={formattedData}
             loading={loading}
             pageNumber={pageNumber}
             setPageNumber={setPageNumber}
