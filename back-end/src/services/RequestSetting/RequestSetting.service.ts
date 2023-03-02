@@ -8,7 +8,7 @@ import RequestSettingRepository from "../../repositories/RequestSetting.reposito
 import AlertSettingService from "../AlertSetting/AlertSetting.service";
 
 export default class RequestSettingService extends RequestSettingRepository {
-  static checkForErrorsAndCreateRequest = async (
+  static createRequest = async (
     url: string,
     frequency: Frequency,
     name: string | undefined,
@@ -20,114 +20,15 @@ export default class RequestSettingService extends RequestSettingRepository {
     customPushErrors: number[] | undefined,
     user: User
   ): Promise<RequestSetting> => {
-    if (headers) {
-      this.checkIfHeadersAreRightFormatted(headers);
-    }
-
-    this.checkIfNonPremiumUserTryToUsePremiumFrequency(user, frequency);
-
-    this.checkIfNonPremiumUserTryToUseCustomError(
-      user,
-      customEmailErrors,
-      customPushErrors
-    );
-
-    const createdRequestSetting = await this.createRequestSetting(
+    await this.checkForBlockingCases(
       user,
       url,
-      frequency,
-      isActive,
       name,
-      headers
-    );
-
-    await AlertSettingService.setPushAlerts(
-      customPushErrors,
-      allErrorsEnabledPush,
-      createdRequestSetting
-    );
-
-    await AlertSettingService.setEmailAlerts(
-      customEmailErrors,
-      allErrorsEnabledEmail,
-      createdRequestSetting
-    );
-
-    return createdRequestSetting;
-  };
-
-  static checkForRequestErrors = (
-    headers: string | undefined,
-    user: User,
-    frequency: Frequency,
-    customEmailErrors: number[] | undefined,
-    customPushErrors: number[] | undefined
-  ) => {
-    if (headers) {
-      this.checkIfHeadersAreRightFormatted(headers);
-    }
-
-    this.checkIfNonPremiumUserTryToUsePremiumFrequency(user, frequency);
-
-    this.checkIfNonPremiumUserTryToUseCustomError(
-      user,
-      customEmailErrors,
-      customPushErrors
-    );
-  };
-
-  static checkForErrorsAndUpdateRequest = async (
-    id: string,
-    url: string,
-    frequency: Frequency,
-    name: string | undefined,
-    headers: string | undefined,
-    isActive: boolean,
-    allErrorsEnabledEmail: boolean,
-    allErrorsEnabledPush: boolean,
-    customEmailErrors: number[] | undefined,
-    customPushErrors: number[] | undefined,
-    user: User
-  ): Promise<RequestSetting> => {
-    this.checkForRequestErrors(
       headers,
-      user,
       frequency,
       customEmailErrors,
       customPushErrors
     );
-
-    const updatedRequestSetting = await this.updateRequestSetting(
-      id,
-      user,
-      url,
-      frequency,
-      isActive,
-      name,
-      headers
-    );
-
-    await AlertSettingService.updateAlerts(
-      updatedRequestSetting,
-      customEmailErrors,
-      customPushErrors,
-      allErrorsEnabledEmail,
-      allErrorsEnabledPush
-    );
-
-    return updatedRequestSetting;
-  };
-
-  static async createRequestSetting(
-    user: User,
-    url: string,
-    frequency: Frequency,
-    isActive: boolean,
-    name?: string,
-    headers?: string
-  ): Promise<RequestSetting> {
-    await this.checkIfNonPremiumUserHasReachedMaxRequestsCount(user);
-    await this.checkIfURLOrNameAreAlreadyUsed(user, url, name);
 
     const requestSetting: RequestSetting = new RequestSetting(
       user,
@@ -139,36 +40,96 @@ export default class RequestSettingService extends RequestSettingRepository {
     );
 
     const savedRequestSetting = await this.saveRequestSetting(requestSetting);
-    return savedRequestSetting;
-  }
 
-  static updateRequestSetting = async (
-    id: string,
+    await AlertSettingService.setPushAlerts(
+      customPushErrors,
+      allErrorsEnabledPush,
+      savedRequestSetting
+    );
+
+    await AlertSettingService.setEmailAlerts(
+      customEmailErrors,
+      allErrorsEnabledEmail,
+      savedRequestSetting
+    );
+
+    return savedRequestSetting;
+  };
+
+  static checkForBlockingCases = async (
     user: User,
     url: string,
+    name: string | undefined,
+    headers: string | undefined,
     frequency: Frequency,
-    isActive: boolean,
-    name?: string,
-    headers?: string
-  ): Promise<RequestSetting> => {
+    customEmailErrors: number[] | undefined,
+    customPushErrors: number[] | undefined,
+    id?: string
+  ) => {
+    if (headers) {
+      await this.checkIfHeadersAreRightFormatted(headers);
+    }
+    await this.checkIfNonPremiumUserTryToUsePremiumFrequency(user, frequency);
+    await this.checkIfNonPremiumUserTryToUseCustomError(
+      user,
+      customEmailErrors,
+      customPushErrors
+    );
     await this.checkIfNonPremiumUserHasReachedMaxRequestsCount(user);
     await this.checkIfURLOrNameAreAlreadyUsed(user, url, name, id);
+  };
 
-    let existingRequestSetting = await this.repository.findOneBy({ id: id });
-    if (!existingRequestSetting) throw Error("Request doesn't exist");
+  static updateRequest = async (
+    id: string,
+    url: string,
+    frequency: Frequency,
+    name: string | undefined,
+    headers: string | undefined,
+    isActive: boolean,
+    allErrorsEnabledEmail: boolean,
+    allErrorsEnabledPush: boolean,
+    customEmailErrors: number[] | undefined,
+    customPushErrors: number[] | undefined,
+    user: User
+  ): Promise<RequestSetting> => {
+    // Check if the request belongs to the user
+    const toUpdateRequestSetting = await RequestSettingService.getById(id);
+    if (!toUpdateRequestSetting) throw Error("Request doesn't exist");
+    if (toUpdateRequestSetting?.user.id !== user.id)
+      throw Error("Unauthorized");
 
-    existingRequestSetting.url = url;
-    existingRequestSetting.frequency = frequency;
-    existingRequestSetting.isActive = isActive;
-    existingRequestSetting.name = name;
+    await this.checkForBlockingCases(
+      user,
+      url,
+      name,
+      headers,
+      frequency,
+      customEmailErrors,
+      customPushErrors,
+      id
+    );
+
+    toUpdateRequestSetting.url = url;
+    toUpdateRequestSetting.frequency = frequency;
+    toUpdateRequestSetting.isActive = isActive;
+    toUpdateRequestSetting.name = name;
     if (headers === undefined) {
-      existingRequestSetting.headers = "";
-    } else existingRequestSetting.headers = headers;
-    existingRequestSetting.updatedAt = new Date();
+      toUpdateRequestSetting.headers = "";
+    } else toUpdateRequestSetting.headers = headers;
+    toUpdateRequestSetting.updatedAt = new Date();
 
     const updatedRequestSetting = await this.saveRequestSetting(
-      existingRequestSetting
+      toUpdateRequestSetting
     );
+
+    await AlertSettingService.updateAlerts(
+      updatedRequestSetting,
+      customEmailErrors,
+      customPushErrors,
+      allErrorsEnabledEmail,
+      allErrorsEnabledPush
+    );
+
     return updatedRequestSetting;
   };
 
@@ -233,14 +194,14 @@ export default class RequestSettingService extends RequestSettingRepository {
     });
   };
 
-  static checkIfHeadersAreRightFormatted = (headers: string) => {
+  static checkIfHeadersAreRightFormatted = async (headers: string) => {
     const headersFormatIsCorrect = this.headerHasAllHaveProperties(
       JSON.parse(headers)
     );
     if (!headersFormatIsCorrect) throw Error("Headers format is incorrect");
   };
 
-  static checkIfNonPremiumUserTryToUsePremiumFrequency = (
+  static checkIfNonPremiumUserTryToUsePremiumFrequency = async (
     user: User,
     frequency: Frequency
   ) => {
@@ -251,7 +212,7 @@ export default class RequestSettingService extends RequestSettingRepository {
       throw Error("This frequency is only useable by Premium users");
   };
 
-  static checkIfNonPremiumUserTryToUseCustomError = (
+  static checkIfNonPremiumUserTryToUseCustomError = async (
     user: User,
     customEmailErrors: number[] | undefined,
     customPushErrors: number[] | undefined

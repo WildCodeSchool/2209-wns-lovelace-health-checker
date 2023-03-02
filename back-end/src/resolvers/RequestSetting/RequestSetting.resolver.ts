@@ -43,7 +43,7 @@ export default class RequestSettingResolver {
     const user = context.user as User;
     if (!user) throw Error("Unable to find user from global context");
 
-    return await RequestSettingService.checkForErrorsAndCreateRequest(
+    return await RequestSettingService.createRequest(
       url,
       frequency,
       name,
@@ -78,11 +78,7 @@ export default class RequestSettingResolver {
     const user = context.user as User;
     if (!user) throw Error("Unable to find user from global context");
 
-    const toUpdateRequestSetting = await RequestSettingService.getById(id);
-    if (toUpdateRequestSetting?.user.id !== user.id)
-      throw Error("Unauthorized");
-
-    return await RequestSettingService.checkForErrorsAndUpdateRequest(
+    return await RequestSettingService.updateRequest(
       id,
       url,
       frequency,
