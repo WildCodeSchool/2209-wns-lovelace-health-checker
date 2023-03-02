@@ -2,6 +2,7 @@ import amqp = require("amqplib");
 
 import {
   onMessageOnAccountCreationEmailQueue,
+  onMessageOnAutomatedRequestQueue,
   onMessageOnResetEmailQueue,
   onMessageOnResetPasswordEmailQueue,
 } from "./consumers";
@@ -17,10 +18,12 @@ export const connectionToRabbitMQ = async () => {
     await channel.assertQueue("account-creation-email");
     await channel.assertQueue("reset-password-email");
     await channel.assertQueue("reset-email");
+    await channel.assertQueue("automated-request");
     console.log("Successfully connected to RabbitMQ.");
     onMessageOnAccountCreationEmailQueue();
     onMessageOnResetPasswordEmailQueue();
     onMessageOnResetEmailQueue();
+    onMessageOnAutomatedRequestQueue();
   } catch (error) {
     console.log(error);
   }

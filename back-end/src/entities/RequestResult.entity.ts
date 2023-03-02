@@ -9,12 +9,12 @@ import RequestSetting from "./RequestSetting.entity";
 export default class RequestResult {
   constructor(
     requestSetting: RequestSetting,
-    statusCode: number,
-    duration: number
+    statusCode?: number,
+    duration?: number
   ) {
     this.requestSetting = requestSetting;
-    this.statusCode = statusCode;
-    this.duration = duration;
+    this.statusCode = statusCode || undefined;
+    this.duration = duration || undefined;
     this.createdAt = new Date();
   }
 
@@ -24,11 +24,10 @@ export default class RequestResult {
   @IsNotEmpty()
   id: string;
 
-  @Column()
-  @Field()
-  @IsNotEmpty()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   @IsNumber()
-  statusCode: number;
+  statusCode?: number;
 
   @Column()
   @Field()
@@ -36,11 +35,10 @@ export default class RequestResult {
   @IsNotEmpty()
   createdAt: Date;
 
-  @Column()
-  @Field()
-  @IsNotEmpty()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   @IsNumber()
-  duration: number;
+  duration?: number;
 
   @ManyToOne(() => RequestSetting)
   @Field(() => RequestSetting)
@@ -48,7 +46,7 @@ export default class RequestResult {
 
   @Field(() => Boolean)
   getIsAvailable() {
-    switch (this.statusCode.toString().charAt(0)) {
+    switch (this.statusCode?.toString().charAt(0)) {
       case "1":
       case "2":
       case "3":

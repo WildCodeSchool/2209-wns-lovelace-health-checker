@@ -93,7 +93,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     user: User
   ): Promise<RequestSetting> => {
     // Check if the request belongs to the user
-    const toUpdateRequestSetting = await RequestSettingService.getById(id);
+    const toUpdateRequestSetting = await RequestSettingService.getRequestSettingById(id);
     if (!toUpdateRequestSetting) throw Error("Request doesn't exist");
     if (toUpdateRequestSetting?.user.id !== user.id)
       throw Error("Unauthorized");
@@ -137,7 +137,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     user: User
   ) => {
     if (user.role === Role.USER) {
-      const userSettingRequests = await RequestSettingRepository.getByUserId(
+      const userSettingRequests = await RequestSettingRepository.getRequestSettingsByUserId(
         user.id
       );
       if (
@@ -151,13 +151,13 @@ export default class RequestSettingService extends RequestSettingRepository {
     return false;
   };
 
-  static async checkIfURLOrNameAreAlreadyUsed(
+  static checkIfURLOrNameAreAlreadyUsed = async (
     user: User,
     url: string,
     name: string | undefined,
     id?: string
-  ) {
-    const userSettingRequests = await RequestSettingRepository.getByUserId(
+  ) => {
+    const userSettingRequests = await RequestSettingRepository.getRequestSettingsByUserId(
       user.id
     );
 
@@ -175,7 +175,7 @@ export default class RequestSettingService extends RequestSettingRepository {
           request.name === name && request.name !== null
       );
     if (nameAlreadyExists) throw Error("This name already exists");
-  }
+  };
 
   static checkIfGivenFrequencyIsPremiumFrequency = (
     frequency: number
@@ -224,10 +224,24 @@ export default class RequestSettingService extends RequestSettingRepository {
       throw Error("Non Premium users can't use custom error alerts");
   };
 
+  public static getRequestSettingsByFrequency = async (
+    frequency: Frequency
+  ): Promise<RequestSetting[]> => {
+    return await RequestSettingRepository.getRequestSettingsByFrequency(
+      frequency
+    );
+  };
+
+  public static getRequestSettingById = async (
+    id: string
+  ): Promise<RequestSetting | null> => {
+    return await RequestSettingRepository.getRequestSettingById(id);
+    };
+
   static getRequestSettingWithLastResultByRequestSettingId = async (
     id: string
   ): Promise<RequestSettingWithLastResult | void> => {
-    const requestSetting = await RequestSettingRepository.getById(id);
+    const requestSetting = await RequestSettingRepository.getRequestSettingById(id);
     if (!requestSetting) throw Error("Request not found");
 
     const lastRequestResult =
