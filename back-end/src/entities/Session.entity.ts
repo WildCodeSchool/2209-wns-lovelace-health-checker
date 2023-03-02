@@ -1,7 +1,7 @@
-import { randomBytes } from 'crypto';
-import { BeforeInsert, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { randomBytes } from "crypto";
+import { BeforeInsert, Entity, ManyToOne, PrimaryColumn } from "typeorm";
 
-import User from './User.entity';
+import User from "./User.entity";
 
 @Entity()
 export default class Session {

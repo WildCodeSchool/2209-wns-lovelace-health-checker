@@ -21,18 +21,6 @@ export default class RequestSettingRepository {
     return this.repository.save(requestSetting);
   };
 
-  protected static getRequestSettingById = async (
-    id: string
-  ): Promise<RequestSetting | null> => {
-    return this.repository.findOne({ where: { id: id } });
-  };
-
-  protected static getRequestSettingsByUserId = async (
-    id: string
-  ): Promise<RequestSetting[]> => {
-    return this.repository.find({ where: { user: { id: id } } });
-  };
-
   // get a RequestSetting array by frequency, isActive, where user is ACTIVE (and is PREMIUM if applicable)
   protected static getRequestSettingsByFrequency = async (
     frequency: Frequency
@@ -62,5 +50,17 @@ export default class RequestSettingRepository {
         },
       });
     }
+  };
+
+  protected static getRequestSettingsByUserId = async (
+    id: string
+  ): Promise<RequestSetting[]> => {
+    return this.repository.find({ where: { user: { id: id } } });
+  };
+
+  protected static getRequestSettingById = async (
+    id: string
+  ): Promise<RequestSetting | null> => {
+    return this.repository.findOne({ where: { id: id } });
   };
 }

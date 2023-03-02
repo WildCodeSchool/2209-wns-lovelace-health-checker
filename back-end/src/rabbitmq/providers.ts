@@ -1,4 +1,4 @@
-import { channel } from './config';
+import { channel } from "./config";
 
 export const sendMessageOnAccountCreationEmailQueue = async (data: any) => {
   await channel.sendToQueue(

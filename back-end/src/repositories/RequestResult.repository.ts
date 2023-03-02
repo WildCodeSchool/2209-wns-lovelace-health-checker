@@ -19,4 +19,17 @@ export default class RequestResultRepository {
   ): Promise<RequestResult> => {
     return this.repository.save(requestResult);
   };
+
+  static async getMostRecentByRequestSettingId(
+    requestSettingId: string
+  ): Promise<RequestResult | null> {
+    const results = await this.repository.find({
+      where: { requestSetting: { id: requestSettingId } },
+      order: { createdAt: "DESC" },
+      take: 1,
+    });
+
+    if (results.length != 0) return results[0];
+    else return null;
+  }
 }

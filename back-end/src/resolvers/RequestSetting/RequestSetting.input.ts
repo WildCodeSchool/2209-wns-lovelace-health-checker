@@ -5,6 +5,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsString,
   Matches,
   MaxLength,
   MinLength,
@@ -72,4 +73,19 @@ export class CreateRequestSettingArgs {
   @IsArray()
   @ArrayUnique()
   customPushErrors?: number[];
+}
+
+@ArgsType()
+export class UpdateRequestSettingArgs extends CreateRequestSettingArgs {
+  @Field()
+  @IsNotEmpty()
+  @IsString()
+  id: string;
+}
+
+@ArgsType()
+export class GetRequestSettingByIdArgs {
+  @Field()
+  @IsString()
+  id: string;
 }

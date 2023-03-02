@@ -1,4 +1,4 @@
-import amqp = require('amqplib');
+import amqp = require("amqplib");
 
 import {
   onMessageOnAccountCreationEmailQueue,
