@@ -63,8 +63,9 @@
     white-space: nowrap;
   }
   &.name {
-    max-width: 150px;
+    max-width: 130px;
     white-space: nowrap;
+    text-overflow: ellipsis;
   }
 }
 
