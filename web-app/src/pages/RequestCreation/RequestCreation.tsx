@@ -146,11 +146,13 @@ enum AlertChoices {
 const RequestCreation = ({
   role,
   existingRequest,
+  setRequestDetailsTab,
 }: {
   role: string | undefined;
   existingRequest?:
     | GetRequestSettingByIdQuery["getRequestSettingById"]
     | undefined;
+  setRequestDetailsTab?: (tab: string) => void;
 }) => {
   const [isActive, setIsActive] = useState(true);
   const [frequency, setFrequency] = useState(Frequency.ONE_HOUR);
@@ -339,7 +341,8 @@ const RequestCreation = ({
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: 101,
       });
-      navigate(REQUESTS_ROUTE);
+      if (setRequestDetailsTab) setRequestDetailsTab("informations");
+      navigate(`${REQUESTS_ROUTE}/${existingRequest?.requestSetting.id}`);
     },
     onError: (error) => {
       switch (error.message) {

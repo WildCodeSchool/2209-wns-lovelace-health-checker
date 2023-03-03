@@ -150,6 +150,7 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
       {selectedTab === "settings" && (
         <RequestCreation
           role={role}
+          setRequestDetailsTab={setSelectedTab}
           existingRequest={data?.getRequestSettingById}
         />
       )}
