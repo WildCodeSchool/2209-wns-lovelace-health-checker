@@ -28,7 +28,6 @@ import {
 import LinkingConfiguration from "./LinkingConfiguration";
 import Home from "../screens/Home/HomeScreen";
 import { variables } from "../styles/variables";
-import Header from "../components/Header/HeaderLogoComponent";
 import HeaderLogo from "../components/Header/HeaderLogoComponent";
 
 export default function Navigation({
@@ -68,7 +67,7 @@ function RootNavigator() {
           headerStyle: {
             backgroundColor: variables.$primary800,
           },
-          headerTitle: () => <HeaderLogo></HeaderLogo>,      
+          headerTitle: () => <HeaderLogo></HeaderLogo>,
         }}
       />
       <Stack.Group screenOptions={{ presentation: "modal" }}>
@@ -91,19 +90,28 @@ function BottomTabNavigator() {
     <BottomTab.Navigator
       initialRouteName="Home"
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
+        // tabBarActiveTintColor: Colors[colorScheme].tint,
+        tabBarActiveTintColor: "white",
       }}
     >
       <BottomTab.Screen
         name="Home"
         component={Home}
-        options={{
+        options={({ navigation }: RootTabScreenProps<"Home">) => ({
+          title: "Search",
           headerStyle: {
             backgroundColor: variables.$primary800,
           },
-          headerTitle: () => <HeaderLogo></HeaderLogo>,
+          headerTitle: () => (
+            <Pressable onPress={() => navigation.navigate("Home")}>
+              <HeaderLogo></HeaderLogo>
+            </Pressable>
+          ),
           tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
-        }}
+          tabBarStyle: {
+            backgroundColor: variables.$primary800,
+          },
+        })}
       />
       {/* <BottomTab.Screen
         name="TabOne"
@@ -127,7 +135,7 @@ function BottomTabNavigator() {
             </Pressable>
           ),
         })}
-      /> */}
+      />
       <BottomTab.Screen
         name="TabTwo"
         component={TabTwoScreen}
@@ -135,7 +143,7 @@ function BottomTabNavigator() {
           title: "Tab Two",
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
-      />
+      /> */}
     </BottomTab.Navigator>
   );
 }

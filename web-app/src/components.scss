@@ -65,6 +65,17 @@
   }
 }
 
+@mixin btnDisabled {
+  background-color: variables.$neutral-200;
+  color: variables.$neutral-400;
+  border: 2px solid variables.$neutral-400;
+  cursor: not-allowed;
+  &:hover {
+    background-color: variables.$neutral-200;
+    color: variables.$neutral-400;
+  }
+}
+
 @mixin clickableText {
   margin: 0;
   color: variables.$primary-800;

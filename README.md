@@ -42,3 +42,14 @@ Make sure you are located on the same folder as the docker-compose.dev.yml file.
 ```
 docker compose -f docker-compose.dev.yml exec web-app npm run test
 ```
+
+### Run mobile-app with expo
+
+While being in mobile-app folder :
+```
+npx expo start
+```
+or
+```
+npx expo start --tunnel
+```

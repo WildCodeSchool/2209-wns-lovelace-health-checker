@@ -54,9 +54,9 @@ const checkIfNonPremiumUserTryToUseCustomError = () => {
     });
 };
 
-const createRequestSetting = () => {
+const createRequest = () => {
   return jest
-    .spyOn(RequestSettingService, "createRequestSetting")
+    .spyOn(RequestSettingService, "createRequest")
     .mockImplementation((data: any) => {
       return data;
     });
@@ -101,178 +101,13 @@ describe("RequestService integration", () => {
     await closeConnection();
   });
 
-  describe("checkForErrorsAndCreateRequest", () => {
-    // doesn't work with just const checkIfHeadersAreRightFormattedSpy = checkIfHeadersAreRightFormatted(), makes below tests fail
-    it("calls checkIfHeadersAreRightFormatted once", async () => {
-      const checkIfHeadersAreRightFormattedSpy =
-        checkIfHeadersAreRightFormatted();
-      checkIfNonPremiumUserTryToUsePremiumFrequency();
-      checkIfNonPremiumUserTryToUseCustomError();
-      createRequestSetting();
-      setPushAlerts();
-      setEmailAlerts();
-      await RequestSettingService.checkForErrorsAndCreateRequest(
-        url,
-        frequency,
-        name,
-        headers,
-        isActive,
-        allErrorsEnabledEmail,
-        allErrorsEnabledPush,
-        customEmailErrors,
-        customPushErrors,
-        user
-      );
-      expect(checkIfHeadersAreRightFormattedSpy).toHaveBeenCalledTimes(1);
-    });
-    // WORKS BUT NOT WITH ONLY
-    it("calls checkIfNonPremiumUserTryToUsePremiumFrequency once", async () => {
-      const checkIfNonPremiumUserTryToUsePremiumFrequencySpy =
-        checkIfNonPremiumUserTryToUsePremiumFrequency();
-      await RequestSettingService.checkForErrorsAndCreateRequest(
-        url,
-        frequency,
-        name,
-        headers,
-        isActive,
-        allErrorsEnabledEmail,
-        allErrorsEnabledPush,
-        customEmailErrors,
-        customPushErrors,
-        user
-      );
-      expect(
-        checkIfNonPremiumUserTryToUsePremiumFrequencySpy
-      ).toHaveBeenCalledTimes(1);
-    });
-    // WORKS BUT NOT WITH ONLY
-    it("calls checkIfNonPremiumUserTryToUseCustomError once", async () => {
-      const checkIfNonPremiumUserTryToUseCustomErrorSpy =
-        checkIfNonPremiumUserTryToUseCustomError();
-      await RequestSettingService.checkForErrorsAndCreateRequest(
-        url,
-        frequency,
-        name,
-        headers,
-        isActive,
-        allErrorsEnabledEmail,
-        allErrorsEnabledPush,
-        customEmailErrors,
-        customPushErrors,
-        user
-      );
-      expect(checkIfNonPremiumUserTryToUseCustomErrorSpy).toHaveBeenCalledTimes(
-        1
-      );
-    });
-    describe("if there's no validation error", () => {
-      // WORKS BUT NOT WITH ONLY
-      it("calls createRequestSetting once", async () => {
-        const createRequestSettingSpy = createRequestSetting();
-        await RequestSettingService.checkForErrorsAndCreateRequest(
-          url,
-          frequency,
-          name,
-          headers,
-          isActive,
-          allErrorsEnabledEmail,
-          allErrorsEnabledPush,
-          customEmailErrors,
-          customPushErrors,
-          user
-        );
-        expect(createRequestSettingSpy).toHaveBeenCalledTimes(1);
-      });
-      // WORKS BUT NOT WITH ONLY
-      it("calls setPushAlerts once", async () => {
-        const setPushAlertsSpy = setPushAlerts();
-        await RequestSettingService.checkForErrorsAndCreateRequest(
-          url,
-          frequency,
-          name,
-          headers,
-          isActive,
-          allErrorsEnabledEmail,
-          allErrorsEnabledPush,
-          customEmailErrors,
-          customPushErrors,
-          user
-        );
-        expect(setPushAlertsSpy).toHaveBeenCalledTimes(1);
-      });
-      // WORKS BUT NOT WITH ONLY
-      it("calls setEmailAlerts once", async () => {
-        const setEmailAlertsSpy = setEmailAlerts();
-        await RequestSettingService.checkForErrorsAndCreateRequest(
-          url,
-          frequency,
-          name,
-          headers,
-          isActive,
-          allErrorsEnabledEmail,
-          allErrorsEnabledPush,
-          customEmailErrors,
-          customPushErrors,
-          user
-        );
-        expect(setEmailAlertsSpy).toHaveBeenCalledTimes(1);
-      });
-      // DOUBT ??
-      it("returns Promise<RequestSetting> object", async () => {
-        const requestResult =
-          RequestSettingService.checkForErrorsAndCreateRequest(
-            url,
-            frequency,
-            name,
-            headers,
-            isActive,
-            allErrorsEnabledEmail,
-            allErrorsEnabledPush,
-            customEmailErrors,
-            customPushErrors,
-            user
-          );
-        expect(requestResult).toBeInstanceOf(Promise<RequestSetting>);
-      });
-    });
-  });
-
-  describe("createRequestSetting", () => {
-    it("calls checkIfNonPremiumUserHasReachedMaxRequestsCount once", async () => {
-      /*       const spy = checkIfNonPremiumUserHasReachedMaxRequestsCount();
-      RequestSettingService.createRequestSetting(
-        user,
-        url,
-        frequency,
-        isActive,
-        name,
-        headers
-      );
-      expect(spy).toBeCalledTimes(1); */
-    });
-    it("calls checkIfURLOrNameAreAlreadyUsed once", async () => {
-      /*       const spy = jest
-        .spyOn(RequestSettingService, "checkIfURLOrNameAreAlreadyUsed")
-        .mockImplementation((data: any) => {
-          return data;
-        });
-      RequestSettingService.createRequestSetting(
-        user,
-        url,
-        frequency,
-        isActive,
-        name,
-        headers
-      );
-      expect(spy).toBeCalledTimes(1); */
-    });
-
+  describe("createRequest", () => {
+    it("calls checkForBlockingCases once", async () => {});
     describe("if there's no validation error", () => {
       it("calls saveRequestSetting once", () => {});
-      // NOT WORKS !
       it("creates a new request in database", async () => {
-        /*         // Not pass into createRequestSetting from service. It seems that it uses a mock which should explain why we get an User instead of RequestSetting
-        const requestSetting = await RequestSettingService.createRequestSetting(
+        /*         // Not pass into createRequest from service. It seems that it uses a mock which should explain why we get an User instead of RequestSetting
+        const requestSetting = await RequestSettingService.createRequest(
           user,
           url,
           frequency,
@@ -294,8 +129,11 @@ describe("RequestService integration", () => {
 
         expect(existingRequestResult?.url).toBe("toto"); */
       });
+      it("calls setPushAlerts once", async () => {});
+      it("calls setEmailAlerts once", async () => {});
     });
 
+    // TODO : move into checkForBlockingCases tests
     describe("non Premium user try to use Premium features", () => {
       describe("non Premium user uses Premium frequency", () => {
         it("displays 'This frequency is only useable by Premium users' error message", () => {});
@@ -319,7 +157,7 @@ describe("RequestService integration", () => {
   });
 
   describe("checkIfURLOrNameAreAlreadyUsed", () => {
-    it("calls getRequestSettingsByUserId once", () => {});
+    it("calls getByUserId once", () => {});
     describe("URL is already used", () => {
       it("displays 'This URL already exists' error message", () => {});
     });

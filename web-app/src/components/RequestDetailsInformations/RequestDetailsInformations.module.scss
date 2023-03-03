@@ -1,0 +1,92 @@
+@use "../../variables.scss";
+@import "../../components.scss";
+
+.contentContainer {
+  @include contentContainer;
+  @media (min-width: variables.$mobile-breakpoint) {
+    padding-top: 0 !important;
+  }
+  .pageTitle {
+    color: variables.$primary-1000;
+    font-weight: variables.$font-weight-600;
+    font-size: variables.$font-lg;
+  }
+  .formContainer {
+    .loaderBackground {
+      background-color: variables.$primary-100;
+      opacity: 85%;
+      .loader {
+        @include loader;
+      }
+    }
+
+    .header {
+      display: flex;
+      gap: 1rem;
+      margin-left: variables.$margin-xs;
+      color: variables.$primary-1000;
+      font-size: variables.$font-md;
+      font-weight: variables.$font-weight-500;
+    }
+    .formContent {
+      padding: variables.$padding-md;
+      margin-top: variables.$margin-md;
+      background-color: variables.$primary-100;
+      border-radius: variables.$border-radius-sm;
+      .label {
+        font-weight: variables.$font-weight-500;
+        .premiumIcon {
+          color: variables.$yellow-1000;
+        }
+      }
+      .value {
+        color: variables.$neutral-800;
+        .checkIcon {
+          color: variables.$green-1000;
+        }
+        .xIcon {
+          color: variables.$red-1000;
+        }
+      }
+      .mainButton {
+        @include btn;
+        @include btnSecondary;
+        width: variables.$width-100;
+      }
+      .checkLabel {
+        color: variables.$primary-1000;
+      }
+      .btn {
+        @include btn;
+        width: variables.$width-100;
+      }
+      .btnSecondary {
+        @include btnSecondary;
+      }
+      .btnDisabled {
+        @include btnDisabled;
+      }
+    }
+    .dangerZone {
+      padding: variables.$padding-md;
+      margin-top: variables.$margin-md;
+      background-color: variables.$red-200;
+      border-radius: variables.$border-radius-sm;
+      .dangerButton {
+        @include btn;
+        @include btnSecondary;
+        color: variables.$red-1000;
+        border-color: variables.$red-1000;
+        width: variables.$width-100;
+        &:hover {
+          background-color: variables.$red-1000;
+          color: white;
+        }
+      }
+    }
+  }
+}
+
+.errorMessage {
+  @include errorMessage;
+}

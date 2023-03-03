@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
     marginTop: variables.$marginMD,
   },
   p: {
-    ...components.p
+    ...components.p,
   },
   btnPrimary: {
     ...components.btnPrimary,

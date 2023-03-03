@@ -1,5 +1,14 @@
 import "react-toastify/dist/ReactToastify.css";
 
+//theme
+import "primereact/resources/themes/lara-light-indigo/theme.css";
+
+//core
+import "primereact/resources/primereact.min.css";
+
+//icons
+import "primeicons/primeicons.css";
+
 import { gql, useQuery } from "@apollo/client";
 import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
@@ -39,7 +48,9 @@ import {
   SIGN_IN_ROUTE,
   SIGN_UP_ROUTE,
   TERMS_ROUTE,
+  REQUEST_DETAILS_ROUTE,
 } from "./routes";
+import RequestDetails from "./pages/RequestDetails/RequestDetails";
 
 export const MY_PROFILE = gql`
   query MyProfile {
@@ -111,6 +122,14 @@ function App() {
               <PreventRequestCreationPageAccessIfLimitHasBeenReached>
                 <RequestCreation role={data?.myProfile.role} />
               </PreventRequestCreationPageAccessIfLimitHasBeenReached>
+            }
+          />
+          <Route
+            path={REQUEST_DETAILS_ROUTE}
+            element={
+              <Protected isLoggedIn={isLogged} loading={loading}>
+                <RequestDetails role={data?.myProfile.role} />
+              </Protected>
             }
           />
           <Route path={PREMIUM_ROUTE} element={<Premium />} />

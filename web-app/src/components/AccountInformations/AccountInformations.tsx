@@ -203,9 +203,9 @@ const AccountInformations = ({
 
       <div className="mt-5 d-flex flex-wrap gap-5 gap-md-3">
         <div className={`col-12 col-md-6 ${styles.formContainer}`}>
-          <div className={`${styles.header}`}>
+          <h2 className={`${styles.header} mt-md-3`}>
             <i className="bi bi-person"></i> Personnal informations
-          </div>
+          </h2>
           <div className={`${styles.formContent}`}>
             <form onSubmit={handleSubmitIdentity(onSubmitIdentity)}>
               <div className="form-floating mb-2">
@@ -265,9 +265,9 @@ const AccountInformations = ({
           </div>
         </div>
         <div className={` col ${styles.formContainer}`}>
-          <div className={`${styles.header}`}>
+          <h2 className={`${styles.header} mt-md-3`}>
             <i className="bi bi-envelope"></i> Change your email
-          </div>
+          </h2>
           <div className={`${styles.formContent}`}>
             <form onSubmit={handleSubmitEmail(onSubmitEmail)}>
               <div className="form-floating mb-2">
@@ -299,9 +299,9 @@ const AccountInformations = ({
       </div>
       <div className="mt-5 d-flex flex-wrap gap-5 gap-md-3">
         <div className={`col-12 col-md-6 ${styles.formContainer}`}>
-          <div className={`${styles.header}`}>
+          <h2 className={`${styles.header} mt-md-3`}>
             <i className="bi bi-lock-fill"></i> Change your password
-          </div>
+          </h2>
           <div className={`${styles.formContent}`}>
             <form onSubmit={handleSubmitPassword(onSubmitPassword)}>
               <div className="form-floating mb-2">
@@ -385,7 +385,8 @@ const AccountInformations = ({
                 />
                 <label
                   className={`form-check-label ${styles.checkLabel}`}
-                  htmlFor="disconnectMe">
+                  htmlFor="disconnectMe"
+                >
                   Disconnect me from all my other devices
                 </label>
               </div>
@@ -396,9 +397,9 @@ const AccountInformations = ({
           </div>
         </div>
         <div className={`col ${styles.formContainer}`}>
-          <div className={`${styles.header}`}>
+          <h2 className={`${styles.header} mt-md-3`}>
             <i className="bi bi-exclamation-triangle"></i> Danger zone
-          </div>
+          </h2>
           <div className={`${styles.dangerZone}`}>
             <p>
               Once you delete your account, there is no going back. You will
@@ -407,7 +408,8 @@ const AccountInformations = ({
             </p>
             <button
               className={`${styles.dangerButton}`}
-              onClick={() => setShowDeleteAccountModal(true)}>
+              onClick={() => setShowDeleteAccountModal(true)}
+            >
               Delete your account
             </button>
           </div>

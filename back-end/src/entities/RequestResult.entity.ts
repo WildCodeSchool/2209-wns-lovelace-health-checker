@@ -9,12 +9,16 @@ import RequestSetting from "./RequestSetting.entity";
 export default class RequestResult {
   constructor(
     requestSetting: RequestSetting,
-    statusCode: number,
-    duration: number
+    url: string,
+    headers?: string,
+    statusCode?: number,
+    duration?: number,
   ) {
     this.requestSetting = requestSetting;
-    this.statusCode = statusCode;
-    this.duration = duration;
+    this.url = url;
+    this.statusCode = statusCode || undefined;
+    this.duration = duration || undefined;
+    this.headers = headers || undefined;
     this.createdAt = new Date();
   }
 
@@ -24,11 +28,10 @@ export default class RequestResult {
   @IsNotEmpty()
   id: string;
 
-  @Column()
-  @Field()
-  @IsNotEmpty()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   @IsNumber()
-  statusCode: number;
+  statusCode?: number;
 
   @Column()
   @Field()
@@ -36,19 +39,29 @@ export default class RequestResult {
   @IsNotEmpty()
   createdAt: Date;
 
-  @Column()
-  @Field()
-  @IsNotEmpty()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   @IsNumber()
-  duration: number;
+  duration?: number;
 
   @ManyToOne(() => RequestSetting)
   @Field(() => RequestSetting)
   requestSetting: RequestSetting;
 
+  @Column({ nullable: true, default: null })
+  @Field({ nullable: true })
+  @IsString()
+  headers?: string;
+
+  @Column()
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  url: string;
+
   @Field(() => Boolean)
   getIsAvailable() {
-    switch (this.statusCode.toString().charAt(0)) {
+    switch (this.statusCode?.toString().charAt(0)) {
       case "1":
       case "2":
       case "3":

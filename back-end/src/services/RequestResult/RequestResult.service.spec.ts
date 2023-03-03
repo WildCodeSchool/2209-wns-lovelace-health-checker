@@ -17,7 +17,7 @@ afterAll(async () => {
 });
 
 describe("RequestResultService", () => {
-  describe("checkUrl", () => {
+  describe("checkUrlForHomepage", () => {
     const url = "https://www.youtube.com";
     it("should return a RequestResult object with a 200 status code", async () => {
       global.fetch = jest.fn(() =>
@@ -28,7 +28,7 @@ describe("RequestResultService", () => {
         )
       );
 
-      const requestResult = await RequestResultService.checkUrl(url);
+      const requestResult = await RequestResultService.checkUrlForHomepage(url);
 
       expect(requestResult).toBeInstanceOf(RequestResult);
       expect(requestResult.statusCode).toEqual(200);
@@ -40,9 +40,9 @@ describe("RequestResultService", () => {
         throw new DOMException("", "AbortError");
       });
 
-      await expect(RequestResultService.checkUrl(url)).rejects.toThrowError(
-        "Request Timeout"
-      );
+      await expect(
+        RequestResultService.checkUrlForHomepage(url)
+      ).rejects.toThrowError("Request Timeout");
       expect(fetch).toHaveBeenCalled();
     });
 
@@ -53,9 +53,9 @@ describe("RequestResultService", () => {
 
       const url = "https://example.com";
 
-      await expect(RequestResultService.checkUrl(url)).rejects.toThrow(
-        "Fetch Failed"
-      );
+      await expect(
+        RequestResultService.checkUrlForHomepage(url)
+      ).rejects.toThrow("Fetch Failed");
       expect(fetch).toHaveBeenCalled();
     });
   });

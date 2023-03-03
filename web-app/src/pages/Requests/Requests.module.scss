@@ -17,17 +17,21 @@
   }
   .tabs {
     color: variables.$primary-1000;
-    font-size: variables.$font-xs;
-    font-weight: variables.$font-weight-600;
+    font-size: variables.$font-sm;
+    font-weight: variables.$font-weight-500;
     @include clickable;
   }
   .tabContainer {
-    padding: 3px 5px;
-    width: 119px;
+    padding: variables.$padding-xxs variables.$padding-lg;
+    width: auto;
     border-radius: 50px;
     text-align: center;
   }
   .selectedTab {
     background-color: variables.$primary-200;
+  }
+  .tableContainer {
+    width: variables.$width-100;
+    margin-top: variables.$margin-xxl;
   }
 }

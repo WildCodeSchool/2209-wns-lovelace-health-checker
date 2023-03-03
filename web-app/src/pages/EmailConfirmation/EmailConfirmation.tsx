@@ -1,9 +1,12 @@
-import { gql, useMutation } from '@apollo/client';
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { gql, useMutation } from "@apollo/client";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
-import { ConfirmEmailMutation, ConfirmEmailMutationVariables } from '../../gql/graphql';
-import styles from '../AccountConfirmation/AccountConfirmation.module.scss';
+import {
+  ConfirmEmailMutation,
+  ConfirmEmailMutationVariables,
+} from "../../gql/graphql";
+import styles from "../AccountConfirmation/AccountConfirmation.module.scss";
 
 const CONFIRM_EMAIL = gql`
   mutation ConfirmEmail($confirmationToken: String!) {
@@ -61,7 +64,8 @@ const EmailConfirmation = ({ onSuccess }: { onSuccess: () => {} }) => {
         <div className="text-center">
           <i
             data-testid="successIcon"
-            className={`bi bi-check-circle ${styles.success}`}></i>
+            className={`bi bi-check-circle ${styles.success}`}
+          ></i>
           <p>Your email has been updated successfully !</p>
         </div>
       </div>
@@ -73,7 +77,8 @@ const EmailConfirmation = ({ onSuccess }: { onSuccess: () => {} }) => {
         <div className="text-center">
           <i
             data-testid="errorIcon"
-            className={`bi bi-x-circle ${styles.error}`}></i>
+            className={`bi bi-x-circle ${styles.error}`}
+          ></i>
           <p>
             Your unique confirmation token is invalid or has already been used.
           </p>

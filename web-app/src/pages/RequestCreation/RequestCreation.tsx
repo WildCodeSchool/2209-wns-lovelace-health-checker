@@ -2,18 +2,37 @@ import { useEffect, useState } from "react";
 import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
 import styles from "./RequestCreation.module.scss";
 import Select from "react-select";
-import { HTTP_ERROR_STATUS_CODES } from "../../utils/http-error-status-codes.enum";
+import {
+  getSpecificErrorsByType,
+  HTTP_ERROR_STATUS_CODES,
+  retrieveExistingSpecificErrors,
+} from "../../utils/http-error-status-codes.enum";
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { gql, useMutation } from "@apollo/client";
 import {
   CreateRequestSettingMutation,
   CreateRequestSettingMutationVariables,
+  GetRequestSettingByIdQuery,
+  UpdateRequestSettingMutation,
+  UpdateRequestSettingMutationVariables,
 } from "../../gql/graphql";
+
 import { Frequency } from "../../utils/request-frequency.enum";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { URL_REG_EXP } from "../../utils/regular-expressions";
-import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import {
+  ALERTS_ONLY_FOR_PREMIUM_USERS,
+  ARGUMENT_VALIDATION_ERROR,
+  FORM_CONTAINS_ERRORS,
+  FREQUENCY_ONLY_FOR_PREMIUM_USERS,
+  INCORRECT_HEADER_FORMAT,
+  NAME_ALREADY_EXISTS,
+  REQUEST_DOESNT_EXIST,
+  SERVER_IS_KO_ERROR_MESSAGE,
+  UNAUTHORIZED,
+  URL_ALREADY_EXISTS,
+} from "../../utils/error-messages";
 import {
   NAME_MAX_LENGTH,
   NAME_MAX_LENGTH_ERROR_MESSAGE,
@@ -26,6 +45,7 @@ import {
   URL_PLACEHOLDER,
 } from "../../utils/form-validations";
 import { REQUESTS_ROUTE } from "../../routes";
+import { AlertType } from "../../utils/alert-types.enum";
 
 export const CREATE_REQUEST = gql`
   mutation CreateRequestSetting(
@@ -64,9 +84,51 @@ export const CREATE_REQUEST = gql`
   }
 `;
 
+export const UPDATE_REQUEST = gql`
+  mutation UpdateRequestSetting(
+    $updateRequestSettingId: String!
+    $url: String!
+    $frequency: Float!
+    $name: String
+    $headers: String
+    $isActive: Boolean!
+    $allErrorsEnabledEmail: Boolean!
+    $allErrorsEnabledPush: Boolean!
+    $customEmailErrors: [Float!]
+    $customPushErrors: [Float!]
+  ) {
+    updateRequestSetting(
+      id: $updateRequestSettingId
+      url: $url
+      frequency: $frequency
+      name: $name
+      headers: $headers
+      isActive: $isActive
+      allErrorsEnabledEmail: $allErrorsEnabledEmail
+      allErrorsEnabledPush: $allErrorsEnabledPush
+      customEmailErrors: $customEmailErrors
+      customPushErrors: $customPushErrors
+    ) {
+      id
+      url
+      name
+      isActive
+      createdAt
+      updatedAt
+      frequency
+      headers
+      alerts {
+        id
+        httpStatusCode
+        type
+      }
+    }
+  }
+`;
+
 type RequestCreationInputs = {
   url: string;
-  name: string;
+  name: string | undefined | null;
   isActive: boolean;
   frequency: number;
   allErrorsEnabledEmail: boolean;
@@ -76,14 +138,32 @@ type RequestCreationInputs = {
   headers: { property: string; value: string }[];
 };
 
-const RequestCreation = ({ role }: { role: string | undefined }) => {
-  const [isActive, setIsActive] = useState(true);
+enum AlertChoices {
+  ALL = "all",
+  SPECIFIC = "specific",
+}
 
-  const [emailSpecificErrors, setEmailSpecificErrors] = useState([]);
+const RequestCreation = ({
+  role,
+  existingRequest,
+  setRequestDetailsTab,
+}: {
+  role: string | undefined;
+  existingRequest?:
+    | GetRequestSettingByIdQuery["getRequestSettingById"]
+    | undefined;
+  setRequestDetailsTab?: (tab: string) => void;
+}) => {
+  const [isActive, setIsActive] = useState(true);
+  const [frequency, setFrequency] = useState(Frequency.ONE_HOUR);
+  const [emailAlerts, setEmailAlerts] = useState<any[] | string>([]);
+  const [pushAlerts, setPushAlerts] = useState<any[] | string>([]);
+
+  const [emailSpecificErrors, setEmailSpecificErrors] = useState<number[]>([]);
   const [emailSpecificErrorsInputValue, setEmailSpecificErrorsInputValue] =
     useState(null);
 
-  const [pushSpecificErrors, setPushSpecificErrors] = useState([]);
+  const [pushSpecificErrors, setPushSpecificErrors] = useState<number[]>([]);
   const [pushSpecificErrorsInputValue, setPushSpecificErrorsInputValue] =
     useState(null);
 
@@ -129,12 +209,61 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
     }
   }, [pushSpecificErrors, pushSpecificErrorRadioIsChecked]);
 
+  useEffect(() => {
+    if (existingRequest) {
+      setIsActive(existingRequest?.requestSetting?.isActive);
+      setFrequency(existingRequest?.requestSetting?.frequency);
+      setExistingRequestErrors(existingRequest?.requestSetting?.alerts);
+    }
+  }, [existingRequest]);
+
+  const setExistingRequestErrors = (requestAlerts: any[]) => {
+    let emailAlerts = getSpecificErrorsByType(AlertType.EMAIL, requestAlerts);
+    let pushAlerts = getSpecificErrorsByType(AlertType.PUSH, requestAlerts);
+
+    setCorrectStateForError(AlertType.EMAIL, emailAlerts);
+    setCorrectStateForError(AlertType.PUSH, pushAlerts);
+  };
+
+  const setCorrectStateForError = (type: AlertType, alerts: any[]) => {
+    const typeIsEmail = type === AlertType.EMAIL;
+
+    // Case with no selected errors
+    if (alerts.length === HTTP_ERROR_STATUS_CODES.length) {
+      if (typeIsEmail) setEmailAlerts(AlertChoices.ALL);
+      else setPushAlerts(AlertChoices.ALL);
+    }
+    // Case with all selected errors
+    else if (!alerts.length) {
+      if (typeIsEmail) setEmailAlerts([]);
+      else setPushAlerts([]);
+    }
+    // Case with specific errors
+    else {
+      if (typeIsEmail) setEmailAlerts(AlertChoices.SPECIFIC);
+      else setPushAlerts(AlertChoices.SPECIFIC);
+      let existingSpecificErrors = retrieveExistingSpecificErrors(alerts);
+      // Simulate OnChange trigger and set existing specific errors
+      if (typeIsEmail) onEmailSpecificErrorChange(existingSpecificErrors);
+      else onPushSpecificErrorChange(existingSpecificErrors);
+    }
+  };
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     control,
   } = useForm<RequestCreationInputs>({
+    defaultValues: {
+      url: existingRequest ? existingRequest?.requestSetting?.url : "",
+      name: existingRequest ? existingRequest?.requestSetting?.name : "",
+      headers:
+        existingRequest?.requestSetting?.headers &&
+        existingRequest?.requestSetting?.headers?.length
+          ? JSON.parse(existingRequest?.requestSetting?.headers)
+          : [],
+    },
     criteriaMode: "all",
   });
 
@@ -158,40 +287,37 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
     },
     onError: (error) => {
       switch (error.message) {
-        case "This URL already exists":
+        case URL_ALREADY_EXISTS:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 2,
           });
           break;
-        case "This name already exists":
+        case NAME_ALREADY_EXISTS:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 3,
           });
           break;
-        case "Argument Validation Error":
-          toast.error(
-            "Your form contains one or more errors. Please check your input values",
-            {
-              position: toast.POSITION.BOTTOM_RIGHT,
-              toastId: 4,
-            }
-          );
+        case ARGUMENT_VALIDATION_ERROR:
+          toast.error(FORM_CONTAINS_ERRORS, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 4,
+          });
           break;
-        case "This frequency is only useable by Premium users":
+        case FREQUENCY_ONLY_FOR_PREMIUM_USERS:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 5,
           });
           break;
-        case "Non Premium users can't use custom error alerts":
+        case ALERTS_ONLY_FOR_PREMIUM_USERS:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 6,
           });
           break;
-        case "Headers format is incorrect":
+        case INCORRECT_HEADER_FORMAT:
           toast.error(error.message, {
             position: toast.POSITION.BOTTOM_RIGHT,
             toastId: 7,
@@ -206,6 +332,77 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
     },
   });
 
+  const [update] = useMutation<
+    UpdateRequestSettingMutation,
+    UpdateRequestSettingMutationVariables
+  >(UPDATE_REQUEST, {
+    onCompleted: () => {
+      toast.success("Request updated successfully !", {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        toastId: 101,
+      });
+      if (setRequestDetailsTab) setRequestDetailsTab("informations");
+      navigate(`${REQUESTS_ROUTE}/${existingRequest?.requestSetting.id}`);
+    },
+    onError: (error) => {
+      switch (error.message) {
+        case URL_ALREADY_EXISTS:
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 2,
+          });
+          break;
+        case NAME_ALREADY_EXISTS:
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 3,
+          });
+          break;
+        case ARGUMENT_VALIDATION_ERROR:
+          toast.error(FORM_CONTAINS_ERRORS, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 4,
+          });
+          break;
+        case FREQUENCY_ONLY_FOR_PREMIUM_USERS:
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 5,
+          });
+          break;
+        case ALERTS_ONLY_FOR_PREMIUM_USERS:
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 6,
+          });
+          break;
+        case INCORRECT_HEADER_FORMAT:
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 7,
+          });
+          break;
+        case REQUEST_DOESNT_EXIST:
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 8,
+          });
+          break;
+        case UNAUTHORIZED:
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 9,
+          });
+          break;
+        default:
+          toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 10,
+          });
+      }
+    },
+  });
+
   const getSpecificErrorsValues = (errors: any[]): number[] => {
     const values: number[] = [];
     errors.forEach((element: any) => {
@@ -215,34 +412,67 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
   };
 
   const onSubmit: SubmitHandler<any> = async (data: any) => {
-    await create({
-      variables: {
-        url: data.url,
-        frequency: parseInt(data.frequency),
-        isActive: data.isActive === "true" ? true : false,
-        allErrorsEnabledEmail:
-          data.allErrorsEnabledEmail === "true" ? true : false,
-        allErrorsEnabledPush:
-          data.allErrorsEnabledPush === "true" ? true : false,
-        customEmailErrors: getSpecificErrorsValues(emailSpecificErrors),
-        customPushErrors: getSpecificErrorsValues(pushSpecificErrors),
-        name: data.name.length ? data.name : undefined,
-        headers: data.headers.length ? JSON.stringify(data.headers) : undefined,
-      },
-    });
+    if (existingRequest) {
+      await update({
+        variables: {
+          updateRequestSettingId: existingRequest?.requestSetting?.id,
+          url: data.url,
+          frequency: frequency,
+          isActive: data.isActive === "true" ? true : false,
+          allErrorsEnabledEmail:
+            emailAlerts === AlertChoices.ALL ? true : false,
+          allErrorsEnabledPush: pushAlerts === AlertChoices.ALL ? true : false,
+          customEmailErrors: getSpecificErrorsValues(emailSpecificErrors),
+          customPushErrors: getSpecificErrorsValues(pushSpecificErrors),
+          name: data.name?.length ? data.name : undefined,
+          headers: data.headers.length
+            ? JSON.stringify(data.headers)
+            : undefined,
+        },
+      });
+    } else {
+      await create({
+        variables: {
+          url: data.url,
+          frequency: parseInt(data.frequency),
+          isActive: data.isActive === "true" ? true : false,
+          allErrorsEnabledEmail:
+            data.allErrorsEnabledEmail === "true" ? true : false,
+          allErrorsEnabledPush:
+            data.allErrorsEnabledPush === "true" ? true : false,
+          customEmailErrors: getSpecificErrorsValues(emailSpecificErrors),
+          customPushErrors: getSpecificErrorsValues(pushSpecificErrors),
+          name: data.name?.length ? data.name : undefined,
+          headers: data.headers.length
+            ? JSON.stringify(data.headers)
+            : undefined,
+        },
+      });
+    }
   };
 
   return (
-    <div className={`${styles.contentContainer}`}>
-      <h1 className={`${styles.pageTitle}`}>Request creation</h1>
+    <div
+      className={`${styles.contentContainer} ${
+        existingRequest ? "pt-md-0" : ""
+      }`}
+    >
+      {existingRequest ? (
+        <></>
+      ) : (
+        <h1 className={`${styles.pageTitle}`}>Request creation</h1>
+      )}
+
       <form
-        className="mt-5 d-flex flex-wrap gap-5 gap-md-3"
+        className={`${
+          existingRequest ? "" : "mt-5"
+        } d-flex flex-wrap gap-5 gap-md-3`}
         onSubmit={handleSubmit(onSubmit)}
       >
         {/* General */}
         <div className={`col-12 col-md-6 ${styles.formContainer}`}>
           <h2 className={`${styles.header} mt-md-3`}>
-            <i className="bi bi-info-circle"></i> General
+            <i className="bi bi-info-circle"></i>General
           </h2>
           <div className={`${styles.formContent}`}>
             <div className="form-floating mb-2">
@@ -322,7 +552,7 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                 id="stateActive"
                 value="true"
                 {...register("isActive")}
-                defaultChecked
+                checked={isActive === true}
                 onClick={() => setIsActive(true)}
               />
               <label className="form-check-label" htmlFor="stateActive">
@@ -336,6 +566,7 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                 id="stateInactive"
                 value="false"
                 {...register("isActive")}
+                checked={isActive === false}
                 onClick={() => setIsActive(false)}
               />
               <label className="form-check-label" htmlFor="stateInactive">
@@ -348,7 +579,7 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
         {/* Frequency */}
         <div className={`col-12 col-md-6 ${styles.formContainer}`}>
           <h2 className={`${styles.header} mt-md-4`}>
-            <i className="bi bi-activity"></i> Frequency
+            <i className="bi bi-activity"></i> Execution frequency
           </h2>
           <div className={`${styles.formContent}`}>
             {/* Days */}
@@ -361,6 +592,8 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                   id="day30"
                   value={Frequency.THIRTY_DAYS}
                   {...register("frequency")}
+                  checked={frequency === Frequency.THIRTY_DAYS}
+                  onClick={() => setFrequency(Frequency.THIRTY_DAYS)}
                 />
                 <label className="form-check-label" htmlFor="day30">
                   30 days
@@ -373,6 +606,8 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                   id="day7"
                   value={Frequency.SEVEN_DAYS}
                   {...register("frequency")}
+                  checked={frequency === Frequency.SEVEN_DAYS}
+                  onClick={() => setFrequency(Frequency.SEVEN_DAYS)}
                 />
                 <label className="form-check-label" htmlFor="day7">
                   7 days
@@ -385,6 +620,8 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                   id="day1"
                   value={Frequency.ONE_DAY}
                   {...register("frequency")}
+                  checked={frequency === Frequency.ONE_DAY}
+                  onClick={() => setFrequency(Frequency.ONE_DAY)}
                 />
                 <label className="form-check-label" htmlFor="day1">
                   1 day
@@ -402,6 +639,8 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                   id="hr12"
                   value={Frequency.TWELVE_HOURS}
                   {...register("frequency")}
+                  checked={frequency === Frequency.TWELVE_HOURS}
+                  onClick={() => setFrequency(Frequency.TWELVE_HOURS)}
                 />
                 <label className="form-check-label" htmlFor="hr12">
                   12 hrs
@@ -414,6 +653,8 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                   id="hr6"
                   value={Frequency.SIX_HOURS}
                   {...register("frequency")}
+                  checked={frequency === Frequency.SIX_HOURS}
+                  onClick={() => setFrequency(Frequency.SIX_HOURS)}
                 />
                 <label className="form-check-label" htmlFor="hr6">
                   6 hrs
@@ -426,7 +667,8 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                   id="hr1"
                   value={Frequency.ONE_HOUR}
                   {...register("frequency")}
-                  defaultChecked
+                  checked={frequency === Frequency.ONE_HOUR}
+                  onClick={() => setFrequency(Frequency.ONE_HOUR)}
                 />
                 <label className="form-check-label" htmlFor="hr1">
                   1 hr
@@ -459,6 +701,8 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                   value={Frequency.THIRTY_MINUTES}
                   {...register("frequency")}
                   disabled={role !== "premium"}
+                  checked={frequency === Frequency.THIRTY_MINUTES}
+                  onClick={() => setFrequency(Frequency.THIRTY_MINUTES)}
                 />
                 <label className="form-check-label" htmlFor="mn30">
                   30 mn
@@ -472,6 +716,8 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                   value={Frequency.FIFTEEN_MINUTES}
                   {...register("frequency")}
                   disabled={role !== "premium"}
+                  checked={frequency === Frequency.FIFTEEN_MINUTES}
+                  onClick={() => setFrequency(Frequency.FIFTEEN_MINUTES)}
                 />
                 <label className="form-check-label" htmlFor="mn15">
                   15 mn
@@ -485,6 +731,8 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                   value={Frequency.ONE_MINUTE}
                   {...register("frequency")}
                   disabled={role !== "premium"}
+                  checked={frequency === Frequency.ONE_MINUTE}
+                  onClick={() => setFrequency(Frequency.ONE_MINUTE)}
                 />
                 <label className="form-check-label" htmlFor="mn1">
                   1 mn
@@ -517,6 +765,8 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                   value={Frequency.THIRTY_SECONDS}
                   {...register("frequency")}
                   disabled={role !== "premium"}
+                  checked={frequency === Frequency.THIRTY_SECONDS}
+                  onClick={() => setFrequency(Frequency.THIRTY_SECONDS)}
                 />
                 <label className="form-check-label" htmlFor="sec30">
                   30 sec
@@ -530,6 +780,8 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                   value={Frequency.FIFTEEN_SECONDS}
                   {...register("frequency")}
                   disabled={role !== "premium"}
+                  checked={frequency === Frequency.FIFTEEN_SECONDS}
+                  onClick={() => setFrequency(Frequency.FIFTEEN_SECONDS)}
                 />
                 <label className="form-check-label" htmlFor="sec15">
                   15 sec
@@ -543,6 +795,8 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                   value={Frequency.FIVE_SECONDS}
                   {...register("frequency")}
                   disabled={role !== "premium"}
+                  checked={frequency === Frequency.FIVE_SECONDS}
+                  onClick={() => setFrequency(Frequency.FIVE_SECONDS)}
                 />
                 <label className="form-check-label" htmlFor="sec5">
                   5 sec
@@ -559,6 +813,8 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
           </h2>
           <div className={`${styles.formContent}`}>
             {/* Email */}
+
+            {/* No email */}
             <div className="form-check mb-2">
               <input
                 className="form-check-input"
@@ -566,13 +822,18 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                 value="false"
                 {...register("allErrorsEnabledEmail")}
                 id="flexRadioDefault1"
-                defaultChecked
-                onClick={clearMultiSelectAndEmptyEmailErrorValues}
+                checked={typeof emailAlerts !== "string" && !emailAlerts.length}
+                onClick={() => {
+                  clearMultiSelectAndEmptyEmailErrorValues();
+                  setEmailAlerts([]);
+                }}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault1">
                 No email alert
               </label>
             </div>
+
+            {/* All email */}
             <div className="form-check mb-2">
               <input
                 className="form-check-input"
@@ -580,12 +841,18 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                 value="true"
                 {...register("allErrorsEnabledEmail")}
                 id="flexRadioDefault1"
-                onChange={clearMultiSelectAndEmptyEmailErrorValues}
+                onChange={() => {
+                  clearMultiSelectAndEmptyEmailErrorValues();
+                  setEmailAlerts(AlertChoices.ALL);
+                }}
+                checked={emailAlerts === AlertChoices.ALL}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault1">
                 Receive email on error 4XX and 5XX
               </label>
             </div>
+
+            {/* Specific email */}
             <div className="form-check mb-2">
               <input
                 className="form-check-input"
@@ -593,12 +860,16 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                 {...register("allErrorsEnabledEmail")}
                 id="flexRadioDefault2"
                 disabled={role !== "premium"}
-                checked={emailSpecificErrorRadioIsChecked}
-                onChange={() =>
+                checked={
+                  emailSpecificErrorRadioIsChecked ||
+                  emailAlerts === AlertChoices.SPECIFIC
+                }
+                onChange={() => {
                   setEmailSpecificErrorRadioIsChecked(
                     !emailSpecificErrorRadioIsChecked
-                  )
-                }
+                  );
+                  setEmailAlerts(AlertChoices.SPECIFIC);
+                }}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault2">
                 Receive email on specific error(s)
@@ -622,12 +893,15 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
               options={HTTP_ERROR_STATUS_CODES}
               className={`${styles.emailSpecificErrors} basic-multi-select`}
               classNamePrefix="select"
-              onChange={(selectedErrors) =>
-                onEmailSpecificErrorChange(selectedErrors)
-              }
+              onChange={(selectedErrors) => {
+                onEmailSpecificErrorChange(selectedErrors);
+                setEmailAlerts(AlertChoices.SPECIFIC);
+              }}
             />
 
             {/* Push */}
+
+            {/* No push */}
             <div className="form-check mb-2">
               <input
                 className="form-check-input"
@@ -635,13 +909,18 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                 value="false"
                 {...register("allErrorsEnabledPush")}
                 id="flexRadioDefault1"
-                defaultChecked
-                onClick={clearMultiSelectAndEmptyPushErrorValues}
+                checked={typeof pushAlerts !== "string" && !pushAlerts.length}
+                onClick={() => {
+                  setPushAlerts([]);
+                  clearMultiSelectAndEmptyPushErrorValues();
+                }}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault1">
                 No push notification
               </label>
             </div>
+
+            {/* All push */}
             <div className="form-check mb-2">
               <input
                 className="form-check-input"
@@ -649,12 +928,18 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                 value="true"
                 {...register("allErrorsEnabledPush")}
                 id="flexRadioDefault1"
-                onChange={clearMultiSelectAndEmptyPushErrorValues}
+                onChange={() => {
+                  setPushAlerts(AlertChoices.ALL);
+                  clearMultiSelectAndEmptyPushErrorValues();
+                }}
+                checked={pushAlerts === AlertChoices.ALL}
               />
               <label className="form-check-label" htmlFor="flexRadioDefault1">
                 Push notification on error 4XX and 5XX
               </label>
             </div>
+
+            {/* Specific push */}
             <div className="form-check mb-2">
               <input
                 className="form-check-input"
@@ -662,13 +947,18 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
                 {...register("allErrorsEnabledPush")}
                 id="flexRadioDefault2"
                 disabled={role !== "premium"}
-                checked={pushSpecificErrorRadioIsChecked}
-                onChange={() =>
+                checked={
+                  pushSpecificErrorRadioIsChecked ||
+                  pushAlerts === AlertChoices.SPECIFIC
+                }
+                onChange={() => {
                   setPushSpecificErrorRadioIsChecked(
                     !pushSpecificErrorRadioIsChecked
-                  )
-                }
+                  );
+                  setPushAlerts(AlertChoices.SPECIFIC);
+                }}
               />
+
               <label
                 className={` ${styles.inline} form-check-label`}
                 htmlFor="flexRadioDefault2"
@@ -694,9 +984,10 @@ const RequestCreation = ({ role }: { role: string | undefined }) => {
               options={HTTP_ERROR_STATUS_CODES}
               className="basic-multi-select"
               classNamePrefix="select"
-              onChange={(selectedErrors) =>
-                onPushSpecificErrorChange(selectedErrors)
-              }
+              onChange={(selectedErrors) => {
+                onPushSpecificErrorChange(selectedErrors);
+                setPushAlerts(AlertChoices.SPECIFIC);
+              }}
             />
           </div>
         </div>
