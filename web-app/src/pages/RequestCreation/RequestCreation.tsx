@@ -46,6 +46,7 @@ import {
 } from "../../utils/form-validations";
 import { REQUESTS_ROUTE } from "../../routes";
 import { AlertType } from "../../utils/alert-types.enum";
+import { Role } from "../../utils/role.enum";
 
 export const CREATE_REQUEST = gql`
   mutation CreateRequestSetting(
@@ -680,17 +681,13 @@ const RequestCreation = ({
             <p
               className={styles.frequencyLabel}
               title={
-                role === "premium"
-                  ? ""
+                role === Role.PREMIUM
+                  ? "You can use these frequencies with your Premium plan"
                   : "You must be Premium to unlock these options"
               }
             >
-              Minutes{" "}
-              {role === "premium" ? (
-                ""
-              ) : (
-                <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
-              )}
+              Minutes
+              <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
             </p>
             <div className="d-flex justify-content-around mb-3">
               <div className="form-check">
@@ -700,7 +697,7 @@ const RequestCreation = ({
                   id="mn30"
                   value={Frequency.THIRTY_MINUTES}
                   {...register("frequency")}
-                  disabled={role !== "premium"}
+                  disabled={role !== Role.PREMIUM}
                   checked={frequency === Frequency.THIRTY_MINUTES}
                   onClick={() => setFrequency(Frequency.THIRTY_MINUTES)}
                 />
@@ -715,7 +712,7 @@ const RequestCreation = ({
                   id="mn15"
                   value={Frequency.FIFTEEN_MINUTES}
                   {...register("frequency")}
-                  disabled={role !== "premium"}
+                  disabled={role !== Role.PREMIUM}
                   checked={frequency === Frequency.FIFTEEN_MINUTES}
                   onClick={() => setFrequency(Frequency.FIFTEEN_MINUTES)}
                 />
@@ -730,7 +727,7 @@ const RequestCreation = ({
                   id="mn1"
                   value={Frequency.ONE_MINUTE}
                   {...register("frequency")}
-                  disabled={role !== "premium"}
+                  disabled={role !== Role.PREMIUM}
                   checked={frequency === Frequency.ONE_MINUTE}
                   onClick={() => setFrequency(Frequency.ONE_MINUTE)}
                 />
@@ -744,17 +741,13 @@ const RequestCreation = ({
             <p
               className={styles.frequencyLabel}
               title={
-                role === "premium"
-                  ? ""
+                role === Role.PREMIUM
+                  ? "You can use these frequencies with your Premium plan"
                   : "You must be Premium to unlock these options"
               }
             >
-              Seconds{" "}
-              {role === "premium" ? (
-                ""
-              ) : (
-                <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
-              )}
+              Seconds
+              <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
             </p>
             <div className="d-flex justify-content-around">
               <div className="form-check">
@@ -764,7 +757,7 @@ const RequestCreation = ({
                   id="sec30"
                   value={Frequency.THIRTY_SECONDS}
                   {...register("frequency")}
-                  disabled={role !== "premium"}
+                  disabled={role !== Role.PREMIUM}
                   checked={frequency === Frequency.THIRTY_SECONDS}
                   onClick={() => setFrequency(Frequency.THIRTY_SECONDS)}
                 />
@@ -779,7 +772,7 @@ const RequestCreation = ({
                   id="sec15"
                   value={Frequency.FIFTEEN_SECONDS}
                   {...register("frequency")}
-                  disabled={role !== "premium"}
+                  disabled={role !== Role.PREMIUM}
                   checked={frequency === Frequency.FIFTEEN_SECONDS}
                   onClick={() => setFrequency(Frequency.FIFTEEN_SECONDS)}
                 />
@@ -794,7 +787,7 @@ const RequestCreation = ({
                   id="sec5"
                   value={Frequency.FIVE_SECONDS}
                   {...register("frequency")}
-                  disabled={role !== "premium"}
+                  disabled={role !== Role.PREMIUM}
                   checked={frequency === Frequency.FIVE_SECONDS}
                   onClick={() => setFrequency(Frequency.FIVE_SECONDS)}
                 />
@@ -853,13 +846,20 @@ const RequestCreation = ({
             </div>
 
             {/* Specific email */}
-            <div className="form-check mb-2">
+            <div
+              title={
+                role === Role.PREMIUM
+                  ? "You can use specific email alerts with your Premium plan"
+                  : "You must be Premium to unlock specific email alerts"
+              }
+              className="form-check mb-2"
+            >
               <input
                 className="form-check-input"
                 type="radio"
                 {...register("allErrorsEnabledEmail")}
                 id="flexRadioDefault2"
-                disabled={role !== "premium"}
+                disabled={role !== Role.PREMIUM}
                 checked={
                   emailSpecificErrorRadioIsChecked ||
                   emailAlerts === AlertChoices.SPECIFIC
@@ -874,21 +874,13 @@ const RequestCreation = ({
               <label className="form-check-label" htmlFor="flexRadioDefault2">
                 Receive email on specific error(s)
               </label>
-              {role === "premium" ? (
-                ""
-              ) : (
-                <span>
-                  <i
-                    className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}
-                  ></i>
-                </span>
-              )}
+              <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
             </div>
             <Select
               isMulti
               value={emailSpecificErrorsInputValue}
               placeholder="Select specific error(s)..."
-              isDisabled={role !== "premium"}
+              isDisabled={role !== Role.PREMIUM}
               name="emailSpecificErrors"
               options={HTTP_ERROR_STATUS_CODES}
               className={`${styles.emailSpecificErrors} basic-multi-select`}
@@ -940,13 +932,20 @@ const RequestCreation = ({
             </div>
 
             {/* Specific push */}
-            <div className="form-check mb-2">
+            <div
+              title={
+                role === Role.PREMIUM
+                  ? "You can use specific push alerts with your Premium plan"
+                  : "You must be Premium to unlock specific push alerts"
+              }
+              className="form-check mb-2"
+            >
               <input
                 className="form-check-input"
                 type="radio"
                 {...register("allErrorsEnabledPush")}
                 id="flexRadioDefault2"
-                disabled={role !== "premium"}
+                disabled={role !== Role.PREMIUM}
                 checked={
                   pushSpecificErrorRadioIsChecked ||
                   pushAlerts === AlertChoices.SPECIFIC
@@ -965,20 +964,12 @@ const RequestCreation = ({
               >
                 Push notification on specific error(s)
               </label>
-              {role === "premium" ? (
-                ""
-              ) : (
-                <span>
-                  <i
-                    className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}
-                  ></i>
-                </span>
-              )}
+              <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
             </div>
             <Select
               isMulti
               value={pushSpecificErrorsInputValue}
-              isDisabled={role !== "premium"}
+              isDisabled={role !== Role.PREMIUM}
               placeholder="Select specific error(s)..."
               name="pushSpecificErrors"
               options={HTTP_ERROR_STATUS_CODES}
