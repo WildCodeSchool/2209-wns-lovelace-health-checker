@@ -8,6 +8,7 @@ import { gql, useMutation } from "@apollo/client";
 import {
   CreateRequestSettingMutation,
   CreateRequestSettingMutationVariables,
+  GetRequestSettingByIdQuery,
   UpdateRequestSettingMutation,
   UpdateRequestSettingMutationVariables,
 } from "../../gql/graphql";
@@ -123,7 +124,7 @@ export const UPDATE_REQUEST = gql`
 
 type RequestCreationInputs = {
   url: string;
-  name: string;
+  name: string | undefined | null;
   isActive: boolean;
   frequency: number;
   allErrorsEnabledEmail: boolean;
@@ -133,17 +134,20 @@ type RequestCreationInputs = {
   headers: { property: string; value: string }[];
 };
 
-interface RequestProps {
-  role: string | undefined;
-  existingRequest?: any;
-}
-
 enum AlertChoices {
   ALL = "all",
   SPECIFIC = "specific",
 }
 
-const RequestCreation = ({ role, existingRequest }: RequestProps) => {
+const RequestCreation = ({
+  role,
+  existingRequest,
+}: {
+  role: string | undefined;
+  existingRequest?:
+    | GetRequestSettingByIdQuery["getRequestSettingById"]
+    | undefined;
+}) => {
   const [isActive, setIsActive] = useState(true);
   const [frequency, setFrequency] = useState(Frequency.ONE_HOUR);
   const [emailAlerts, setEmailAlerts] = useState<any[] | string>([]);
@@ -201,6 +205,7 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
 
   useEffect(() => {
     if (existingRequest) {
+      console.log({ existingRequest });
       setIsActive(existingRequest?.requestSetting?.isActive);
       setFrequency(existingRequest?.requestSetting?.frequency);
       setExistingRequestErrors(existingRequest?.requestSetting?.alerts);
@@ -459,7 +464,9 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
 
   return (
     <div
-      className={`${styles.contentContainer} ${existingRequest ? "pt-0" : ""}`}
+      className={`${styles.contentContainer} ${
+        existingRequest ? "pt-md-0" : ""
+      }`}
     >
       {existingRequest ? (
         <></>
@@ -583,7 +590,7 @@ const RequestCreation = ({ role, existingRequest }: RequestProps) => {
         {/* Frequency */}
         <div className={`col-12 col-md-6 ${styles.formContainer}`}>
           <h2 className={`${styles.header} mt-md-4`}>
-            <i className="bi bi-activity"></i> Frequency
+            <i className="bi bi-activity"></i> Execution frequency
           </h2>
           <div className={`${styles.formContent}`}>
             {/* Days */}
