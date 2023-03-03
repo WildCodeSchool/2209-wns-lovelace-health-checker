@@ -15,6 +15,21 @@ import UserResolver from "./resolvers/User/User.resolver";
 import RequestSettingResolver from "./resolvers/RequestSetting/RequestSetting.resolver";
 import UserService from "./services/User/User.service";
 
+import {
+  fiveSecondsJob,
+  fifteenSecondsJob,
+  thirtySecondsJob,
+  oneMinuteJob,
+  fifteenMinuteJob,
+  thirtyMinutesJob,
+  hourlyJob,
+  sixHoursJob,
+  twelveHoursJob,
+  dailyJob,
+  weeklyJob,
+  monthlyJob,
+} from "./services/cron/cron.service";
+
 export type GlobalContext = ExpressContext & {
   user: User | null;
   sessionId: string | undefined;
@@ -56,6 +71,20 @@ const startServer = async () => {
   await connectionToRabbitMQ();
 
   console.log(`🚀  Server ready at ${url}`);
+
+  fiveSecondsJob.start();
+  fifteenSecondsJob.start();
+  thirtySecondsJob.start();
+  oneMinuteJob.start();
+  fifteenMinuteJob.start();
+  thirtyMinutesJob.start();
+  hourlyJob.start();
+  sixHoursJob.start();
+  twelveHoursJob.start();
+  dailyJob.start();
+  weeklyJob.start();
+  monthlyJob.start();
+  console.log("cron are started");
 };
 
 startServer();
