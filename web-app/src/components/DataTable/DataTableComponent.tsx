@@ -5,11 +5,8 @@ import { useEffect, useState } from "react";
 import { FilterMatchMode } from "primereact/api";
 
 import styles from "./DataTableComponent.module.scss";
-import {
-  formatFrequency,
-  Frequency,
-  parseTimeString,
-} from "../../utils/request-frequency.enum";
+import { formatFrequency, Frequency } from "../../utils/request-frequency.enum";
+import { formatDateString } from "../../utils/date";
 
 interface DataTableProps {
   requests: Request[];
@@ -27,18 +24,6 @@ interface Request {
   statusCode: number;
   url: string;
 }
-
-const formatDateString = (dateString: string): string => {
-  const date = new Date(dateString);
-  const year = date.getUTCFullYear().toString().slice(2);
-  const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
-  const day = date.getUTCDate().toString().padStart(2, "0");
-  const hours = date.getUTCHours().toString().padStart(2, "0");
-  const minutes = date.getUTCMinutes().toString().padStart(2, "0");
-  const seconds = date.getUTCSeconds().toString().padStart(2, "0");
-
-  return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
-};
 
 const DataTableComponent = (
   pageOfRequestSettingWithLastResult: DataTableProps
@@ -138,20 +123,23 @@ const DataTableComponent = (
         loading={pageOfRequestSettingWithLastResult.loading}
         dataKey="id"
         className={`${styles.table}`}
-        filters={filters}>
+        filters={filters}
+      >
         <Column
           field="url"
           header="URL"
           filter
           headerClassName={`${styles.header}`}
-          bodyClassName={`${styles.primary} ${styles.hidden} ${styles.url} `}></Column>
+          bodyClassName={`${styles.primary} ${styles.hidden} ${styles.url} `}
+        ></Column>
         <Column
           field="name"
           header="Name"
           filter
           headerClassName={`${styles.header}`}
           body={nameBodyTemplate}
-          bodyClassName={`${styles.primary} ${styles.hidden} ${styles.name}`}></Column>
+          bodyClassName={`${styles.primary} ${styles.hidden} ${styles.name}`}
+        ></Column>
         <Column
           field="frequency"
           header="Frequency"
@@ -161,25 +149,29 @@ const DataTableComponent = (
           style={{ minWidth: "12rem" }}
           headerClassName={`${styles.header}`}
           body={frequencyBodyTemplate}
-          bodyClassName={`text-center ${styles.primary}`}></Column>
+          bodyClassName={`text-center ${styles.primary}`}
+        ></Column>
         <Column
           field="createdAt"
           header="Last Result"
           headerClassName={`${styles.header}`}
           className={`${styles.createdAt}`}
           body={createdAtBodyTemplate}
-          bodyClassName={`text-center ${styles.primary} ${styles.hidden} ${styles.createdAt}`}></Column>
+          bodyClassName={`text-center ${styles.primary} ${styles.hidden} ${styles.createdAt}`}
+        ></Column>
         <Column
           field="isAvailable"
           header="Availability"
           headerClassName={`${styles.header}`}
           body={isAvailableBodyTemplate}
-          bodyClassName="text-center"></Column>
+          bodyClassName="text-center"
+        ></Column>
         <Column
           field="statusCode"
           header="Status"
           headerClassName={`${styles.header}`}
-          bodyClassName={`text-center ${styles.primary}`}></Column>
+          bodyClassName={`text-center ${styles.primary}`}
+        ></Column>
       </DataTable>
     </>
   );

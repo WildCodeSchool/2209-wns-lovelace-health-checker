@@ -1,3 +1,6 @@
+import { AlertSetting } from "../gql/graphql";
+import { AlertType } from "./alert-types.enum";
+
 export enum HttpErrorStatusCode {
   BAD_REQUEST = 400,
   UNAUTHORIZED = 401,
@@ -81,3 +84,34 @@ export const HTTP_ERROR_STATUS_CODES = [
   { value: 510, label: "510" },
   { value: 511, label: "511" },
 ];
+
+export const getSpecificErrorsByType = (
+  type: AlertType,
+  alertSettings: any[]
+) => {
+  return alertSettings.filter((alertSetting: any) => {
+    return alertSetting.type === type;
+  });
+};
+
+export const retrieveExistingSpecificErrors = (alerts: any[]) => {
+  let errors: any[] = [];
+  alerts.forEach((alert: any) => {
+    errors.push({
+      value: alert.httpStatusCode,
+      label: alert.httpStatusCode.toString(),
+    });
+  });
+  return errors;
+};
+
+export const getSpecificErrorsCodes = (alerts: AlertSetting[]) => {
+  if (alerts.length !== HTTP_ERROR_STATUS_CODES.length) {
+    let errors: number[] = [];
+    alerts.forEach((alert: AlertSetting) => {
+      errors.push(alert.httpStatusCode);
+    });
+    return errors;
+  }
+  return [];
+};

@@ -93,39 +93,18 @@ export default class RequestResultService extends RequestResultRepository {
   public static checkUrlOfAutomatedRequest = async (
     requestSettingFromMessage: RequestSetting
   ): Promise<void> => {
-    this.checkUrlOfRequestSettingByRequestSettingId(
-      requestSettingFromMessage.id,
-      true
-    );
+    this.checkUrlOfRequestSettingByRequestSetting(requestSettingFromMessage);
   };
 
-  public static checkUrlOfRequestSettingByRequestSettingId = async (
-    requestSettingId: string,
-    isAutomatedRequest: boolean = false
-  ): Promise<void> => {
-    try {
-      // Check if the request setting still exists in db and fetch it
-      const requestSettingFromDB: RequestSetting | null =
-        await RequestSettingService.getRequestSettingById(requestSettingId);
-      // Check if the request setting is still active for automated request only
-      if (
-        isAutomatedRequest &&
-        requestSettingFromDB &&
-        !requestSettingFromDB.isActive
-      ) {
-        return;
-      }
-      if (requestSettingFromDB && requestSettingFromDB.isActive) {
-        // Not a homepage request so add false
-        const requestResultToSave: RequestResult = await this.checkUrl(
-          requestSettingFromDB,
-          false
-        );
-        RequestResultRepository.saveRequestResult(requestResultToSave);
-      }
-    } catch (error) {
-      throw error;
-    }
+  public static checkUrlOfRequestSettingByRequestSetting = async (
+    requestSetting: RequestSetting
+  ): Promise<RequestResult> => {
+    // Not a homepage request so add false
+    const requestResultToSave: RequestResult = await this.checkUrl(
+      requestSetting,
+      false
+    );
+    return await RequestResultRepository.saveRequestResult(requestResultToSave);
   };
 
   public static checkUrlForHomepage = async (

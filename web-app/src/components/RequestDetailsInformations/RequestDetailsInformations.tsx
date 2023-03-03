@@ -1,39 +1,95 @@
+import { gql, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
-import { GetRequestSettingByIdQuery } from "../../gql/graphql";
+import { toast } from "react-toastify";
+import {
+  CheckUrlLaunchedManuallyQuery,
+  GetRequestSettingByIdQuery,
+} from "../../gql/graphql";
+import { AlertType } from "../../utils/alert-types.enum";
+import { formatDateString } from "../../utils/date";
+import {
+  getSpecificErrorsByType,
+  getSpecificErrorsCodes,
+  HTTP_ERROR_STATUS_CODES,
+} from "../../utils/http-error-status-codes.enum";
+import { formatFrequency } from "../../utils/request-frequency.enum";
 import styles from "./RequestDetailsInformations.module.scss";
+
+export const CHECK_URL_LAUNCHED_MANUALLY = gql`
+  query CheckUrlLaunchedManually($checkUrlLaunchedManuallyId: String!) {
+    checkUrlLaunchedManually(id: $checkUrlLaunchedManuallyId) {
+      id
+      createdAt
+      url
+      getIsAvailable
+      statusCode
+      duration
+      headers
+    }
+  }
+`;
 
 const RequestDetailsInformations = ({
   existingRequest,
+  refetch,
 }: {
   existingRequest:
     | GetRequestSettingByIdQuery["getRequestSettingById"]
     | undefined;
+  refetch: any;
 }) => {
   const [frequency, setFrequency] = useState("");
-
-  /* TODO : remove this method which is already implemented into request-frequency.enum.ts, just import it ! */
-  const formatFrequency = (frequency: number): string => {
-    if (frequency >= 2592000) {
-      const numMonths = Math.round(frequency / 2592000);
-      return `${numMonths} ${numMonths > 1 ? "months" : "month"}`;
-    } else if (frequency >= 86400) {
-      const numDays = Math.round(frequency / 86400);
-      return `${numDays} ${numDays > 1 ? "days" : "day"}`;
-    } else if (frequency >= 3600) {
-      const numHours = Math.round(frequency / 3600);
-      return `${numHours} ${numHours > 1 ? "hrs" : "hr"}`;
-    } else if (frequency >= 60) {
-      const numMinutes = Math.round(frequency / 60);
-      return `${numMinutes} ${numMinutes > 1 ? "mins" : "min"}`;
-    } else {
-      return `${frequency} ${frequency > 1 ? "secs" : "sec"}`;
-    }
-  };
+  const [emailAlerts, setEmailAlerts] = useState<any[]>([]);
+  const [pushAlerts, setPushAlerts] = useState<any[]>([]);
+  const [specificEmailAlerts, setSpecificEmailAlerts] = useState<number[]>([]);
+  const [specificPushAlerts, setSpecificPushAlerts] = useState<number[]>([]);
+  const [parsedHeaders, setParsedHeaders] = useState<any[]>();
 
   useEffect(() => {
     if (existingRequest)
       setFrequency(formatFrequency(existingRequest?.requestSetting?.frequency));
+    if (existingRequest?.requestSetting.alerts.length) {
+      setEmailAlerts(
+        getSpecificErrorsByType(
+          AlertType.EMAIL,
+          existingRequest?.requestSetting.alerts
+        )
+      );
+      setPushAlerts(
+        getSpecificErrorsByType(
+          AlertType.PUSH,
+          existingRequest?.requestSetting.alerts
+        )
+      );
+    }
+    if (existingRequest?.requestSetting.headers)
+      setParsedHeaders(
+        JSON.parse(existingRequest.requestSetting.headers as string)
+      );
   }, [existingRequest]);
+
+  useEffect(() => {
+    setSpecificEmailAlerts(getSpecificErrorsCodes(emailAlerts));
+  }, [emailAlerts]);
+
+  useEffect(() => {
+    setSpecificPushAlerts(getSpecificErrorsCodes(pushAlerts));
+  }, [pushAlerts]);
+
+  const [checkUrlManually, { loading }] =
+    useLazyQuery<CheckUrlLaunchedManuallyQuery>(CHECK_URL_LAUNCHED_MANUALLY, {
+      variables: {
+        checkUrlLaunchedManuallyId: existingRequest?.requestSetting.id!,
+      },
+      fetchPolicy: "no-cache",
+      onCompleted: () => {
+        toast.success("Your request has been executed successfully !", {
+          position: toast.POSITION.BOTTOM_RIGHT,
+          toastId: 1,
+        });
+        refetch();
+      },
+    });
 
   return (
     <div className={`${styles.contentContainer}`}>
@@ -91,23 +147,62 @@ const RequestDetailsInformations = ({
                   button to execute it manually.
                 </div>
                 <button
+                  disabled={loading}
                   type="button"
+                  onClick={() => {
+                    console.log("clicked");
+                    checkUrlManually();
+                  }}
                   className={`${styles.btn} ${styles.btnSecondary} mt-4`}
                 >
-                  Launch
+                  {loading ? "In progress" : "Launch"}
                 </button>
               </div>
             ) : (
               <div>
-                <div>Date :</div>
-                <div>Availability : </div>
-                <div>Status code : </div>
-                <div>Duration : </div>
+                <div className={`${styles.label}`}>Date</div>
+                <p className={`${styles.value}`}>
+                  {formatDateString(existingRequest?.requestResult?.createdAt)}
+                </p>
+                <div className={`${styles.label}`}>Availability</div>
+                <p className={`${styles.value}`}>
+                  {existingRequest?.requestResult?.getIsAvailable === false && (
+                    <span>
+                      Not available
+                      <i className={`bi bi-x-circle ${styles.xIcon} ms-2`}></i>
+                    </span>
+                  )}
+                  {existingRequest?.requestResult?.getIsAvailable === true && (
+                    <span>
+                      Available
+                      <i
+                        className={`bi bi-check-circle ${styles.checkIcon} ms-2`}
+                      ></i>
+                    </span>
+                  )}
+                </p>
+                <div className={`${styles.label}`}>Status code</div>
+                <p className={`${styles.value}`}>
+                  {existingRequest?.requestResult?.statusCode === null
+                    ? "Not reachable"
+                    : existingRequest?.requestResult?.statusCode}
+                </p>
+                <div className={`${styles.label}`}>Duration</div>
+                <p className={`${styles.value} m-0`}>
+                  {existingRequest?.requestResult?.duration === null
+                    ? "-"
+                    : `${existingRequest?.requestResult?.duration} ms`}
+                </p>
                 <button
+                  disabled={loading}
                   type="button"
+                  onClick={() => {
+                    console.log("clicked");
+                    checkUrlManually();
+                  }}
                   className={`${styles.btn} ${styles.btnSecondary} mt-4`}
                 >
-                  Relaunch
+                  {loading ? "In progress" : "Relaunch"}
                 </button>
               </div>
             )}
@@ -122,18 +217,19 @@ const RequestDetailsInformations = ({
           </h2>
           <div className={`${styles.formContent}`}>
             <div>
+              {/* Email */}
               <div className={`${styles.label}`}>
                 Email on error 4XX and 5XX
               </div>
               <p className={`${styles.value}`}>
-                {existingRequest?.requestSetting?.alerts.length === 0 && (
+                {(emailAlerts.length === 0 ||
+                  emailAlerts.length !== HTTP_ERROR_STATUS_CODES.length) && (
                   <span>
                     Inactive
                     <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
                   </span>
                 )}
-                {/* TODO : Get all email alerts (type email), check if length equals enum length. If same length => true */}
-                {existingRequest?.requestSetting?.alerts.length !== 0 && (
+                {emailAlerts.length === HTTP_ERROR_STATUS_CODES.length && (
                   <span>
                     Active
                     <i
@@ -143,11 +239,47 @@ const RequestDetailsInformations = ({
                 )}
               </p>
               <div className={`${styles.label}`}>
+                Specific errors emails
+                <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
+              </div>
+              <p className={`${styles.value} m-0`}>
+                {emailAlerts.length !== 0 &&
+                  emailAlerts.length !== HTTP_ERROR_STATUS_CODES.length && (
+                    <span>
+                      Active
+                      <i
+                        className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
+                      ></i>
+                    </span>
+                  )}
+                {(emailAlerts.length === HTTP_ERROR_STATUS_CODES.length ||
+                  emailAlerts.length === 0) && (
+                  <span>
+                    Inactive
+                    <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
+                  </span>
+                )}
+              </p>
+              <p>
+                {specificEmailAlerts.length > 0 &&
+                  specificEmailAlerts.join(", ")}
+              </p>
+
+              <hr />
+
+              {/* Push */}
+              <div className={`${styles.label}`}>
                 Push notification on error 4XX and 5XX
               </div>
               <p className={`${styles.value}`}>
-                {/* TODO : Get all email alerts (type email), check if length not empty && NOT equals to enum length. Verified = true */}
-                {existingRequest?.requestSetting?.alerts.length !== 0 && (
+                {(pushAlerts.length === 0 ||
+                  pushAlerts.length !== HTTP_ERROR_STATUS_CODES.length) && (
+                  <span>
+                    Inactive
+                    <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
+                  </span>
+                )}
+                {pushAlerts.length === HTTP_ERROR_STATUS_CODES.length && (
                   <span>
                     Active
                     <i
@@ -155,17 +287,32 @@ const RequestDetailsInformations = ({
                     ></i>
                   </span>
                 )}
-                {/* TODO : Get all email alerts (type email), inactive if length empty && length equals enum length */}
-                {existingRequest?.requestSetting?.alerts.length === 0 && (
+              </p>
+              <div className={`${styles.label}`}>
+                Specific errors notifications
+                <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
+              </div>
+              <p className={`${styles.value} m-0`}>
+                {pushAlerts.length !== 0 &&
+                  pushAlerts.length !== HTTP_ERROR_STATUS_CODES.length && (
+                    <span>
+                      Active
+                      <i
+                        className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
+                      ></i>
+                    </span>
+                  )}
+                {(pushAlerts.length === HTTP_ERROR_STATUS_CODES.length ||
+                  pushAlerts.length === 0) && (
                   <span>
                     Inactive
                     <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
                   </span>
                 )}
               </p>
-              {/* TODO : do same for push alerts */}
-              <div>Specific errors emails :</div>
-              <div>Specific errors notifications :</div>
+              <p className="m-0">
+                {specificPushAlerts.length > 0 && specificPushAlerts.join(", ")}
+              </p>
             </div>
           </div>
         </div>
@@ -176,14 +323,16 @@ const RequestDetailsInformations = ({
             <i className="bi bi-card-text"></i> Headers
           </h2>
           <div className={`${styles.formContent}`}>
-            {existingRequest?.requestSetting?.headers === null ||
-            existingRequest?.requestSetting?.headers === "" ? (
+            {(existingRequest?.requestSetting?.headers === null ||
+              existingRequest?.requestSetting?.headers === "") && (
               <div>No headers set</div>
-            ) : (
-              <div>
-                {/* Parse headers to get values and loop to display correct informations */}
-              </div>
             )}
+            {parsedHeaders?.map((header, index) => (
+              <div key={index}>
+                <div className={`${styles.label}`}>{header.property}</div>
+                <p className={`${styles.value}`}>{header.value}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

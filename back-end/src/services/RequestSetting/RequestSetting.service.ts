@@ -80,6 +80,42 @@ export default class RequestSettingService extends RequestSettingRepository {
     await this.checkIfURLOrNameAreAlreadyUsed(user, url, name, id);
   };
 
+  static checkIfRequestBelongsToUserByRequestSetting = async (
+    user: User,
+    requestSetting: RequestSetting
+  ) => {
+    if (requestSetting?.user.id !== user.id) throw Error("Unauthorized");
+  };
+
+  static checkIfRequestBelongsToUserByRequestSettingId = async (
+    user: User,
+    requestSettingId: string
+  ) => {
+    const requestSetting = await this.getRequestSettingByIdOrThrowNotFoundError(
+      requestSettingId
+    );
+    await this.checkIfRequestBelongsToUserByRequestSetting(
+      user,
+      requestSetting
+    );
+  };
+
+  static getRequestSettingByIdOrThrowNotFoundError = async (
+    requestSettingId: string
+  ) => {
+    const requestSetting = await RequestSettingService.getRequestSettingById(
+      requestSettingId
+    );
+    if (!requestSetting) throw Error("Request doesn't exist");
+    return requestSetting;
+  };
+
+  public static getRequestSettingById = async (
+    id: string
+  ): Promise<RequestSetting | null> => {
+    return await RequestSettingRepository.getRequestSettingById(id);
+  };
+
   static updateRequest = async (
     id: string,
     url: string,
@@ -93,12 +129,13 @@ export default class RequestSettingService extends RequestSettingRepository {
     customPushErrors: number[] | undefined,
     user: User
   ): Promise<RequestSetting> => {
-    // Check if the request belongs to the user
     const toUpdateRequestSetting =
-      await RequestSettingService.getRequestSettingById(id);
-    if (!toUpdateRequestSetting) throw Error("Request doesn't exist");
-    if (toUpdateRequestSetting?.user.id !== user.id)
-      throw Error("Unauthorized");
+      await this.getRequestSettingByIdOrThrowNotFoundError(id);
+
+    this.checkIfRequestBelongsToUserByRequestSetting(
+      user,
+      toUpdateRequestSetting
+    );
 
     await this.checkForBlockingCases(
       user,
@@ -267,12 +304,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     return await RequestSettingRepository.getRequestSettingsByFrequency(
       frequency
     );
-  };
-
-  public static getRequestSettingById = async (
-    id: string
-  ): Promise<RequestSetting | null> => {
-    return await RequestSettingRepository.getRequestSettingById(id);
   };
 
   static getRequestSettingWithLastResultByRequestSettingId = async (

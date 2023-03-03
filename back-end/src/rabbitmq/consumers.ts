@@ -6,6 +6,7 @@ import {
   sendResetPasswordEmail,
 } from "../services/nodemailer/nodemailer.service";
 import RequestResultService from "../services/RequestResult/RequestResult.service";
+import RequestSettingService from "../services/RequestSetting/RequestSetting.service";
 import { channel } from "./config";
 
 export const onMessageOnAccountCreationEmailQueue = async () => {
@@ -81,11 +82,16 @@ export const onMessageOnAutomatedRequestQueue = async () => {
     let parsedMessage = JSON.parse(
       String.fromCharCode.apply(String, message.content)
     );
-    const requestSettingToCheck: RequestSetting =
+
+    const toCheckForExistanceRequestSetting: RequestSetting =
       parsedMessage as RequestSetting;
-    await RequestResultService.checkUrlOfAutomatedRequest(
-      requestSettingToCheck
+
+    const requestSetting = await RequestSettingService.getRequestSettingById(
+      toCheckForExistanceRequestSetting.id
     );
+
+    if (requestSetting && requestSetting.isActive)
+      await RequestResultService.checkUrlOfAutomatedRequest(requestSetting);
     channel.ack(message);
   });
 };
