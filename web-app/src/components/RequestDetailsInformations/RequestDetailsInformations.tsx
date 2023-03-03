@@ -1,5 +1,10 @@
+import { gql, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
-import { GetRequestSettingByIdQuery } from "../../gql/graphql";
+import { toast } from "react-toastify";
+import {
+  CheckUrlLaunchedManuallyQuery,
+  GetRequestSettingByIdQuery,
+} from "../../gql/graphql";
 import { AlertType } from "../../utils/alert-types.enum";
 import { formatDateString } from "../../utils/date";
 import {
@@ -10,12 +15,28 @@ import {
 import { formatFrequency } from "../../utils/request-frequency.enum";
 import styles from "./RequestDetailsInformations.module.scss";
 
+export const CHECK_URL_LAUNCHED_MANUALLY = gql`
+  query CheckUrlLaunchedManually($checkUrlLaunchedManuallyId: String!) {
+    checkUrlLaunchedManually(id: $checkUrlLaunchedManuallyId) {
+      id
+      createdAt
+      url
+      getIsAvailable
+      statusCode
+      duration
+      headers
+    }
+  }
+`;
+
 const RequestDetailsInformations = ({
   existingRequest,
+  refetch,
 }: {
   existingRequest:
     | GetRequestSettingByIdQuery["getRequestSettingById"]
     | undefined;
+  refetch: any;
 }) => {
   const [frequency, setFrequency] = useState("");
   const [emailAlerts, setEmailAlerts] = useState<any[]>([]);
@@ -40,11 +61,11 @@ const RequestDetailsInformations = ({
           existingRequest?.requestSetting.alerts
         )
       );
-      if (existingRequest.requestSetting.headers)
-        setParsedHeaders(
-          JSON.parse(existingRequest.requestSetting.headers as string)
-        );
     }
+    if (existingRequest?.requestSetting.headers)
+      setParsedHeaders(
+        JSON.parse(existingRequest.requestSetting.headers as string)
+      );
   }, [existingRequest]);
 
   useEffect(() => {
@@ -54,6 +75,21 @@ const RequestDetailsInformations = ({
   useEffect(() => {
     setSpecificPushAlerts(getSpecificErrorsCodes(pushAlerts));
   }, [pushAlerts]);
+
+  const [checkUrlManually, { loading }] =
+    useLazyQuery<CheckUrlLaunchedManuallyQuery>(CHECK_URL_LAUNCHED_MANUALLY, {
+      variables: {
+        checkUrlLaunchedManuallyId: existingRequest?.requestSetting.id!,
+      },
+      fetchPolicy: "no-cache",
+      onCompleted: () => {
+        toast.success("Your request has been executed successfully !", {
+          position: toast.POSITION.BOTTOM_RIGHT,
+          toastId: 1,
+        });
+        refetch();
+      },
+    });
 
   return (
     <div className={`${styles.contentContainer}`}>
@@ -111,10 +147,15 @@ const RequestDetailsInformations = ({
                   button to execute it manually.
                 </div>
                 <button
+                  disabled={loading}
                   type="button"
+                  onClick={() => {
+                    console.log("clicked");
+                    checkUrlManually();
+                  }}
                   className={`${styles.btn} ${styles.btnSecondary} mt-4`}
                 >
-                  Launch
+                  {loading ? "In progress" : "Launch"}
                 </button>
               </div>
             ) : (
@@ -153,10 +194,15 @@ const RequestDetailsInformations = ({
                     : `${existingRequest?.requestResult?.duration} ms`}
                 </p>
                 <button
+                  disabled={loading}
                   type="button"
+                  onClick={() => {
+                    console.log("clicked");
+                    checkUrlManually();
+                  }}
                   className={`${styles.btn} ${styles.btnSecondary} mt-4`}
                 >
-                  Relaunch
+                  {loading ? "In progress" : "Relaunch"}
                 </button>
               </div>
             )}
@@ -277,10 +323,10 @@ const RequestDetailsInformations = ({
             <i className="bi bi-card-text"></i> Headers
           </h2>
           <div className={`${styles.formContent}`}>
-            {existingRequest?.requestSetting?.headers === null ||
-              (existingRequest?.requestSetting?.headers === "" && (
-                <div>No headers set</div>
-              ))}
+            {(existingRequest?.requestSetting?.headers === null ||
+              existingRequest?.requestSetting?.headers === "") && (
+              <div>No headers set</div>
+            )}
             {parsedHeaders?.map((header, index) => (
               <div key={index}>
                 <div className={`${styles.label}`}>{header.property}</div>

@@ -5,8 +5,8 @@ const HomepageRequestTable = ({
   duration,
   getIsAvailable,
 }: {
-  statusCode: number;
-  duration: number;
+  statusCode: number | null | undefined;
+  duration: number | null | undefined;
   getIsAvailable: boolean;
 }) => {
   return (

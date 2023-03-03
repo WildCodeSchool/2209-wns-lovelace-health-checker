@@ -1,5 +1,5 @@
 import { ArgsType, Field } from "type-graphql";
-import { IsNotEmpty, Matches } from "class-validator";
+import { IsNotEmpty, IsString, Matches } from "class-validator";
 import { URL_REG_EXP } from "../../utils/regular-expressions";
 import { INVALID_URL_FORMAT_ERROR_MESSAGE } from "../../utils/form-validations";
 
@@ -9,4 +9,12 @@ export class checkUrlArgs {
   @IsNotEmpty()
   @Matches(URL_REG_EXP, { message: INVALID_URL_FORMAT_ERROR_MESSAGE })
   url: string;
+}
+
+@ArgsType()
+export class checkUrlLaunchedManuallyArgs {
+  @Field()
+  @IsNotEmpty()
+  @IsString()
+  id: string;
 }
