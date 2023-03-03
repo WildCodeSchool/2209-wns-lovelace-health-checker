@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { GetRequestSettingByIdQuery } from "../../gql/graphql";
 import { AlertType } from "../../utils/alert-types.enum";
+import { formatDateString } from "../../utils/date";
 import {
   getSpecificErrorsByType,
   getSpecificErrorsCodes,
   HTTP_ERROR_STATUS_CODES,
-  retrieveExistingSpecificErrors,
 } from "../../utils/http-error-status-codes.enum";
 import { formatFrequency } from "../../utils/request-frequency.enum";
 import styles from "./RequestDetailsInformations.module.scss";
@@ -22,6 +22,7 @@ const RequestDetailsInformations = ({
   const [pushAlerts, setPushAlerts] = useState<any[]>([]);
   const [specificEmailAlerts, setSpecificEmailAlerts] = useState<number[]>([]);
   const [specificPushAlerts, setSpecificPushAlerts] = useState<number[]>([]);
+  const [parsedHeaders, setParsedHeaders] = useState<any[]>();
 
   useEffect(() => {
     if (existingRequest)
@@ -39,6 +40,10 @@ const RequestDetailsInformations = ({
           existingRequest?.requestSetting.alerts
         )
       );
+      if (existingRequest.requestSetting.headers)
+        setParsedHeaders(
+          JSON.parse(existingRequest.requestSetting.headers as string)
+        );
     }
   }, [existingRequest]);
 
@@ -114,10 +119,39 @@ const RequestDetailsInformations = ({
               </div>
             ) : (
               <div>
-                <div>Date :</div>
-                <div>Availability : </div>
-                <div>Status code : </div>
-                <div>Duration : </div>
+                <div className={`${styles.label}`}>Date</div>
+                <p className={`${styles.value}`}>
+                  {formatDateString(existingRequest?.requestResult?.createdAt)}
+                </p>
+                <div className={`${styles.label}`}>Availability</div>
+                <p className={`${styles.value}`}>
+                  {existingRequest?.requestResult?.getIsAvailable === false && (
+                    <span>
+                      Not available
+                      <i className={`bi bi-x-circle ${styles.xIcon} ms-2`}></i>
+                    </span>
+                  )}
+                  {existingRequest?.requestResult?.getIsAvailable === true && (
+                    <span>
+                      Available
+                      <i
+                        className={`bi bi-check-circle ${styles.checkIcon} ms-2`}
+                      ></i>
+                    </span>
+                  )}
+                </p>
+                <div className={`${styles.label}`}>Status code</div>
+                <p className={`${styles.value}`}>
+                  {existingRequest?.requestResult?.statusCode === null
+                    ? "Not reachable"
+                    : existingRequest?.requestResult?.statusCode}
+                </p>
+                <div className={`${styles.label}`}>Duration</div>
+                <p className={`${styles.value} m-0`}>
+                  {existingRequest?.requestResult?.duration === null
+                    ? "-"
+                    : `${existingRequest?.requestResult?.duration} ms`}
+                </p>
                 <button
                   type="button"
                   className={`${styles.btn} ${styles.btnSecondary} mt-4`}
@@ -158,7 +192,10 @@ const RequestDetailsInformations = ({
                   </span>
                 )}
               </p>
-              <div className={`${styles.label}`}>Specific errors emails</div>
+              <div className={`${styles.label}`}>
+                Specific errors emails
+                <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
+              </div>
               <p className={`${styles.value} m-0`}>
                 {emailAlerts.length !== 0 &&
                   emailAlerts.length !== HTTP_ERROR_STATUS_CODES.length && (
@@ -207,6 +244,7 @@ const RequestDetailsInformations = ({
               </p>
               <div className={`${styles.label}`}>
                 Specific errors notifications
+                <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
               </div>
               <p className={`${styles.value} m-0`}>
                 {pushAlerts.length !== 0 &&
@@ -240,13 +278,15 @@ const RequestDetailsInformations = ({
           </h2>
           <div className={`${styles.formContent}`}>
             {existingRequest?.requestSetting?.headers === null ||
-            existingRequest?.requestSetting?.headers === "" ? (
-              <div>No headers set</div>
-            ) : (
-              <div>
-                {/* Parse headers to get values and loop to display correct informations */}
+              (existingRequest?.requestSetting?.headers === "" && (
+                <div>No headers set</div>
+              ))}
+            {parsedHeaders?.map((header, index) => (
+              <div key={index}>
+                <div className={`${styles.label}`}>{header.property}</div>
+                <p className={`${styles.value}`}>{header.value}</p>
               </div>
-            )}
+            ))}
           </div>
         </div>
       </div>
