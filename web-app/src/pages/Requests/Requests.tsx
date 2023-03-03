@@ -1,10 +1,8 @@
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DataTable } from "primereact/datatable";
 import { toast } from "react-toastify";
 import DataTableComponent from "../../components/DataTable/DataTableComponent";
-import RequestsTable from "../../components/RequestsTable/RequestsTable";
 
 import {
   CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery,
@@ -13,7 +11,6 @@ import {
 } from "../../gql/graphql";
 import { REQUEST_CREATION_ROUTE } from "../../routes";
 import styles from "./Requests.module.scss";
-import { Column } from "primereact/column";
 
 const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
   query CheckIfNonPremiumUserHasReachedMaxRequestsCount {
@@ -64,7 +61,7 @@ const Requests = () => {
       }
     );
 
-  const { data, loading, error, refetch } = useQuery<
+  const { data, loading, refetch } = useQuery<
     GetPageOfRequestSettingWithLastResultQuery,
     GetPageOfRequestSettingWithLastResultQueryVariables
   >(GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT, {
@@ -140,6 +137,8 @@ const Requests = () => {
             loading={loading}
             pageNumber={pageNumber}
             setPageNumber={setPageNumber}
+            totalCount={data?.getPageOfRequestSettingWithLastResult.totalCount}
+            refetch={refetch}
           />
         </div>
       </div>
