@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
 import { GetRequestSettingByIdQuery } from "../../gql/graphql";
+import { AlertType } from "../../utils/alert-types.enum";
+import {
+  getSpecificErrorsByType,
+  getSpecificErrorsCodes,
+  HTTP_ERROR_STATUS_CODES,
+  retrieveExistingSpecificErrors,
+} from "../../utils/http-error-status-codes.enum";
+import { formatFrequency } from "../../utils/request-frequency.enum";
 import styles from "./RequestDetailsInformations.module.scss";
 
 const RequestDetailsInformations = ({
@@ -10,30 +18,37 @@ const RequestDetailsInformations = ({
     | undefined;
 }) => {
   const [frequency, setFrequency] = useState("");
-
-  /* TODO : remove this method which is already implemented into request-frequency.enum.ts, just import it ! */
-  const formatFrequency = (frequency: number): string => {
-    if (frequency >= 2592000) {
-      const numMonths = Math.round(frequency / 2592000);
-      return `${numMonths} ${numMonths > 1 ? "months" : "month"}`;
-    } else if (frequency >= 86400) {
-      const numDays = Math.round(frequency / 86400);
-      return `${numDays} ${numDays > 1 ? "days" : "day"}`;
-    } else if (frequency >= 3600) {
-      const numHours = Math.round(frequency / 3600);
-      return `${numHours} ${numHours > 1 ? "hrs" : "hr"}`;
-    } else if (frequency >= 60) {
-      const numMinutes = Math.round(frequency / 60);
-      return `${numMinutes} ${numMinutes > 1 ? "mins" : "min"}`;
-    } else {
-      return `${frequency} ${frequency > 1 ? "secs" : "sec"}`;
-    }
-  };
+  const [emailAlerts, setEmailAlerts] = useState<any[]>([]);
+  const [pushAlerts, setPushAlerts] = useState<any[]>([]);
+  const [specificEmailAlerts, setSpecificEmailAlerts] = useState<number[]>([]);
+  const [specificPushAlerts, setSpecificPushAlerts] = useState<number[]>([]);
 
   useEffect(() => {
     if (existingRequest)
       setFrequency(formatFrequency(existingRequest?.requestSetting?.frequency));
+    if (existingRequest?.requestSetting.alerts.length) {
+      setEmailAlerts(
+        getSpecificErrorsByType(
+          AlertType.EMAIL,
+          existingRequest?.requestSetting.alerts
+        )
+      );
+      setPushAlerts(
+        getSpecificErrorsByType(
+          AlertType.PUSH,
+          existingRequest?.requestSetting.alerts
+        )
+      );
+    }
   }, [existingRequest]);
+
+  useEffect(() => {
+    setSpecificEmailAlerts(getSpecificErrorsCodes(emailAlerts));
+  }, [emailAlerts]);
+
+  useEffect(() => {
+    setSpecificPushAlerts(getSpecificErrorsCodes(pushAlerts));
+  }, [pushAlerts]);
 
   return (
     <div className={`${styles.contentContainer}`}>
@@ -122,18 +137,66 @@ const RequestDetailsInformations = ({
           </h2>
           <div className={`${styles.formContent}`}>
             <div>
+              {/* Email */}
               <div className={`${styles.label}`}>
                 Email on error 4XX and 5XX
               </div>
               <p className={`${styles.value}`}>
-                {existingRequest?.requestSetting?.alerts.length === 0 && (
+                {(emailAlerts.length === 0 ||
+                  emailAlerts.length !== HTTP_ERROR_STATUS_CODES.length) && (
                   <span>
                     Inactive
                     <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
                   </span>
                 )}
-                {/* TODO : Get all email alerts (type email), check if length equals enum length. If same length => true */}
-                {existingRequest?.requestSetting?.alerts.length !== 0 && (
+                {emailAlerts.length === HTTP_ERROR_STATUS_CODES.length && (
+                  <span>
+                    Active
+                    <i
+                      className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
+                    ></i>
+                  </span>
+                )}
+              </p>
+              <div className={`${styles.label}`}>Specific errors emails</div>
+              <p className={`${styles.value} m-0`}>
+                {emailAlerts.length !== 0 &&
+                  emailAlerts.length !== HTTP_ERROR_STATUS_CODES.length && (
+                    <span>
+                      Active
+                      <i
+                        className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
+                      ></i>
+                    </span>
+                  )}
+                {(emailAlerts.length === HTTP_ERROR_STATUS_CODES.length ||
+                  emailAlerts.length === 0) && (
+                  <span>
+                    Inactive
+                    <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
+                  </span>
+                )}
+              </p>
+              <p>
+                {specificEmailAlerts.length > 0 &&
+                  specificEmailAlerts.join(", ")}
+              </p>
+
+              <hr />
+
+              {/* Push */}
+              <div className={`${styles.label}`}>
+                Push notification on error 4XX and 5XX
+              </div>
+              <p className={`${styles.value}`}>
+                {(pushAlerts.length === 0 ||
+                  pushAlerts.length !== HTTP_ERROR_STATUS_CODES.length) && (
+                  <span>
+                    Inactive
+                    <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
+                  </span>
+                )}
+                {pushAlerts.length === HTTP_ERROR_STATUS_CODES.length && (
                   <span>
                     Active
                     <i
@@ -143,29 +206,29 @@ const RequestDetailsInformations = ({
                 )}
               </p>
               <div className={`${styles.label}`}>
-                Push notification on error 4XX and 5XX
+                Specific errors notifications
               </div>
-              <p className={`${styles.value}`}>
-                {/* TODO : Get all email alerts (type email), check if length not empty && NOT equals to enum length. Verified = true */}
-                {existingRequest?.requestSetting?.alerts.length !== 0 && (
-                  <span>
-                    Active
-                    <i
-                      className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
-                    ></i>
-                  </span>
-                )}
-                {/* TODO : Get all email alerts (type email), inactive if length empty && length equals enum length */}
-                {existingRequest?.requestSetting?.alerts.length === 0 && (
+              <p className={`${styles.value} m-0`}>
+                {pushAlerts.length !== 0 &&
+                  pushAlerts.length !== HTTP_ERROR_STATUS_CODES.length && (
+                    <span>
+                      Active
+                      <i
+                        className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
+                      ></i>
+                    </span>
+                  )}
+                {(pushAlerts.length === HTTP_ERROR_STATUS_CODES.length ||
+                  pushAlerts.length === 0) && (
                   <span>
                     Inactive
                     <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
                   </span>
                 )}
               </p>
-              {/* TODO : do same for push alerts */}
-              <div>Specific errors emails :</div>
-              <div>Specific errors notifications :</div>
+              <p className="m-0">
+                {specificPushAlerts.length > 0 && specificPushAlerts.join(", ")}
+              </p>
             </div>
           </div>
         </div>
