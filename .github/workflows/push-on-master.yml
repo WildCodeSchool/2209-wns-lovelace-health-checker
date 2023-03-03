@@ -3,7 +3,6 @@ name: fix-formatting
 on:
   push:
     branches:
-      - dev
       - master
 
 jobs:
