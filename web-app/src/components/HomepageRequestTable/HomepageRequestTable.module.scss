@@ -1,11 +1,11 @@
 @use "../../variables.scss";
 
-tr {
+.tr {
   text-align: center;
 }
 
-td,
-th {
+.td,
+.th {
   width: 33%;
   color: variables.$primary-1000;
   font-size: 12px;
@@ -15,6 +15,7 @@ th {
 }
 
 th {
+  color: variables.$primary-1000;
   font-weight: variables.$font-weight-600;
 }
 
@@ -22,7 +23,7 @@ thead {
   background-color: variables.$primary-100;
 }
 
-table {
+.table {
   width: auto;
   @media (min-width: 768px) {
     width: 70% !important;

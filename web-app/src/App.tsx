@@ -1,5 +1,14 @@
 import "react-toastify/dist/ReactToastify.css";
 
+//theme
+import "primereact/resources/themes/lara-light-indigo/theme.css";
+
+//core
+import "primereact/resources/primereact.min.css";
+
+//icons
+import "primeicons/primeicons.css";
+
 import { gql, useQuery } from "@apollo/client";
 import { useState } from "react";
 import { Route, Routes } from "react-router-dom";

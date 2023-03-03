@@ -2,6 +2,7 @@ import RequestSetting, {
   Frequency,
 } from "../../entities/RequestSetting.entity";
 import User, { Role } from "../../entities/User.entity";
+import PageOfRequestSettingWithLastResult from "../../models/PageOfRequestSettingWithLastResult";
 import RequestSettingWithLastResult from "../../models/RequestSettingWithLastResult";
 import RequestResultRepository from "../../repositories/RequestResult.repository";
 import RequestSettingRepository from "../../repositories/RequestSetting.repository";
@@ -93,7 +94,8 @@ export default class RequestSettingService extends RequestSettingRepository {
     user: User
   ): Promise<RequestSetting> => {
     // Check if the request belongs to the user
-    const toUpdateRequestSetting = await RequestSettingService.getRequestSettingById(id);
+    const toUpdateRequestSetting =
+      await RequestSettingService.getRequestSettingById(id);
     if (!toUpdateRequestSetting) throw Error("Request doesn't exist");
     if (toUpdateRequestSetting?.user.id !== user.id)
       throw Error("Unauthorized");
@@ -137,9 +139,8 @@ export default class RequestSettingService extends RequestSettingRepository {
     user: User
   ) => {
     if (user.role === Role.USER) {
-      const userSettingRequests = await RequestSettingRepository.getRequestSettingsByUserId(
-        user.id
-      );
+      const userSettingRequests =
+        await RequestSettingRepository.getRequestSettingsByUserId(user.id);
       if (
         userSettingRequests.length ===
         parseInt(process.env.NON_PREMIUM_MAX_AUTHORIZED_REQUESTS!)
@@ -157,9 +158,8 @@ export default class RequestSettingService extends RequestSettingRepository {
     name: string | undefined,
     id?: string
   ) => {
-    const userSettingRequests = await RequestSettingRepository.getRequestSettingsByUserId(
-      user.id
-    );
+    const userSettingRequests =
+      await RequestSettingRepository.getRequestSettingsByUserId(user.id);
 
     // For request update case, we exclude current request
     const URLAlreadyExists = userSettingRequests
@@ -224,6 +224,43 @@ export default class RequestSettingService extends RequestSettingRepository {
       throw Error("Non Premium users can't use custom error alerts");
   };
 
+  static getPageOfRequestSettingWithLastResult = async (
+    pageSize: number,
+    pageNumber: number,
+    userId: string
+  ): Promise<PageOfRequestSettingWithLastResult> => {
+    const [requestSettings, totalCount] = await this.repository.findAndCount({
+      where: { user: { id: userId } },
+      take: pageSize,
+      skip: (pageNumber - 1) * pageSize,
+      order: {
+        createdAt: "DESC",
+      },
+    });
+
+    const numberOfRemainingItems = totalCount - pageNumber * pageSize;
+    const requestSettingsWithLastResult = await Promise.all(
+      requestSettings.map(async (requestSetting) => {
+        const lastRequestResult =
+          await RequestResultRepository.getMostRecentByRequestSettingId(
+            requestSetting.id
+          );
+        if (lastRequestResult)
+          return new RequestSettingWithLastResult(
+            requestSetting,
+            lastRequestResult
+          );
+        else return new RequestSettingWithLastResult(requestSetting, null);
+      })
+    );
+
+    return {
+      totalCount,
+      nextPageNumber: numberOfRemainingItems > 0 ? pageNumber + 1 : null,
+      requestSettingsWithLastResult,
+    };
+  };
+
   public static getRequestSettingsByFrequency = async (
     frequency: Frequency
   ): Promise<RequestSetting[]> => {
@@ -236,12 +273,14 @@ export default class RequestSettingService extends RequestSettingRepository {
     id: string
   ): Promise<RequestSetting | null> => {
     return await RequestSettingRepository.getRequestSettingById(id);
-    };
+  };
 
   static getRequestSettingWithLastResultByRequestSettingId = async (
     id: string
   ): Promise<RequestSettingWithLastResult | void> => {
-    const requestSetting = await RequestSettingRepository.getRequestSettingById(id);
+    const requestSetting = await RequestSettingRepository.getRequestSettingById(
+      id
+    );
     if (!requestSetting) throw Error("Request not found");
 
     const lastRequestResult =
