@@ -5,7 +5,7 @@ import RequestSetting, { Frequency } from "../entities/RequestSetting.entity";
 import { Role, Status } from "../entities/User.entity";
 
 export default class RequestSettingRepository {
-  private static repository: Repository<RequestSetting>;
+  static repository: Repository<RequestSetting>;
 
   static initializeRepository = async () => {
     this.repository = await getRepository(RequestSetting);

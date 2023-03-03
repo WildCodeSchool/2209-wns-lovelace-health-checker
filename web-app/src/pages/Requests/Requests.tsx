@@ -1,10 +1,19 @@
-import { gql, useLazyQuery } from "@apollo/client";
-import { useState } from "react";
+import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { DataTable } from "primereact/datatable";
 import { toast } from "react-toastify";
-import { CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery } from "../../gql/graphql";
+import DataTableComponent from "../../components/DataTable/DataTableComponent";
+import RequestsTable from "../../components/RequestsTable/RequestsTable";
+
+import {
+  CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery,
+  GetPageOfRequestSettingWithLastResultQuery,
+  GetPageOfRequestSettingWithLastResultQueryVariables,
+} from "../../gql/graphql";
 import { REQUEST_CREATION_ROUTE } from "../../routes";
 import styles from "./Requests.module.scss";
+import { Column } from "primereact/column";
 
 const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
   query CheckIfNonPremiumUserHasReachedMaxRequestsCount {
@@ -12,7 +21,31 @@ const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
   }
 `;
 
+const GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT = gql`
+  query GetPageOfRequestSettingWithLastResult($pageNumber: Int!) {
+    getPageOfRequestSettingWithLastResult(pageNumber: $pageNumber) {
+      totalCount
+      nextPageNumber
+      requestSettingsWithLastResult {
+        requestSetting {
+          id
+          name
+          url
+          frequency
+        }
+        requestResult {
+          getIsAvailable
+          statusCode
+          createdAt
+        }
+      }
+    }
+  }
+`;
+
 const Requests = () => {
+  const [pageNumber, setPageNumber] = useState(1);
+  const [formattedData, setFormattedData] = useState<any>([]);
   const navigate = useNavigate();
 
   const [checkUserMaxRequestsBeforeNavigate] =
@@ -31,9 +64,36 @@ const Requests = () => {
       }
     );
 
+  const { data, loading, error, refetch } = useQuery<
+    GetPageOfRequestSettingWithLastResultQuery,
+    GetPageOfRequestSettingWithLastResultQueryVariables
+  >(GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT, {
+    variables: {
+      pageNumber: pageNumber,
+    },
+    fetchPolicy: "cache-and-network",
+  });
+
+  if (!loading) console.log(data);
+
   const navigateToRequestCreationPage = () => {
     checkUserMaxRequestsBeforeNavigate();
   };
+
+  useEffect(() => {
+    setFormattedData(
+      data?.getPageOfRequestSettingWithLastResult.requestSettingsWithLastResult.map(
+        (item) => {
+          return {
+            ...item.requestSetting,
+            isAvailable: item.requestResult?.getIsAvailable,
+            statusCode: item.requestResult?.statusCode,
+            createdAt: item.requestResult?.createdAt,
+          };
+        }
+      )
+    );
+  }, [data]);
 
   const [selectedTab] = useState("informations");
 
@@ -44,35 +104,44 @@ const Requests = () => {
           <h1 className={`${styles.pageTitle}`}>Requests</h1>
           <button
             className={`${styles.createBtn}`}
-            onClick={navigateToRequestCreationPage}
-          >
+            onClick={navigateToRequestCreationPage}>
             Create
           </button>
         </div>
-        <div className="d-flex gap-4 mt-5">
+        <div className="d-flex gap-5 mt-5">
           <div
             className={`${
               selectedTab === "informations" && styles.selectedTab
-            }  ${styles.tabContainer}`}
-          >
+            }  ${styles.tabContainer}`}>
             <span className={`${styles.tabs} `}>All</span>
           </div>
           <div
             className={`${selectedTab === "premium" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}
-          >
+            }`}>
             <span className={`${styles.tabs} `}>Active</span>
           </div>
           <div
             className={`${selectedTab === "bills" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}
-          >
+            }`}>
             <span className={`${styles.tabs} `}>Inactive</span>
           </div>
         </div>
-        <div>{/* Insert table here */}</div>
+        <div className={`${styles.tableContainer}`}>
+          {/* <RequestsTable
+            requests={data}
+            loading={loading}
+            pageNumber={pageNumber}
+            setPageNumber={setPageNumber}
+          /> */}
+          <DataTableComponent
+            requests={formattedData}
+            loading={loading}
+            pageNumber={pageNumber}
+            setPageNumber={setPageNumber}
+          />
+        </div>
       </div>
     </>
   );

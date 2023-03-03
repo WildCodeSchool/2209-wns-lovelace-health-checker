@@ -3,6 +3,7 @@
 
 .contentContainer {
   @include contentContainer;
+
   .pageTitle {
     color: variables.$primary-1000;
     font-weight: variables.$font-weight-600;
