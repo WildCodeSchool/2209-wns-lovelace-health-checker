@@ -62,7 +62,7 @@ const Requests = () => {
       }
     );
 
-  const { data, loading, error, refetch } = useQuery<
+  const { data, loading, refetch } = useQuery<
     GetPageOfRequestSettingWithLastResultQuery,
     GetPageOfRequestSettingWithLastResultQueryVariables
   >(GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT, {
@@ -102,8 +102,7 @@ const Requests = () => {
           <h1 className={`${styles.pageTitle}`}>Requests</h1>
           <button
             className={`${styles.createBtn}`}
-            onClick={navigateToRequestCreationPage}
-          >
+            onClick={navigateToRequestCreationPage}>
             Create
           </button>
         </div>
@@ -111,22 +110,19 @@ const Requests = () => {
           <div
             className={`${
               selectedTab === "informations" && styles.selectedTab
-            }  ${styles.tabContainer}`}
-          >
+            }  ${styles.tabContainer}`}>
             <span className={`${styles.tabs} `}>All</span>
           </div>
           <div
             className={`${selectedTab === "premium" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}
-          >
+            }`}>
             <span className={`${styles.tabs} `}>Active</span>
           </div>
           <div
             className={`${selectedTab === "bills" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}
-          >
+            }`}>
             <span className={`${styles.tabs} `}>Inactive</span>
           </div>
         </div>
@@ -142,6 +138,8 @@ const Requests = () => {
             loading={loading}
             pageNumber={pageNumber}
             setPageNumber={setPageNumber}
+            totalCount={data?.getPageOfRequestSettingWithLastResult.totalCount}
+            refetch={refetch}
           />
         </div>
       </div>

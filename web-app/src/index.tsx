@@ -12,7 +12,25 @@ import App from "./App";
 
 const client = new ApolloClient({
   uri: "/",
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          getPageOfRequestSettingWithLastResult: {
+            keyArgs: ["pageNumber"],
+            merge(existing = { requestSettingsWithLastResult: [] }, incoming) {
+              return {
+                ...incoming,
+                requestSettingsWithLastResult: [
+                  ...incoming.requestSettingsWithLastResult,
+                ],
+              };
+            },
+          },
+        },
+      },
+    },
+  }),
 });
 
 const root = ReactDOM.createRoot(

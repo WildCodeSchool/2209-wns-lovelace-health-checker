@@ -32,6 +32,9 @@ export const formatFrequency = (frequency: number): string => {
 };
 
 export const parseTimeString = (timeString: string): number => {
+  if (typeof timeString !== "string") {
+    timeString = formatFrequency(timeString);
+  }
   const [valueString, unitString] = timeString.split(" ");
   const value = parseInt(valueString);
 

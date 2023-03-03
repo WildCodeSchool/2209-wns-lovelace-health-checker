@@ -22,9 +22,14 @@
 .header {
   background-color: variables.$primary-200 !important;
   color: variables.$primary-1000 !important;
+  font-weight: variables.$font-weight-500 !important;
   div {
     .p-column-filter-menu {
       margin-left: none !important;
+      font-size: 5px !important;
+    }
+    button > span {
+      font-size: variables.$font-xs !important;
     }
   }
 }
@@ -44,17 +49,29 @@
   font-size: variables.$font-dataTable !important;
 }
 
+.table > .p-datatable .p-datatable-loading-overlay {
+  z-index: 1 !important;
+}
+
 .hidden {
   overflow: hidden;
   &.url {
-    max-width: 250px;
+    max-width: 230px;
+    text-overflow: ellipsis;
   }
   &.createdAt {
-    max-width: 150px;
     white-space: nowrap;
   }
   &.name {
     max-width: 150px;
     white-space: nowrap;
+  }
+}
+
+.actions {
+  @include clickable;
+  color: variables.$primary-1000;
+  &:hover {
+    color: variables.$primary-500;
   }
 }
