@@ -46,8 +46,11 @@ const RequestDetailsInformations = ({
   const [parsedHeaders, setParsedHeaders] = useState<any[]>();
 
   useEffect(() => {
-    if (existingRequest)
+    if (existingRequest) {
+      refetch();
       setFrequency(formatFrequency(existingRequest?.requestSetting?.frequency));
+    }
+
     if (existingRequest?.requestSetting.alerts.length) {
       setEmailAlerts(
         getSpecificErrorsByType(

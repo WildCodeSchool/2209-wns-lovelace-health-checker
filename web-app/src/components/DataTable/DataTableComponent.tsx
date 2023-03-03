@@ -12,6 +12,7 @@ import {
   parseTimeString,
 } from "../../utils/request-frequency.enum";
 import { formatDateString } from "../../utils/date";
+import { REQUESTS_ROUTE } from "../../routes";
 
 interface DataTableProps {
   requests: Request[];
@@ -143,7 +144,8 @@ const DataTableComponent = (
     return (
       <i
         className={`bi bi-gear ${styles.actions}`}
-        onClick={() => navigate(`/requests/${request.id}`)}></i>
+        onClick={() => navigate(`${REQUESTS_ROUTE}/${request.id}`)}
+      ></i>
     );
   };
 
@@ -161,7 +163,7 @@ const DataTableComponent = (
         totalRecords={pageOfRequestSettingWithLastResult.totalCount}
         // paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
         // currentPageReportTemplate="{first} to {last} of {totalRecords}"
-        onPage={(e) => {
+        onPage={(e: any) => {
           console.log(e);
           pageOfRequestSettingWithLastResult.setPageNumber(
             e.page ? e.page + 1 : 1
@@ -171,25 +173,29 @@ const DataTableComponent = (
           });
         }}
         className={`${styles.table}`}
-        filters={filters}>
+        filters={filters}
+      >
         <Column
           headerClassName={`${styles.header}`}
           bodyClassName={`text-center ${styles.primary}`}
-          body={iconBodyTemplate}></Column>
+          body={iconBodyTemplate}
+        ></Column>
         <Column
           field="url"
           header="URL"
           filter
           body={urlBodyTemplate}
           headerClassName={`${styles.header}`}
-          bodyClassName={`${styles.primary} ${styles.hidden} ${styles.url}`}></Column>
+          bodyClassName={`${styles.primary} ${styles.hidden} ${styles.url}`}
+        ></Column>
         <Column
           field="name"
           header="Name"
           filter
           headerClassName={`${styles.header}`}
           body={nameBodyTemplate}
-          bodyClassName={`${styles.primary} ${styles.hidden} ${styles.name}`}></Column>
+          bodyClassName={`${styles.primary} ${styles.hidden} ${styles.name}`}
+        ></Column>
         <Column
           field="frequency"
           header="Frequency"
@@ -197,26 +203,30 @@ const DataTableComponent = (
           filterElement={frequenciesFilterTemplate}
           headerClassName={`${styles.header}`}
           body={frequencyBodyTemplate}
-          bodyClassName={`text-center ${styles.primary}`}></Column>
+          bodyClassName={`text-center ${styles.primary}`}
+        ></Column>
         <Column
           field="createdAt"
           header="Last Result"
           headerClassName={`${styles.header}`}
           className={`${styles.createdAt}`}
           body={createdAtBodyTemplate}
-          bodyClassName={`text-center ${styles.primary} ${styles.hidden} ${styles.createdAt}`}></Column>
+          bodyClassName={`text-center ${styles.primary} ${styles.hidden} ${styles.createdAt}`}
+        ></Column>
         <Column
           field="isAvailable"
           header="Availability"
           headerClassName={`${styles.header}`}
           body={isAvailableBodyTemplate}
-          bodyClassName="text-center"></Column>
+          bodyClassName="text-center"
+        ></Column>
         <Column
           field="statusCode"
           header="Status"
           body={statusCodeBodyTemplate}
           headerClassName={`${styles.header}`}
-          bodyClassName={`text-center ${styles.primary}`}></Column>
+          bodyClassName={`text-center ${styles.primary}`}
+        ></Column>
       </DataTable>
     </>
   );

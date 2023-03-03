@@ -96,7 +96,10 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
             className={`${
               selectedTab === "informations" && styles.selectedTab
             }  ${styles.tabContainer}`}
-            onClick={() => setSelectedTab("informations")}
+            onClick={() => {
+              setSelectedTab("informations");
+              refetch();
+            }}
           >
             <span className={`${styles.tabs} `}>Informations</span>
           </div>
@@ -105,7 +108,10 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
             className={`${selectedTab === "settings" && styles.selectedTab}  ${
               styles.tabContainer
             }`}
-            onClick={() => setSelectedTab("settings")}
+            onClick={() => {
+              setSelectedTab("settings");
+              refetch();
+            }}
           >
             <span className={`${styles.tabs} `}>Settings</span>
           </div>
@@ -114,7 +120,10 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
             className={`${selectedTab === "history" && styles.selectedTab}  ${
               styles.tabContainer
             }`}
-            onClick={() => setSelectedTab("history")}
+            onClick={() => {
+              setSelectedTab("history");
+              refetch();
+            }}
           >
             <span className={`${styles.tabs} `}>History</span>
           </div>
@@ -123,7 +132,10 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
             className={`${selectedTab === "graph" && styles.selectedTab}  ${
               styles.tabContainer
             }`}
-            onClick={() => setSelectedTab("graph")}
+            onClick={() => {
+              setSelectedTab("graph");
+              refetch();
+            }}
           >
             <span className={`${styles.tabs} `}>Graph</span>
           </div>

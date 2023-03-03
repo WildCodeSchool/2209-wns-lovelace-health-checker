@@ -209,7 +209,6 @@ const RequestCreation = ({
 
   useEffect(() => {
     if (existingRequest) {
-      console.log({ existingRequest });
       setIsActive(existingRequest?.requestSetting?.isActive);
       setFrequency(existingRequest?.requestSetting?.frequency);
       setExistingRequestErrors(existingRequest?.requestSetting?.alerts);
@@ -415,7 +414,7 @@ const RequestCreation = ({
         variables: {
           updateRequestSettingId: existingRequest?.requestSetting?.id,
           url: data.url,
-          frequency: parseInt(data.frequency),
+          frequency: frequency,
           isActive: data.isActive === "true" ? true : false,
           allErrorsEnabledEmail:
             emailAlerts === AlertChoices.ALL ? true : false,
