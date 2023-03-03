@@ -43,22 +43,22 @@ const formatDateString = (dateString: string): string => {
 const DataTableComponent = (
   pageOfRequestSettingWithLastResult: DataTableProps
 ) => {
-  // const getFrequencies = () => {
-  //   const enumFrequencies = Object.values(Frequency).filter(
-  //     (f) => typeof f === "number"
-  //   );
-  //   return enumFrequencies.map((n) => {
-  //     return formatFrequency(+n);
-  //   });
-  // };
+  const getFrequencies = () => {
+    const enumFrequencies = Object.values(Frequency).filter(
+      (f) => typeof f === "number"
+    );
+    return enumFrequencies.map((n) => {
+      return formatFrequency(+n);
+    });
+  };
 
   const [filters, setFilters] = useState<any>({});
-  // const [frequencies] = useState(getFrequencies());
-  // const [selectedFrequency, setSelectedFrequency] = useState<number | null>(
-  //   null
-  // );
+  const [frequencies] = useState(getFrequencies());
+  const [selectedFrequency, setSelectedFrequency] = useState<string | null>(
+    null
+  );
 
-  // getFrequencies();
+  getFrequencies();
 
   const initFilters = () => {
     setFilters({
@@ -78,24 +78,24 @@ const DataTableComponent = (
     initFilters();
   }, []);
 
-  // const frequenciesFilterTemplate = (
-  //   options: ColumnFilterElementTemplateOptions
-  // ) => {
-  //   return (
-  //     <Dropdown
-  //       value={selectedFrequency}
-  //       options={[5, 30, 60, 3600]}
-  //       onChange={(e: DropdownChangeEvent) => {
-  //         console.log(e.value);
-  //         options.filterCallback(e.value, options.index);
-  //         setSelectedFrequency(e.value);
-  //       }}
-  //       placeholder="Select One"
-  //       className="p-column-filter"
-  //       showClear
-  //     />
-  //   );
-  // };
+  const frequenciesFilterTemplate = (
+    options: ColumnFilterElementTemplateOptions
+  ) => {
+    return (
+      <Dropdown
+        value={selectedFrequency}
+        options={frequencies}
+        onChange={(e: DropdownChangeEvent) => {
+          console.log(e.value);
+          options.filterCallback(e.value, options.index);
+          setSelectedFrequency(e.value);
+        }}
+        placeholder="Select One"
+        className="p-column-filter"
+        showClear
+      />
+    );
+  };
 
   // const frequencyItemTemplate = (option: string) => {
   //   return <Tag value={option} />;
@@ -157,7 +157,7 @@ const DataTableComponent = (
           header="Frequency"
           filter
           filterMenuStyle={{ width: "14rem" }}
-          // filterElement={frequenciesFilterTemplate}
+          filterElement={frequenciesFilterTemplate}
           style={{ minWidth: "12rem" }}
           headerClassName={`${styles.header}`}
           body={frequencyBodyTemplate}
