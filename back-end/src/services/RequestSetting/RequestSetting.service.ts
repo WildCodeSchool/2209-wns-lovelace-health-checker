@@ -94,7 +94,8 @@ export default class RequestSettingService extends RequestSettingRepository {
     user: User
   ): Promise<RequestSetting> => {
     // Check if the request belongs to the user
-    const toUpdateRequestSetting = await RequestSettingService.getRequestSettingById(id);
+    const toUpdateRequestSetting =
+      await RequestSettingService.getRequestSettingById(id);
     if (!toUpdateRequestSetting) throw Error("Request doesn't exist");
     if (toUpdateRequestSetting?.user.id !== user.id)
       throw Error("Unauthorized");
@@ -138,9 +139,8 @@ export default class RequestSettingService extends RequestSettingRepository {
     user: User
   ) => {
     if (user.role === Role.USER) {
-      const userSettingRequests = await RequestSettingRepository.getRequestSettingsByUserId(
-        user.id
-      );
+      const userSettingRequests =
+        await RequestSettingRepository.getRequestSettingsByUserId(user.id);
       if (
         userSettingRequests.length ===
         parseInt(process.env.NON_PREMIUM_MAX_AUTHORIZED_REQUESTS!)
@@ -158,9 +158,8 @@ export default class RequestSettingService extends RequestSettingRepository {
     name: string | undefined,
     id?: string
   ) => {
-    const userSettingRequests = await RequestSettingRepository.getRequestSettingsByUserId(
-      user.id
-    );
+    const userSettingRequests =
+      await RequestSettingRepository.getRequestSettingsByUserId(user.id);
 
     // For request update case, we exclude current request
     const URLAlreadyExists = userSettingRequests
@@ -225,7 +224,6 @@ export default class RequestSettingService extends RequestSettingRepository {
       throw Error("Non Premium users can't use custom error alerts");
   };
 
-<<<<<<< HEAD
   static getPageOfRequestSettingWithLastResult = async (
     pageSize: number,
     pageNumber: number,
@@ -263,7 +261,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     };
   };
 
-=======
   public static getRequestSettingsByFrequency = async (
     frequency: Frequency
   ): Promise<RequestSetting[]> => {
@@ -276,13 +273,14 @@ export default class RequestSettingService extends RequestSettingRepository {
     id: string
   ): Promise<RequestSetting | null> => {
     return await RequestSettingRepository.getRequestSettingById(id);
-    };
+  };
 
->>>>>>> dev
   static getRequestSettingWithLastResultByRequestSettingId = async (
     id: string
   ): Promise<RequestSettingWithLastResult | void> => {
-    const requestSetting = await RequestSettingRepository.getRequestSettingById(id);
+    const requestSetting = await RequestSettingRepository.getRequestSettingById(
+      id
+    );
     if (!requestSetting) throw Error("Request not found");
 
     const lastRequestResult =
