@@ -10,17 +10,25 @@ export default class RequestResultService extends RequestResultRepository {
     isHomepageRequest: boolean = true
   ) => {
     try {
-      const startTimer: number = Date.now();
       let response;
+      const startTimer: number = Date.now();
       if (isHomepageRequest) {
-        response = await this.fetchWithTimeout(new URL(requestSetting.url));
+        response = await this.fetchWithOptions(new URL(requestSetting.url));
       } else {
-        response = await fetch(requestSetting.url);
+        // Is not a homepage request so timeout is set to 0 to deactivate it
+        response = await this.fetchWithOptions(
+          new URL(requestSetting.url),
+          0,
+          requestSetting.headers
+        );
       }
+      const endTimer: number = Date.now();
       return new RequestResult(
         requestSetting,
+        requestSetting.url,
+        requestSetting.headers,
         response.status,
-        Date.now() - startTimer
+        endTimer - startTimer
       );
     } catch (error) {
       if (error instanceof DOMException && error.name) {
@@ -33,11 +41,17 @@ export default class RequestResultService extends RequestResultRepository {
         switch (error.message) {
           case "fetch failed":
             if (isHomepageRequest) {
-              // will be handled by web-app
+              // Will be handled by web-app
               throw Error("Fetch Failed");
             } else {
-              // will be sent to be saved in db with no status code nor duration
-              return new RequestResult(requestSetting);
+              // Will be sent to be saved in db with no status code nor duration
+              return new RequestResult(
+                requestSetting,
+                requestSetting.url,
+                requestSetting.headers,
+                undefined,
+                undefined
+              );
             }
           // It sould never reach this case since url is valided beforehand
           case "Invalid URL":
@@ -48,22 +62,62 @@ export default class RequestResultService extends RequestResultRepository {
     }
   };
 
-  private static fetchWithTimeout = async (
+  private static fetchWithOptions = async (
     url: URL,
     timeout: number = process.env.REQUEST_TIMEOUT
       ? parseInt(process.env.REQUEST_TIMEOUT)
-      : 15000
+      : 15000,
+    headers?: any
   ): Promise<Response> => {
-    const options = { timeout };
-
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
-    clearTimeout(id);
+    let response;
+    // Timeout is for homepage request
+    if (timeout) {
+      const options = { timeout };
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+      clearTimeout(id);
+    } else if (headers) {
+      // TODO: ajouter les headers
+      response = await fetch(url);
+    } else {
+      response = await fetch(url);
+    }
     return response;
+  };
+
+  // Rabbit comnsumers will use this method
+  public static checkUrlOfAutomatedRequest = async (
+    requestSettingFromMessage: RequestSetting
+  ): Promise<void> => {
+    try {
+      // Check if the request setting still exists in db and fetch it
+      const requestSettingFromDB: RequestSetting | null =
+        await RequestSettingService.getRequestSettingById(
+          requestSettingFromMessage.id
+        );
+      // Check if the request setting is still active
+      if (requestSettingFromDB && requestSettingFromDB.isActive) {
+        // Not a homepage request so add false
+        this.checkUrlOfRequestSetting(requestSettingFromDB);
+      }
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public static checkUrlOfRequestSetting = async (
+    requestSetting: RequestSetting
+  ): Promise<void> => {
+    // Not a homepage request so add false
+    const requestResultToSave: RequestResult = await this.checkUrl(
+      requestSetting,
+      false
+    );
+    RequestResultRepository.saveRequestResult(requestResultToSave);
   };
 
   public static checkUrlForHomepage = async (
@@ -73,24 +127,10 @@ export default class RequestResultService extends RequestResultRepository {
       new User("", "", "", ""),
       url,
       0,
-      false
+      true
     );
+    // Is homepage request : true
+    // Send the result to web-app (front-end)
     return await this.checkUrl(dummyRequestSetting, true);
-  };
-
-  public static checkUrlOfRequestSetting = async (
-    requestSetting: RequestSetting
-  ): Promise<void> => {
-    try {
-      if (!!RequestSettingService.getRequestSettingById(requestSetting.id)) {
-        const requestResultToSave: RequestResult = await this.checkUrl(
-          requestSetting,
-          false
-        );
-        RequestResultRepository.saveRequestResult(requestResultToSave);
-      }
-    } catch (error) {
-      throw error;
-    }
   };
 }
