@@ -143,72 +143,77 @@ const RequestDetailsInformations = ({
             <i className="bi bi-clock-history"></i> Last request
           </h2>
           <div className={`${styles.formContent}`}>
-            {existingRequest?.requestResult === null ? (
-              <div>
+            <div className="position-relative">
+              {loading && (
+                <div
+                  className={`${styles.loaderBackground} position-absolute d-flex align-items-center justify-content-center w-100 h-100`}
+                >
+                  <div className={styles.loader}></div>
+                </div>
+              )}
+
+              {existingRequest?.requestResult === null ? (
                 <div>
                   This request has never been executed yet. You can press below
                   button to execute it manually.
                 </div>
-                <button
-                  disabled={loading}
-                  type="button"
-                  onClick={() => {
-                    console.log("clicked");
-                    checkUrlManually();
-                  }}
-                  className={`${styles.btn} ${styles.btnSecondary} mt-4`}
-                >
-                  {loading ? "In progress" : "Launch"}
-                </button>
-              </div>
-            ) : (
-              <div>
-                <div className={`${styles.label}`}>Date</div>
-                <p className={`${styles.value}`}>
-                  {formatDateString(existingRequest?.requestResult?.createdAt)}
-                </p>
-                <div className={`${styles.label}`}>Availability</div>
-                <p className={`${styles.value}`}>
-                  {existingRequest?.requestResult?.getIsAvailable === false && (
-                    <span>
-                      Not available
-                      <i className={`bi bi-x-circle ${styles.xIcon} ms-2`}></i>
-                    </span>
-                  )}
-                  {existingRequest?.requestResult?.getIsAvailable === true && (
-                    <span>
-                      Available
-                      <i
-                        className={`bi bi-check-circle ${styles.checkIcon} ms-2`}
-                      ></i>
-                    </span>
-                  )}
-                </p>
-                <div className={`${styles.label}`}>Status code</div>
-                <p className={`${styles.value}`}>
-                  {existingRequest?.requestResult?.statusCode === null
-                    ? "Not reachable"
-                    : existingRequest?.requestResult?.statusCode}
-                </p>
-                <div className={`${styles.label}`}>Duration</div>
-                <p className={`${styles.value} m-0`}>
-                  {existingRequest?.requestResult?.duration === null
-                    ? "-"
-                    : `${existingRequest?.requestResult?.duration} ms`}
-                </p>
-                <button
-                  disabled={loading}
-                  type="button"
-                  onClick={() => {
-                    console.log("clicked");
-                    checkUrlManually();
-                  }}
-                  className={`${styles.btn} ${styles.btnSecondary} mt-4`}
-                >
-                  {loading ? "In progress" : "Relaunch"}
-                </button>
-              </div>
-            )}
+              ) : (
+                <div>
+                  <div className={`${styles.label}`}>Date</div>
+                  <p className={`${styles.value}`}>
+                    {formatDateString(
+                      existingRequest?.requestResult?.createdAt
+                    )}
+                  </p>
+                  <div className={`${styles.label}`}>Availability</div>
+                  <p className={`${styles.value}`}>
+                    {existingRequest?.requestResult?.getIsAvailable ===
+                      false && (
+                      <span>
+                        Not available
+                        <i
+                          className={`bi bi-x-circle ${styles.xIcon} ms-2`}
+                        ></i>
+                      </span>
+                    )}
+                    {existingRequest?.requestResult?.getIsAvailable ===
+                      true && (
+                      <span>
+                        Available
+                        <i
+                          className={`bi bi-check-circle ${styles.checkIcon} ms-2`}
+                        ></i>
+                      </span>
+                    )}
+                  </p>
+                  <div className={`${styles.label}`}>Status code</div>
+                  <p className={`${styles.value}`}>
+                    {existingRequest?.requestResult?.statusCode === null
+                      ? "Not reachable"
+                      : existingRequest?.requestResult?.statusCode}
+                  </p>
+                  <div className={`${styles.label}`}>Duration</div>
+                  <p className={`${styles.value} m-0`}>
+                    {existingRequest?.requestResult?.duration === null
+                      ? "-"
+                      : `${existingRequest?.requestResult?.duration} ms`}
+                  </p>
+                </div>
+              )}
+            </div>
+            <button
+              disabled={loading}
+              type="button"
+              onClick={() => {
+                console.log("clicked");
+                checkUrlManually();
+              }}
+              className={`${styles.btn} ${styles.btnSecondary} mt-4 ${
+                loading && styles.btnDisabled
+              }`}
+            >
+              {existingRequest?.requestResult === null ? "Launch" : "Relaunch"}
+            </button>
           </div>
         </div>
       </div>
@@ -330,12 +335,14 @@ const RequestDetailsInformations = ({
               existingRequest?.requestSetting?.headers === "") && (
               <div>No headers set</div>
             )}
-            {parsedHeaders?.map((header, index) => (
-              <div key={index}>
-                <div className={`${styles.label}`}>{header.property}</div>
-                <p className={`${styles.value}`}>{header.value}</p>
-              </div>
-            ))}
+            <div className="d-flex flex-column gap-3">
+              {parsedHeaders?.map((header, index) => (
+                <div key={index}>
+                  <div className={`${styles.label}`}>{header.property}</div>
+                  <p className={`${styles.value} m-0`}>{header.value}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
