@@ -49,14 +49,11 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
 
   let { requestId } = useParams();
 
-  const { data } = useQuery<
+  const { data, refetch } = useQuery<
     GetRequestSettingByIdQuery,
     GetRequestSettingByIdQueryVariables
   >(GET_REQUEST_SETTING_BY_ID, {
     variables: { id: requestId! },
-    onCompleted: (data) => {
-      console.log({ data });
-    },
     onError: (error) => {
       if (error.message.includes("invalid input syntax for type uuid"))
         toast.error(REQUEST_DOESNT_EXIST, {
@@ -134,6 +131,7 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
       </div>
       {selectedTab === "informations" && (
         <RequestDetailsInformations
+          {...{ refetch }}
           existingRequest={data?.getRequestSettingById}
         />
       )}

@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
 import styles from "./RequestCreation.module.scss";
 import Select from "react-select";
-import { HTTP_ERROR_STATUS_CODES } from "../../utils/http-error-status-codes.enum";
+import {
+  getSpecificErrorsByType,
+  HTTP_ERROR_STATUS_CODES,
+  retrieveExistingSpecificErrors,
+} from "../../utils/http-error-status-codes.enum";
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { gql, useMutation } from "@apollo/client";
 import {
@@ -220,12 +224,6 @@ const RequestCreation = ({
     setCorrectStateForError(AlertType.PUSH, pushAlerts);
   };
 
-  const getSpecificErrorsByType = (type: AlertType, requestAlerts: any[]) => {
-    return requestAlerts.filter((alert: any) => {
-      return alert.type === type;
-    });
-  };
-
   const setCorrectStateForError = (type: AlertType, alerts: any[]) => {
     const typeIsEmail = type === AlertType.EMAIL;
 
@@ -248,17 +246,6 @@ const RequestCreation = ({
       if (typeIsEmail) onEmailSpecificErrorChange(existingSpecificErrors);
       else onPushSpecificErrorChange(existingSpecificErrors);
     }
-  };
-
-  const retrieveExistingSpecificErrors = (alerts: any[]) => {
-    let errors: any[] = [];
-    alerts.forEach((alert: any) => {
-      errors.push({
-        value: alert.httpStatusCode,
-        label: alert.httpStatusCode.toString(),
-      });
-    });
-    return errors;
   };
 
   const {
