@@ -1,0 +1,23 @@
+{
+  "name": "health-check",
+  "version": "1.0.0",
+  "description": "Global utils",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format:fix": "prettier -w \"**/*.{ts,tsx}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WildCodeSchool/2209-wns-lovelace-health-checker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WildCodeSchool/2209-wns-lovelace-health-checker/issues"
+  },
+  "homepage": "https://github.com/WildCodeSchool/2209-wns-lovelace-health-checker#readme",
+  "devDependencies": {
+    "prettier": "^2.8.4"
+  }
+}

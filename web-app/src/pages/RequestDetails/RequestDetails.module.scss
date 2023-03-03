@@ -19,11 +19,7 @@
     width: 100%;
     display: flex;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     padding-bottom: variables.$padding-sm;
-    &:hover {
-      overflow-x: scroll;
-    }
     .tabContainer {
       padding: variables.$padding-xxs variables.$padding-lg;
       width: 119px;

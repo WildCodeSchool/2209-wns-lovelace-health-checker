@@ -18,6 +18,7 @@ import RequestSettingService from "../../services/RequestSetting/RequestSetting.
 import {
   CreateRequestSettingArgs,
   GetRequestSettingByIdArgs,
+  UpdateRequestSettingArgs,
 } from "./RequestSetting.input";
 
 const PAGE_SIZE = 10;
@@ -53,7 +54,43 @@ export default class RequestSettingResolver {
     const user = context.user as User;
     if (!user) throw Error("Unable to find user from global context");
 
-    return await RequestSettingService.checkForErrorsAndCreateRequest(
+    return await RequestSettingService.createRequest(
+      url,
+      frequency,
+      name,
+      headers,
+      isActive,
+      allErrorsEnabledEmail,
+      allErrorsEnabledPush,
+      customEmailErrors,
+      customPushErrors,
+      user
+    );
+  }
+
+  @Authorized()
+  @Mutation(() => RequestSetting)
+  async updateRequestSetting(
+    @Args()
+    {
+      id,
+      url,
+      frequency,
+      name,
+      headers,
+      isActive,
+      allErrorsEnabledEmail,
+      allErrorsEnabledPush,
+      customEmailErrors,
+      customPushErrors,
+    }: UpdateRequestSettingArgs,
+    @Ctx() context: GlobalContext
+  ): Promise<RequestSetting> {
+    const user = context.user as User;
+    if (!user) throw Error("Unable to find user from global context");
+
+    return await RequestSettingService.updateRequest(
+      id,
       url,
       frequency,
       name,
@@ -89,6 +126,8 @@ export default class RequestSettingResolver {
     @Ctx() context: GlobalContext
   ) {
     const user = context.user as User;
+    if (!user) throw Error("Unable to find user from global context");
+
     const result =
       await RequestSettingService.getRequestSettingWithLastResultByRequestSettingId(
         id

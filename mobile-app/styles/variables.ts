@@ -45,8 +45,8 @@ class Variables {
   $fontLG = 24;
   $fontXL = 32;
   $fontXXL = 40;
-  $fontWeight400 : '400' = "400";
-  $fontWeight600 : '600' = "600";
+  $fontWeight400: "400" = "400";
+  $fontWeight600: "600" = "600";
   $primary1000 = "#0f2837";
   $primary900 = "#143c5f";
   $primary800 = "#195078";
