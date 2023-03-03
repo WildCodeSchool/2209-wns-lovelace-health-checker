@@ -9,12 +9,16 @@ import RequestSetting from "./RequestSetting.entity";
 export default class RequestResult {
   constructor(
     requestSetting: RequestSetting,
+    url: string,
+    headers?: string,
     statusCode?: number,
-    duration?: number
+    duration?: number,
   ) {
     this.requestSetting = requestSetting;
+    this.url = url;
     this.statusCode = statusCode || undefined;
     this.duration = duration || undefined;
+    this.headers = headers || undefined;
     this.createdAt = new Date();
   }
 
@@ -43,6 +47,17 @@ export default class RequestResult {
   @ManyToOne(() => RequestSetting)
   @Field(() => RequestSetting)
   requestSetting: RequestSetting;
+
+  @Column({ nullable: true, default: null })
+  @Field({ nullable: true })
+  @IsString()
+  headers?: string;
+
+  @Column()
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  url: string;
 
   @Field(() => Boolean)
   getIsAvailable() {

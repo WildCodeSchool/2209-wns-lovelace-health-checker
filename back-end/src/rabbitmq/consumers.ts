@@ -83,7 +83,9 @@ export const onMessageOnAutomatedRequestQueue = async () => {
     );
     const requestSettingToCheck: RequestSetting =
       parsedMessage as RequestSetting;
-    await RequestResultService.checkUrlOfRequestSetting(requestSettingToCheck);
+    await RequestResultService.checkUrlOfAutomatedRequest(
+      requestSettingToCheck
+    );
     channel.ack(message);
   });
 };
