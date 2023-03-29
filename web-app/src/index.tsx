@@ -11,7 +11,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 
 const client = new ApolloClient({
-  uri: "/",
+  uri: "/api",
   cache: new InMemoryCache({
     typePolicies: {
       Query: {
