@@ -4,18 +4,16 @@ services:
 
   rabbitmq:
     image: rabbitmq:management
-    ports:
-      - 5672:5672
-      - 15672:15672
+    expose:
+      - 5672
 
   back-end:
     build: 
       context: ./back-end
-      target: dev
+      target: prod
     environment:
       DATABASE_URL: postgres://postgres:password@database:5432/postgres
-      TEST_DATABASE_URL: postgres://postgres:password@test-database:5432/postgres
-      NODE_ENV: development
+      NODE_ENV: production
       SERVER_PORT: ${SERVER_PORT}
       RABBIT_AMQP_URL: ${RABBIT_AMQP_URL}
       NODEMAILER_USER: ${NODEMAILER_USER}
@@ -27,10 +25,9 @@ services:
       REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
       RESET_PASSWORD_EXPIRATION_DELAY: ${RESET_PASSWORD_EXPIRATION_DELAY}
       NON_PREMIUM_MAX_AUTHORIZED_REQUESTS: ${NON_PREMIUM_MAX_AUTHORIZED_REQUESTS}
-    ports:
-      - 4069:4069
-    volumes:
-      - ./back-end/src:/app/src
+    expose:
+      - 4000
+    restart: always  
     depends_on:
       - database
       - rabbitmq
@@ -38,18 +35,14 @@ services:
   web-app:
     build:
       context: ./web-app
-      target: dev
+      target: prod
     environment:
       REACT_APP_REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
       REACT_APP_RESET_PASSWORD_ROUTE: ${RESET_PASSWORD_ROUTE}
       REACT_APP_ACCOUNT_CONFIRMATION_ROUTE: ${ACCOUNT_CONFIRMATION_ROUTE}
       REACT_APP_RESET_EMAIL_ROUTE: ${RESET_EMAIL_ROUTE}
-    ports:
-      - 3000:3000
     volumes:
-      - ./web-app/src:/app/src
-    depends_on:
-      - back-end
+      - web-app-build:/app/build
 
   database:
     image: postgres:14.5-alpine
@@ -59,13 +52,19 @@ services:
       - database-content:/var/lib/postgresql/data
     expose:
       - 5432
+    restart: always
 
-  test-database:
-    image: postgres:14.5-alpine
-    environment:
-      POSTGRES_PASSWORD: password
-    expose:
-      - 5432
+  gateway:
+    image: nginx
+    ports:
+      - ${GATEWAY_PORT}:80
+    depends_on:
+      - back-end
+      - web-app
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf
+      - web-app-build:/web-app-build
+    restart: always
 
   adminer:
     image: adminer
@@ -75,3 +74,4 @@ services:
 
 volumes:
   database-content:
+  web-app-build:
