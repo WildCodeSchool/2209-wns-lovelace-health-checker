@@ -3,7 +3,7 @@ name: Fix formatting with prettier
 on:
   push:
     branches:
-      - staging
+      - dev
 
 jobs:
   fix-formatting:
