@@ -101,7 +101,7 @@ const Home = () => {
     <div>
       <div className={`d-flex flex-column ${styles.searchBarContainer}`}>
         <h1 className="col-sm-5 col-10 my-5">
-          Enter a website URL and check its availability !
+          Enter a website URL and check its availability
         </h1>
         <div className="col-sm-6 col-12 position-relative">
           <form onSubmit={handleSubmit(onSubmit)} className="d-flex">
