@@ -101,7 +101,7 @@ const Home = () => {
     <div>
       <div className={`d-flex flex-column ${styles.searchBarContainer}`}>
         <h1 className="col-sm-5 col-10 my-5">
-          Enter a website URL and check its availability
+          Enter a website URL and check its availability !
         </h1>
         <div className="col-sm-6 col-12 position-relative">
           <form onSubmit={handleSubmit(onSubmit)} className="d-flex">
@@ -123,8 +123,7 @@ const Home = () => {
               data-testid="url-button"
               disabled={loading}
               type="submit"
-              className={`d-flex justify-content-center align-items-center ${styles.searchButton}`}
-            >
+              className={`d-flex justify-content-center align-items-center ${styles.searchButton}`}>
               <i className="bi bi-search"></i>
             </button>
           </form>
@@ -149,8 +148,7 @@ const Home = () => {
               )}
             </p>
             <div
-              className={`d-flex justify-content-center align-items-center ${styles.requestContainer}`}
-            >
+              className={`d-flex justify-content-center align-items-center ${styles.requestContainer}`}>
               {loading ? (
                 <div className={styles.loader}></div>
               ) : data ? (
@@ -190,8 +188,7 @@ const Home = () => {
 
           <Link
             className="m-0 col-12 col-md-6 d-flex justify-content-center"
-            to={SIGN_UP_ROUTE}
-          >
+            to={SIGN_UP_ROUTE}>
             <button className={`${styles.btn} ${styles.btnPrimary}`}>
               Create your free account
             </button>
@@ -209,8 +206,7 @@ const Home = () => {
           </div>
           <Link
             className="m-0 col-12 col-md-6 d-flex justify-content-center"
-            to={PREMIUM_ROUTE}
-          >
+            to={PREMIUM_ROUTE}>
             <button className={`${styles.btn} ${styles.btnSecondary}`}>
               Discover Premium
             </button>
