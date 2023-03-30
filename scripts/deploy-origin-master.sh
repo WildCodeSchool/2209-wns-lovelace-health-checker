@@ -1,3 +1,3 @@
 #!/bin/sh
-git fetch origin && git reset --hard origin/master && git clean -f -d
+git clean -f -d && git reset --hard HEAD && git checkout master && git pull
 ./build-start.prod.sh
