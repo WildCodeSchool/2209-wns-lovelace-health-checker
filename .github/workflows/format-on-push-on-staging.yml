@@ -1,13 +1,16 @@
 name: Fix formatting with prettier
 
 on:
-  push:
-    branches:
-      - staging
+  workflow_run:
+    workflows: ["build-and-test"]
+    branches: [staging]
+    types:
+      - completed
 
 jobs:
   fix-formatting:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Check out code
         uses: actions/checkout@v3
