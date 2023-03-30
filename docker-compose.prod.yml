@@ -30,7 +30,6 @@ services:
     restart: always  
     depends_on:
       - database
-      - rabbitmq
 
   web-app:
     build:

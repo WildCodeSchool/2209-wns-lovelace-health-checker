@@ -32,7 +32,6 @@ services:
       - ./back-end/src:/app/src
     depends_on:
       - database
-      - rabbitmq
 
   web-app:
     build:
