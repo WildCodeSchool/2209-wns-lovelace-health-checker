@@ -1,0 +1,16 @@
+name: Deploy master on production
+
+on:
+  workflow_run:
+    workflows: ["build-and-test"]
+    branches: [master]
+    types:
+      - completed
+
+jobs:
+  deploy-master-on-production:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Call webhook to deploy master branch on production environment
+        run: curl ${{ secrets.URL_WEBHOOK_DEPLOY_MASTER_ON_PRODUCTION }}
