@@ -26,8 +26,6 @@ services:
       REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
       RESET_PASSWORD_EXPIRATION_DELAY: ${RESET_PASSWORD_EXPIRATION_DELAY}
       NON_PREMIUM_MAX_AUTHORIZED_REQUESTS: ${NON_PREMIUM_MAX_AUTHORIZED_REQUESTS}
-    depends_on:
-      - rabbitmq
 
   test-database:
     image: postgres:14.5-alpine
