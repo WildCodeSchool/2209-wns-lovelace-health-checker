@@ -12,7 +12,7 @@ services:
       context: ./back-end
       target: prod
     environment:
-      DATABASE_URL: postgres://postgres:password@database:5432/postgres
+      DATABASE_URL: ${DATABASE_URL}
       NODE_ENV: production
       SERVER_PORT: ${SERVER_PORT}
       RABBIT_AMQP_URL: ${RABBIT_AMQP_URL}
@@ -46,7 +46,7 @@ services:
   database:
     image: postgres:14.5-alpine
     environment:
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - database-content:/var/lib/postgresql/data
     expose:
@@ -68,8 +68,8 @@ services:
   adminer:
     image: adminer
     restart: always
-    ports:
-      - 8081:8080
+    expose:
+      - 8080
 
 volumes:
   database-content:
