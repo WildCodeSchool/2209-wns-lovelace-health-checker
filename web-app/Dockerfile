@@ -15,7 +15,7 @@ FROM base as dev
 CMD npm start
 
 FROM build as ci
-CMD npm run test
+CMD CI=true npm run test
 
 FROM build as prod
 RUN npm install -g serve
