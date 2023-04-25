@@ -63,4 +63,10 @@ export default class RequestSettingRepository {
   ): Promise<RequestSetting | null> => {
     return this.repository.findOne({ where: { id: id } });
   };
+
+  static async deleteRequestSetting(
+    requestSetting: RequestSetting
+  ): Promise<void> {
+    await this.repository.remove(requestSetting);
+  }
 }
