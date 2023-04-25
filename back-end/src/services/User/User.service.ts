@@ -32,13 +32,11 @@ export default class UserService extends UserRepository {
       for (const user of usersWithSameEmail) {
         user.emailAwaitingConfirmation = null;
         user.confirmationEmailToken = null;
-        user.confirmationEmailCreatedAt = null;
         await this.saveUser(user);
       }
     }
 
     user.accountConfirmationToken = randomBytes(32).toString("hex");
-    user.accountConfirmationTokenCreatedAt = new Date();
     const savedUser = await this.saveUser(user);
     this.buildAccountConfirmationMessageToQueue(user);
     return savedUser;
@@ -221,7 +219,6 @@ export default class UserService extends UserRepository {
 
     user.emailAwaitingConfirmation = email;
     user.confirmationEmailToken = randomBytes(32).toString("hex");
-    user.confirmationEmailCreatedAt = new Date();
     const savedUser = await this.saveUser(user);
     this.buildResetEmailMessageToQueue(savedUser);
     return "Your request has been processed successfully. Please, check your inbox to confirm your email !";
@@ -252,7 +249,6 @@ export default class UserService extends UserRepository {
     user.email = user.emailAwaitingConfirmation;
     user.emailAwaitingConfirmation = null;
     user.confirmationEmailToken = null;
-    user.confirmationEmailCreatedAt = null;
     user.updatedAt = new Date();
     const savedUser = await this.saveUser(user);
 
@@ -264,7 +260,6 @@ export default class UserService extends UserRepository {
       for (const user of usersWithSameEmail) {
         user.emailAwaitingConfirmation = null;
         user.confirmationEmailToken = null;
-        user.confirmationEmailCreatedAt = null;
         await this.saveUser(user);
       }
     }
