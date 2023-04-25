@@ -1,6 +1,26 @@
 @use "../../variables.scss";
 @import "../../components.scss";
 
+.btn {
+  @include btn;
+  width: variables.$width-100;
+}
+.btnModal {
+  @include btnModal;
+}
+.btnPrimary {
+  @include btnPrimary;
+}
+.btnSecondary {
+  @include btnSecondary;
+}
+.modalTitle {
+  @include modalTitle;
+}
+.modalHeader {
+  @include modalHeader;
+}
+
 .contentContainer {
   @include contentContainer;
   @media (min-width: variables.$mobile-breakpoint) {
@@ -55,13 +75,6 @@
       }
       .checkLabel {
         color: variables.$primary-1000;
-      }
-      .btn {
-        @include btn;
-        width: variables.$width-100;
-      }
-      .btnSecondary {
-        @include btnSecondary;
       }
       .btnDisabled {
         @include btnDisabled;

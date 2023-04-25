@@ -76,6 +76,22 @@
   }
 }
 
+@mixin btnModal {
+  @include btn;
+  min-width: auto;
+  width: variables.$width-xl;
+  height: variables.$height-lg;
+}
+
+@mixin modalTitle {
+  font-size: variables.$font-md;
+}
+
+@mixin modalHeader {
+  background-color: variables.$primary-800;
+  color: white;
+}
+
 @mixin clickableText {
   margin: 0;
   color: variables.$primary-800;
