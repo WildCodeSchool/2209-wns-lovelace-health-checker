@@ -21,8 +21,8 @@ import { REQUESTS_ROUTE } from "../../routes";
 import {
   REQUEST_DOESNT_EXIST,
   SERVER_IS_KO_ERROR_MESSAGE,
-} from "../../utils/error-messages";
-import { UNAUTHORIZED } from "../../utils/error-messages";
+} from "../../utils/info-and-error-messages";
+import { UNAUTHORIZED } from "../../utils/info-and-error-messages";
 
 export const CHECK_URL_LAUNCHED_MANUALLY = gql`
   query CheckUrlLaunchedManually($checkUrlLaunchedManuallyId: String!) {
@@ -118,7 +118,7 @@ const RequestDetailsInformations = ({
   >(DELETE_REQUEST, {
     variables: { requestId: requestId!! },
     onCompleted: () => {
-      toast.success("Your request has been executed successfully !", {
+      toast.success("Request deleted successfully !", {
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: "deletedRequest",
       });
@@ -148,279 +148,333 @@ const RequestDetailsInformations = ({
   });
 
   return (
-    <div className={`${styles.contentContainer}`}>
-      <div className="d-flex flex-wrap gap-5 gap-md-3">
-        {/* General */}
-        <div className={`col-12 col-md-6 ${styles.formContainer}`}>
-          <h2 className={`${styles.header} mt-md-3`}>
-            <i className="bi bi-info-circle"></i> General
-          </h2>
-          <div className={`${styles.formContent}`}>
-            <div>
-              <div className={`${styles.label}`}>URL</div>
-              <p className={`${styles.value}`}>
-                {existingRequest?.requestSetting?.url}
-              </p>
-              <div className={`${styles.label}`}>Name</div>
-              <p className={`${styles.value}`}>
-                {existingRequest?.requestSetting?.name === null
-                  ? "-"
-                  : existingRequest?.requestSetting?.name}
-              </p>
-              <div className={`${styles.label}`}>State</div>
-              <p className={`${styles.value}`}>
-                {existingRequest?.requestSetting?.isActive ? (
-                  <span>
-                    Active
-                    <i
-                      className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
-                    ></i>
-                  </span>
-                ) : (
-                  <span>
-                    Inactive
-                    <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
-                  </span>
-                )}
-              </p>
-
-              <div className={`${styles.label}`}>Execution frequency</div>
-              <p className={`${styles.value} m-0`}>{frequency}</p>
+    <>
+      <div
+        className="modal fade"
+        id="staticBackdrop"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        aria-labelledby="staticBackdropLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className={`modal-header ${styles.modalHeader}`}>
+              <h1
+                className={`m-0 ${styles.modalTitle}`}
+                id="staticBackdropLabel"
+              >
+                Deletion confirmation
+              </h1>
             </div>
-          </div>
-        </div>
-
-        {/* Last request */}
-        <div className={`col ${styles.formContainer}`}>
-          <h2 className={`${styles.header} mt-md-3`}>
-            <i className="bi bi-clock-history"></i> Last request
-          </h2>
-          <div className={`${styles.formContent}`}>
-            <div className="position-relative">
-              {loading && (
-                <div
-                  className={`${styles.loaderBackground} position-absolute d-flex align-items-center justify-content-center w-100 h-100`}
-                >
-                  <div className={styles.loader}></div>
-                </div>
-              )}
-
-              {existingRequest?.requestResult === null ? (
-                <div>
-                  This request has never been executed yet. You can press below
-                  button to execute it manually.
-                </div>
-              ) : (
-                <div>
-                  <div className={`${styles.label}`}>Date</div>
-                  <p className={`${styles.value}`}>
-                    {formatDateString(
-                      existingRequest?.requestResult?.createdAt
-                    )}
-                  </p>
-                  <div className={`${styles.label}`}>Availability</div>
-                  <p className={`${styles.value}`}>
-                    {existingRequest?.requestResult?.getIsAvailable ===
-                      false && (
-                      <span>
-                        Not available
-                        <i
-                          className={`bi bi-x-circle ${styles.xIcon} ms-2`}
-                        ></i>
-                      </span>
-                    )}
-                    {existingRequest?.requestResult?.getIsAvailable ===
-                      true && (
-                      <span>
-                        Available
-                        <i
-                          className={`bi bi-check-circle ${styles.checkIcon} ms-2`}
-                        ></i>
-                      </span>
-                    )}
-                  </p>
-                  <div className={`${styles.label}`}>Status code</div>
-                  <p className={`${styles.value}`}>
-                    {existingRequest?.requestResult?.statusCode === null
-                      ? "Not reachable"
-                      : existingRequest?.requestResult?.statusCode}
-                  </p>
-                  <div className={`${styles.label}`}>Duration</div>
-                  <p className={`${styles.value} m-0`}>
-                    {existingRequest?.requestResult?.duration === null
-                      ? "-"
-                      : `${existingRequest?.requestResult?.duration} ms`}
-                  </p>
-                </div>
-              )}
-            </div>
-            <button
-              disabled={loading}
-              type="button"
-              onClick={() => {
-                checkUrlManually();
-              }}
-              className={`${styles.btn} ${styles.btnSecondary} mt-4 ${
-                loading && styles.btnDisabled
-              }`}
-            >
-              {existingRequest?.requestResult === null ? "Launch" : "Relaunch"}
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="mt-5 d-flex flex-wrap gap-5 gap-md-3">
-        {/* Alerts */}
-        <div className={`col-12 col-md-6 ${styles.formContainer}`}>
-          <h2 className={`${styles.header} mt-md-3`}>
-            <i className="bi bi-bell"></i> Alerts
-          </h2>
-          <div className={`${styles.formContent}`}>
-            <div>
-              {/* Email */}
-              <div className={`${styles.label}`}>
-                Email on error 4XX and 5XX
-              </div>
-              <p className={`${styles.value}`}>
-                {(emailAlerts.length === 0 ||
-                  emailAlerts.length !== HTTP_ERROR_STATUS_CODES.length) && (
-                  <span>
-                    Inactive
-                    <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
-                  </span>
-                )}
-                {emailAlerts.length === HTTP_ERROR_STATUS_CODES.length && (
-                  <span>
-                    Active
-                    <i
-                      className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
-                    ></i>
-                  </span>
-                )}
-              </p>
-              <div className={`${styles.label}`}>
-                Specific errors emails
-                <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
-              </div>
-              <p className={`${styles.value} m-0`}>
-                {emailAlerts.length !== 0 &&
-                  emailAlerts.length !== HTTP_ERROR_STATUS_CODES.length && (
-                    <span>
-                      Active
-                      <i
-                        className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
-                      ></i>
-                    </span>
-                  )}
-                {(emailAlerts.length === HTTP_ERROR_STATUS_CODES.length ||
-                  emailAlerts.length === 0) && (
-                  <span>
-                    Inactive
-                    <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
-                  </span>
-                )}
-              </p>
-              <p>
-                {specificEmailAlerts.length > 0 &&
-                  specificEmailAlerts.join(", ")}
-              </p>
-
-              <hr />
-
-              {/* Push */}
-              <div className={`${styles.label}`}>
-                Push notification on error 4XX and 5XX
-              </div>
-              <p className={`${styles.value}`}>
-                {(pushAlerts.length === 0 ||
-                  pushAlerts.length !== HTTP_ERROR_STATUS_CODES.length) && (
-                  <span>
-                    Inactive
-                    <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
-                  </span>
-                )}
-                {pushAlerts.length === HTTP_ERROR_STATUS_CODES.length && (
-                  <span>
-                    Active
-                    <i
-                      className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
-                    ></i>
-                  </span>
-                )}
-              </p>
-              <div className={`${styles.label}`}>
-                Specific errors notifications
-                <i className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}></i>
-              </div>
-              <p className={`${styles.value} m-0`}>
-                {pushAlerts.length !== 0 &&
-                  pushAlerts.length !== HTTP_ERROR_STATUS_CODES.length && (
-                    <span>
-                      Active
-                      <i
-                        className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
-                      ></i>
-                    </span>
-                  )}
-                {(pushAlerts.length === HTTP_ERROR_STATUS_CODES.length ||
-                  pushAlerts.length === 0) && (
-                  <span>
-                    Inactive
-                    <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
-                  </span>
-                )}
-              </p>
-              <p className="m-0">
-                {specificPushAlerts.length > 0 && specificPushAlerts.join(", ")}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Headers */}
-        <div className={`col ${styles.formContainer}`}>
-          <h2 className={`${styles.header} mt-md-3`}>
-            <i className="bi bi-card-text"></i> Headers
-          </h2>
-          <div className={`${styles.formContent}`}>
-            {(existingRequest?.requestSetting?.headers === null ||
-              existingRequest?.requestSetting?.headers === "") && (
-              <div>No headers set</div>
-            )}
-            <div className="d-flex flex-column gap-3">
-              {parsedHeaders?.map((header, index) => (
-                <div key={index}>
-                  <div className={`${styles.label}`}>{header.property}</div>
-                  <p className={`${styles.value} m-0`}>{header.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="mt-5 d-flex flex-wrap gap-5 gap-md-3">
-        {/* Request deletion */}
-        <div className={`col-12 col-md-6 ${styles.formContainer}`}>
-          <h2 className={`${styles.header} mt-md-3`}>
-            <i className="bi bi-exclamation-triangle"></i> Request deletion
-          </h2>
-          <div className={`${styles.dangerZone}`}>
-            <p>
+            <div className="modal-body py-4">
               Once you delete your request, there is no going back. You will
               loose all related history and alerts. Please be certain.
-            </p>
-            <button
-              className={`${styles.dangerButton}`}
-              onClick={() => {
-                deleteRequest();
-              }}
-            >
-              Delete
-            </button>
+            </div>
+            <div className="modal-footer">
+              <button
+                className={`${styles.btnModal} ${styles.btnSecondary}`}
+                type="button"
+                data-bs-dismiss="modal"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                data-bs-dismiss="modal"
+                className={`${styles.btnModal} ${styles.btnPrimary}`}
+                onClick={() => {
+                  deleteRequest();
+                }}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <div className={`${styles.contentContainer}`}>
+        <div className="d-flex flex-wrap gap-5 gap-md-3">
+          {/* General */}
+          <div className={`col-12 col-md-6 ${styles.formContainer}`}>
+            <h2 className={`${styles.header} mt-md-3`}>
+              <i className="bi bi-info-circle"></i> General
+            </h2>
+            <div className={`${styles.formContent}`}>
+              <div>
+                <div className={`${styles.label}`}>URL</div>
+                <p className={`${styles.value}`}>
+                  {existingRequest?.requestSetting?.url}
+                </p>
+                <div className={`${styles.label}`}>Name</div>
+                <p className={`${styles.value}`}>
+                  {existingRequest?.requestSetting?.name === null
+                    ? "-"
+                    : existingRequest?.requestSetting?.name}
+                </p>
+                <div className={`${styles.label}`}>State</div>
+                <p className={`${styles.value}`}>
+                  {existingRequest?.requestSetting?.isActive ? (
+                    <span>
+                      Active
+                      <i
+                        className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
+                      ></i>
+                    </span>
+                  ) : (
+                    <span>
+                      Inactive
+                      <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
+                    </span>
+                  )}
+                </p>
+
+                <div className={`${styles.label}`}>Execution frequency</div>
+                <p className={`${styles.value} m-0`}>{frequency}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Last request */}
+          <div className={`col ${styles.formContainer}`}>
+            <h2 className={`${styles.header} mt-md-3`}>
+              <i className="bi bi-clock-history"></i> Last request
+            </h2>
+            <div className={`${styles.formContent}`}>
+              <div className="position-relative">
+                {loading && (
+                  <div
+                    className={`${styles.loaderBackground} position-absolute d-flex align-items-center justify-content-center w-100 h-100`}
+                  >
+                    <div className={styles.loader}></div>
+                  </div>
+                )}
+
+                {existingRequest?.requestResult === null ? (
+                  <div>
+                    This request has never been executed yet. You can press
+                    below button to execute it manually.
+                  </div>
+                ) : (
+                  <div>
+                    <div className={`${styles.label}`}>Date</div>
+                    <p className={`${styles.value}`}>
+                      {formatDateString(
+                        existingRequest?.requestResult?.createdAt
+                      )}
+                    </p>
+                    <div className={`${styles.label}`}>Availability</div>
+                    <p className={`${styles.value}`}>
+                      {existingRequest?.requestResult?.getIsAvailable ===
+                        false && (
+                        <span>
+                          Not available
+                          <i
+                            className={`bi bi-x-circle ${styles.xIcon} ms-2`}
+                          ></i>
+                        </span>
+                      )}
+                      {existingRequest?.requestResult?.getIsAvailable ===
+                        true && (
+                        <span>
+                          Available
+                          <i
+                            className={`bi bi-check-circle ${styles.checkIcon} ms-2`}
+                          ></i>
+                        </span>
+                      )}
+                    </p>
+                    <div className={`${styles.label}`}>Status code</div>
+                    <p className={`${styles.value}`}>
+                      {existingRequest?.requestResult?.statusCode === null
+                        ? "Not reachable"
+                        : existingRequest?.requestResult?.statusCode}
+                    </p>
+                    <div className={`${styles.label}`}>Duration</div>
+                    <p className={`${styles.value} m-0`}>
+                      {existingRequest?.requestResult?.duration === null
+                        ? "-"
+                        : `${existingRequest?.requestResult?.duration} ms`}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <button
+                disabled={loading}
+                type="button"
+                onClick={() => {
+                  checkUrlManually();
+                }}
+                className={`${styles.btn} ${styles.btnSecondary} mt-4 ${
+                  loading && styles.btnDisabled
+                }`}
+              >
+                {existingRequest?.requestResult === null
+                  ? "Launch"
+                  : "Relaunch"}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="mt-5 d-flex flex-wrap gap-5 gap-md-3">
+          {/* Alerts */}
+          <div className={`col-12 col-md-6 ${styles.formContainer}`}>
+            <h2 className={`${styles.header} mt-md-3`}>
+              <i className="bi bi-bell"></i> Alerts
+            </h2>
+            <div className={`${styles.formContent}`}>
+              <div>
+                {/* Email */}
+                <div className={`${styles.label}`}>
+                  Email on error 4XX and 5XX
+                </div>
+                <p className={`${styles.value}`}>
+                  {(emailAlerts.length === 0 ||
+                    emailAlerts.length !== HTTP_ERROR_STATUS_CODES.length) && (
+                    <span>
+                      Inactive
+                      <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
+                    </span>
+                  )}
+                  {emailAlerts.length === HTTP_ERROR_STATUS_CODES.length && (
+                    <span>
+                      Active
+                      <i
+                        className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
+                      ></i>
+                    </span>
+                  )}
+                </p>
+                <div className={`${styles.label}`}>
+                  Specific errors emails
+                  <i
+                    className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}
+                  ></i>
+                </div>
+                <p className={`${styles.value} m-0`}>
+                  {emailAlerts.length !== 0 &&
+                    emailAlerts.length !== HTTP_ERROR_STATUS_CODES.length && (
+                      <span>
+                        Active
+                        <i
+                          className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
+                        ></i>
+                      </span>
+                    )}
+                  {(emailAlerts.length === HTTP_ERROR_STATUS_CODES.length ||
+                    emailAlerts.length === 0) && (
+                    <span>
+                      Inactive
+                      <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
+                    </span>
+                  )}
+                </p>
+                <p>
+                  {specificEmailAlerts.length > 0 &&
+                    specificEmailAlerts.join(", ")}
+                </p>
+
+                <hr />
+
+                {/* Push */}
+                <div className={`${styles.label}`}>
+                  Push notification on error 4XX and 5XX
+                </div>
+                <p className={`${styles.value}`}>
+                  {(pushAlerts.length === 0 ||
+                    pushAlerts.length !== HTTP_ERROR_STATUS_CODES.length) && (
+                    <span>
+                      Inactive
+                      <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
+                    </span>
+                  )}
+                  {pushAlerts.length === HTTP_ERROR_STATUS_CODES.length && (
+                    <span>
+                      Active
+                      <i
+                        className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
+                      ></i>
+                    </span>
+                  )}
+                </p>
+                <div className={`${styles.label}`}>
+                  Specific errors notifications
+                  <i
+                    className={`${styles.premiumIcon} ms-2 bi bi-star-fill`}
+                  ></i>
+                </div>
+                <p className={`${styles.value} m-0`}>
+                  {pushAlerts.length !== 0 &&
+                    pushAlerts.length !== HTTP_ERROR_STATUS_CODES.length && (
+                      <span>
+                        Active
+                        <i
+                          className={`bi bi-check-circle ms-2 ${styles.checkIcon}`}
+                        ></i>
+                      </span>
+                    )}
+                  {(pushAlerts.length === HTTP_ERROR_STATUS_CODES.length ||
+                    pushAlerts.length === 0) && (
+                    <span>
+                      Inactive
+                      <i className={`bi bi-x-circle ms-2 ${styles.xIcon}`}></i>
+                    </span>
+                  )}
+                </p>
+                <p className="m-0">
+                  {specificPushAlerts.length > 0 &&
+                    specificPushAlerts.join(", ")}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Headers */}
+          <div className={`col ${styles.formContainer}`}>
+            <h2 className={`${styles.header} mt-md-3`}>
+              <i className="bi bi-card-text"></i> Headers
+            </h2>
+            <div className={`${styles.formContent}`}>
+              {(existingRequest?.requestSetting?.headers === null ||
+                existingRequest?.requestSetting?.headers === "") && (
+                <div>No headers set</div>
+              )}
+              <div className="d-flex flex-column gap-3">
+                {parsedHeaders?.map((header, index) => (
+                  <div key={index}>
+                    <div className={`${styles.label}`}>{header.property}</div>
+                    <p className={`${styles.value} m-0`}>{header.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mt-5 d-flex flex-wrap gap-5 gap-md-3">
+          {/* Request deletion */}
+          <div className={`col-12 col-md-6 ${styles.formContainer}`}>
+            <h2 className={`${styles.header} mt-md-3`}>
+              <i className="bi bi-exclamation-triangle"></i> Request deletion
+            </h2>
+            <div className={`${styles.dangerZone}`}>
+              <p>
+                Once you delete your request, there is no going back. You will
+                loose all related history and alerts. Please be certain.
+              </p>
+              <button
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#staticBackdrop"
+                className={`${styles.dangerButton}`}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

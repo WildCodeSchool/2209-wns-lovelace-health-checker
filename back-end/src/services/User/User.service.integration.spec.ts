@@ -529,10 +529,10 @@ describe("UserService integration", () => {
       });
     });
     describe("when no sessionId", () => {
-      it("throws 'You're not signed in' error message", async () => {
+      it("throws 'Unauthorized' error message", async () => {
         const context: any = { cookies: { sessionId: "" } };
         await expect(UserService.logout(context)).rejects.toThrowError(
-          "You're not signed in"
+          "Unauthorized"
         );
       });
     });

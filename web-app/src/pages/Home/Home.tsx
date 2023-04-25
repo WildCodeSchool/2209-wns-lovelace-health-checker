@@ -11,7 +11,7 @@ import { PREMIUM_ROUTE, SIGN_UP_ROUTE } from "../../routes";
 import {
   getErrorMessage,
   SERVER_IS_KO_ERROR_MESSAGE,
-} from "../../utils/error-messages";
+} from "../../utils/info-and-error-messages";
 import {
   URL_IS_REQUIRED_ERROR_MESSAGE,
   URL_PATTERN_ERROR_MESSAGE,
@@ -123,7 +123,8 @@ const Home = () => {
               data-testid="url-button"
               disabled={loading}
               type="submit"
-              className={`d-flex justify-content-center align-items-center ${styles.searchButton}`}>
+              className={`d-flex justify-content-center align-items-center ${styles.searchButton}`}
+            >
               <i className="bi bi-search"></i>
             </button>
           </form>
@@ -148,7 +149,8 @@ const Home = () => {
               )}
             </p>
             <div
-              className={`d-flex justify-content-center align-items-center ${styles.requestContainer}`}>
+              className={`d-flex justify-content-center align-items-center ${styles.requestContainer}`}
+            >
               {loading ? (
                 <div className={styles.loader}></div>
               ) : data ? (
@@ -188,7 +190,8 @@ const Home = () => {
 
           <Link
             className="m-0 col-12 col-md-6 d-flex justify-content-center"
-            to={SIGN_UP_ROUTE}>
+            to={SIGN_UP_ROUTE}
+          >
             <button className={`${styles.btn} ${styles.btnPrimary}`}>
               Create your free account
             </button>
@@ -206,7 +209,8 @@ const Home = () => {
           </div>
           <Link
             className="m-0 col-12 col-md-6 d-flex justify-content-center"
-            to={PREMIUM_ROUTE}>
+            to={PREMIUM_ROUTE}
+          >
             <button className={`${styles.btn} ${styles.btnSecondary}`}>
               Discover Premium
             </button>

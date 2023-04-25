@@ -32,7 +32,7 @@ import {
   SERVER_IS_KO_ERROR_MESSAGE,
   UNAUTHORIZED,
   URL_ALREADY_EXISTS,
-} from "../../utils/error-messages";
+} from "../../utils/info-and-error-messages";
 import {
   NAME_MAX_LENGTH,
   NAME_MAX_LENGTH_ERROR_MESSAGE,
