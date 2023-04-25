@@ -9,7 +9,7 @@ import { MemoryRouter, Router } from "react-router-dom";
 import * as toastify from "react-toastify";
 
 import { SignInMutation } from "../../gql/graphql";
-import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/info-and-error-messages";
 import SignIn, { SIGN_IN } from "./SignIn";
 import { HOMEPAGE_ROUTE } from "../../routes";
 

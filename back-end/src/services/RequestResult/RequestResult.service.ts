@@ -2,7 +2,6 @@ import RequestResult from "../../entities/RequestResult.entity";
 import RequestSetting from "../../entities/RequestSetting.entity";
 import User from "../../entities/User.entity";
 import RequestResultRepository from "../../repositories/RequestResult.repository";
-import RequestSettingService from "../RequestSetting/RequestSetting.service";
 
 export default class RequestResultService extends RequestResultRepository {
   private static checkUrl = async (

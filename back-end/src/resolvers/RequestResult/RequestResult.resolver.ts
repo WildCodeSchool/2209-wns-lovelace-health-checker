@@ -10,6 +10,7 @@ import {
   checkUrlArgs,
   checkUrlLaunchedManuallyArgs,
 } from "./RequestResult.input";
+import { UNABLE_TO_FIND_USER_FROM_CONTEXT } from "../../utils/info-and-error-messages";
 
 @Resolver(RequestResult)
 export default class RequestResultResolver {
@@ -29,7 +30,7 @@ export default class RequestResultResolver {
     @Ctx() context: GlobalContext
   ): Promise<RequestResult> {
     const user = context.user as User;
-    if (!user) throw Error("Unable to find user from global context");
+    if (!user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
 
     const requestSetting =
       await RequestSettingService.getRequestSettingByIdOrThrowNotFoundError(id);

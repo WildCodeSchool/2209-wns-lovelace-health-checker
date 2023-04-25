@@ -16,7 +16,7 @@ import {
   HOMEPAGE_ROUTE,
   SIGN_UP_ROUTE,
 } from "../../routes";
-import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/info-and-error-messages";
 import {
   EMAIL_IS_REQUIRED_ERROR_MESSAGE,
   EMAIL_MAX_LENGTH,

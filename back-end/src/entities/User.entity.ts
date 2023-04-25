@@ -43,7 +43,6 @@ export default class User {
     this.email = email;
     this.password = password;
     this.createdAt = new Date();
-    this.accountConfirmationTokenCreatedAt = new Date();
   }
 
   @PrimaryGeneratedColumn("uuid")
@@ -131,10 +130,6 @@ export default class User {
   @Length(1, 320)
   emailAwaitingConfirmation: string | null;
 
-  @Column({ nullable: true, default: null, type: "date" })
-  @IsDate()
-  confirmationEmailCreatedAt: Date | null;
-
   @Column({ nullable: true, default: null, type: "varchar" })
   @Index({ unique: true })
   @IsString()
@@ -149,10 +144,6 @@ export default class User {
   @IsString()
   @Length(1, 64)
   accountConfirmationToken: string | null;
-
-  @Column({ nullable: true, default: null })
-  @IsDate()
-  accountConfirmationTokenCreatedAt: Date;
 
   @OneToMany(() => RequestSetting, (requestSetting) => requestSetting.user)
   @Field(() => [RequestSetting])

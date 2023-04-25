@@ -12,6 +12,24 @@ import {
 import UserRepository from "../../repositories/User.repository";
 import { getSessionIdInCookie } from "../../utils/http-cookies";
 import SessionService from "../Session/Session.service";
+import {
+  ACCOUNT_ALREADY_ACTIVE,
+  ACCOUNT_NOT_ACTIVE,
+  ACTION_DONE_SUCCESSFULLY,
+  ACTION_DONE_SUCCESSFULLY_CHECK_INBOX,
+  EMAIL_ALREADY_USED,
+  IF_EMAIL_EXISTS_CHECK_INBOX,
+  INCORRECT_CREDENTIALS,
+  INCORRECT_CURRENT_PASSWORD,
+  INVALID_CONFIRMATION_TOKEN,
+  INVALID_EMAIL_CONFIRMATION_TOKEN,
+  INVALID_RESET_PASSWORD_TOKEN,
+  NO_EMAIL_AWAITING_CONFIRMATION,
+  PASSWORD_CHANGE_SUCCESS,
+  PASSWORD_CHANGE_SUCCESS_AND_DISCONNECTED,
+  UNAUTHORIZED,
+  USER_NOT_FOUND,
+} from "../../utils/info-and-error-messages";
 
 export default class UserService extends UserRepository {
   static async createUser(
@@ -21,7 +39,7 @@ export default class UserService extends UserRepository {
     password: string
   ): Promise<User> {
     const userWithDesiredEmail = await UserRepository.findByEmail(email);
-    if (userWithDesiredEmail) throw Error("This email is already used");
+    if (userWithDesiredEmail) throw Error(EMAIL_ALREADY_USED);
 
     const user = new User(firstname, lastname, email, hashSync(password));
 
@@ -32,13 +50,11 @@ export default class UserService extends UserRepository {
       for (const user of usersWithSameEmail) {
         user.emailAwaitingConfirmation = null;
         user.confirmationEmailToken = null;
-        user.confirmationEmailCreatedAt = null;
         await this.saveUser(user);
       }
     }
 
     user.accountConfirmationToken = randomBytes(32).toString("hex");
-    user.accountConfirmationTokenCreatedAt = new Date();
     const savedUser = await this.saveUser(user);
     this.buildAccountConfirmationMessageToQueue(user);
     return savedUser;
@@ -79,23 +95,23 @@ export default class UserService extends UserRepository {
 
   static resendAccountConfirmationToken = async (email: string) => {
     const user = await UserRepository.findByEmail(email);
-    if (!user) throw Error("User not found");
+    if (!user) throw Error(USER_NOT_FOUND);
     if (
       (user.status == Status.ACTIVE && user.accountConfirmationToken == null) ||
       (user.status == Status.ACTIVE && user.accountConfirmationToken == "") ||
       user.status == Status.ACTIVE ||
       user.status == Status.INACTIVE
     )
-      throw new Error("Account already active");
+      throw new Error(ACCOUNT_ALREADY_ACTIVE);
     this.buildAccountConfirmationMessageToQueue(user, true);
-    return "Your request has been processed successfully";
+    return ACTION_DONE_SUCCESSFULLY;
   };
 
   static confirmAccount = async (confirmationToken: string) => {
     const user = await this.getUserByAccountConfirmationToken(
       confirmationToken
     );
-    if (!user) throw Error("Invalid confirmation token");
+    if (!user) throw Error(INVALID_CONFIRMATION_TOKEN);
 
     user.status = Status.ACTIVE;
     user.accountConfirmationToken = null;
@@ -110,13 +126,11 @@ export default class UserService extends UserRepository {
     const user = await this.findByEmail(email);
 
     if (!user || !compareSync(password, user.password)) {
-      throw new Error("Incorrect credentials");
+      throw new Error(INCORRECT_CREDENTIALS);
     }
 
     if (user.status === Status.PENDING || user.status === Status.INACTIVE) {
-      throw new Error(
-        "Your account is not active, click on the link in your email to activate it"
-      );
+      throw new Error(ACCOUNT_NOT_ACTIVE);
     }
 
     const session = await SessionService.createSession(user);
@@ -125,14 +139,13 @@ export default class UserService extends UserRepository {
 
   static askForNewPassword = async (email: string): Promise<string> => {
     const user = await this.findByEmail(email);
-    if (!user)
-      return "If this email address exists, you'll receive an email to regenerate your password. Check your inbox.";
+    if (!user) return IF_EMAIL_EXISTS_CHECK_INBOX;
 
     user.resetPasswordToken = randomBytes(32).toString("hex");
     user.resetPasswordTokenCreatedAt = new Date();
     await this.saveUser(user);
     this.buildResetPasswordMessageToQueue(user);
-    return "If this email address exists, you'll receive an email to regenerate your password. Check your inbox.";
+    return IF_EMAIL_EXISTS_CHECK_INBOX;
   };
 
   static resetPassword = async (
@@ -140,7 +153,7 @@ export default class UserService extends UserRepository {
     resetPasswordToken: string
   ) => {
     const user = await this.getUserByResetPasswordToken(resetPasswordToken);
-    if (!user) throw Error("Your reset password token is no longer valid");
+    if (!user) throw Error(INVALID_RESET_PASSWORD_TOKEN);
 
     const resetPasswordTokenIsValid =
       this.checkIfResetPasswordTokenIsValid(user);
@@ -179,7 +192,7 @@ export default class UserService extends UserRepository {
 
   static logout = async (context: ExpressContext) => {
     const sessionId = getSessionIdInCookie(context);
-    if (!sessionId) throw new Error("You're not signed in");
+    if (!sessionId) throw new Error(UNAUTHORIZED);
     await SessionService.deleteSessionById(sessionId);
   };
 
@@ -203,28 +216,27 @@ export default class UserService extends UserRepository {
     sessionId: string
   ): Promise<string> => {
     if (!compareSync(currentPassword, user.password)) {
-      throw new Error("Incorrect current password");
+      throw new Error(INCORRECT_CURRENT_PASSWORD);
     }
     user.password = hashSync(newPassword);
     user.updatedAt = new Date();
     await this.saveUser(user);
     if (disconnectMe) {
       await SessionService.deleteAllSessionsButNotCurrentOne(user, sessionId);
-      return "Your password has been updated successfully. You have been disconnected from all your other devices";
+      return PASSWORD_CHANGE_SUCCESS_AND_DISCONNECTED;
     }
-    return "Your password has been updated successfully";
+    return PASSWORD_CHANGE_SUCCESS;
   };
 
   static updateUserEmail = async (user: User, email: string) => {
     const userWithDesiredEmail = await UserRepository.findByEmail(email);
-    if (userWithDesiredEmail) throw Error("This email is already used");
+    if (userWithDesiredEmail) throw Error(EMAIL_ALREADY_USED);
 
     user.emailAwaitingConfirmation = email;
     user.confirmationEmailToken = randomBytes(32).toString("hex");
-    user.confirmationEmailCreatedAt = new Date();
     const savedUser = await this.saveUser(user);
     this.buildResetEmailMessageToQueue(savedUser);
-    return "Your request has been processed successfully. Please, check your inbox to confirm your email !";
+    return ACTION_DONE_SUCCESSFULLY_CHECK_INBOX;
   };
 
   static buildResetEmailMessageToQueue = async (user: User) => {
@@ -241,18 +253,17 @@ export default class UserService extends UserRepository {
     const user = await this.getUserByConfirmationEmailToken(
       confirmationEmailToken
     );
-    if (!user) throw Error("Invalid email confirmation token");
+    if (!user) throw Error(INVALID_EMAIL_CONFIRMATION_TOKEN);
     if (!user.emailAwaitingConfirmation)
-      throw Error("No email awaiting confirmation");
+      throw Error(NO_EMAIL_AWAITING_CONFIRMATION);
     const alreadyUsedEmail = await this.findByEmail(
       user.emailAwaitingConfirmation
     );
-    if (alreadyUsedEmail) throw Error("This email is already used");
+    if (alreadyUsedEmail) throw Error(EMAIL_ALREADY_USED);
 
     user.email = user.emailAwaitingConfirmation;
     user.emailAwaitingConfirmation = null;
     user.confirmationEmailToken = null;
-    user.confirmationEmailCreatedAt = null;
     user.updatedAt = new Date();
     const savedUser = await this.saveUser(user);
 
@@ -264,7 +275,6 @@ export default class UserService extends UserRepository {
       for (const user of usersWithSameEmail) {
         user.emailAwaitingConfirmation = null;
         user.confirmationEmailToken = null;
-        user.confirmationEmailCreatedAt = null;
         await this.saveUser(user);
       }
     }
@@ -276,7 +286,7 @@ export default class UserService extends UserRepository {
     currentPassword: string
   ): Promise<Boolean> => {
     if (!compareSync(currentPassword, user.password)) {
-      throw new Error("Incorrect current password");
+      throw new Error(INCORRECT_CURRENT_PASSWORD);
     }
     await this.deleteUser(user);
     return true;

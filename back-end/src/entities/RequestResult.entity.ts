@@ -1,6 +1,12 @@
 import { IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { Field, ID, ObjectType } from "type-graphql";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
 import RequestSetting from "./RequestSetting.entity";
 
@@ -12,7 +18,7 @@ export default class RequestResult {
     url: string,
     headers?: string,
     statusCode?: number,
-    duration?: number,
+    duration?: number
   ) {
     this.requestSetting = requestSetting;
     this.url = url;
@@ -44,9 +50,19 @@ export default class RequestResult {
   @IsNumber()
   duration?: number;
 
-  @ManyToOne(() => RequestSetting)
+  @ManyToOne(() => RequestSetting, (requestSetting) => requestSetting.results, {
+    onDelete: "CASCADE",
+  })
   @Field(() => RequestSetting)
   requestSetting: RequestSetting;
+
+  @OneToMany(
+    () => RequestResult,
+    (requestResult) => requestResult.requestSetting,
+    { lazy: true }
+  )
+  @Field(() => [RequestResult])
+  alerts: RequestResult[];
 
   @Column({ nullable: true, default: null })
   @Field({ nullable: true })

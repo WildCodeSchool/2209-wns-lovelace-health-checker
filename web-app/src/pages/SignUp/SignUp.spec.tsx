@@ -8,7 +8,7 @@ import * as toastify from "react-toastify";
 
 import { SignUpMutation } from "../../gql/graphql";
 import SignUp, { SIGN_UP } from "./SignUp";
-import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/info-and-error-messages";
 import { SIGN_IN_ROUTE, TERMS_ROUTE } from "../../routes";
 
 jest.mock("react-toastify");
