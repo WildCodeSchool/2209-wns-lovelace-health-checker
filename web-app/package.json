@@ -21,7 +21,7 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.40.0",
     "react-router-dom": "^6.4.0",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^4.0.3",
     "react-select": "^5.7.0",
     "react-toastify": "^9.0.8",
     "typescript": "^4.8.3",
@@ -57,7 +57,7 @@
   },
   "proxy": "http://back-end:4069",
   "devDependencies": {
-    "@graphql-codegen/cli": "2.13.7",
+    "@graphql-codegen/cli": "^1.19.4",
     "@graphql-codegen/client-preset": "^1.0.7",
     "@types/jest": "^29.2.4"
   }
