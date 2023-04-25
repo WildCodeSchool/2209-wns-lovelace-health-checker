@@ -21,8 +21,8 @@ import { REQUESTS_ROUTE } from "../../routes";
 import {
   REQUEST_DOESNT_EXIST,
   SERVER_IS_KO_ERROR_MESSAGE,
-} from "../../utils/error-messages";
-import { UNAUTHORIZED } from "../../utils/error-messages";
+} from "../../utils/info-and-error-messages";
+import { UNAUTHORIZED } from "../../utils/info-and-error-messages";
 
 export const CHECK_URL_LAUNCHED_MANUALLY = gql`
   query CheckUrlLaunchedManually($checkUrlLaunchedManuallyId: String!) {

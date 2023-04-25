@@ -24,7 +24,7 @@ import {
   REQUEST_DOESNT_EXIST,
   UNABLE_TO_FIND_USER_FROM_CONTEXT,
   UNAUTHORIZED,
-} from "../../utils/error-messages";
+} from "../../utils/info-and-error-messages";
 
 const PAGE_SIZE = 10;
 @Resolver(RequestSetting)
@@ -57,7 +57,7 @@ export default class RequestSettingResolver {
     @Ctx() context: GlobalContext
   ): Promise<RequestSetting> {
     const user = context.user as User;
-    if (!user) throw Error("Unable to find user from global context");
+    if (!user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
 
     return await RequestSettingService.createRequest(
       url,
@@ -92,7 +92,7 @@ export default class RequestSettingResolver {
     @Ctx() context: GlobalContext
   ): Promise<RequestSetting> {
     const user = context.user as User;
-    if (!user) throw Error("Unable to find user from global context");
+    if (!user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
 
     return await RequestSettingService.updateRequest(
       id,
@@ -115,7 +115,7 @@ export default class RequestSettingResolver {
     @Ctx() context: GlobalContext
     // @Arg("userId", () => String) userId: string
   ): Promise<PageOfRequestSettingWithLastResult> {
-    if (!context.user) throw Error("Unable to find user from global context");
+    if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
     return RequestSettingService.getPageOfRequestSettingWithLastResult(
       PAGE_SIZE,
       pageNumber,

@@ -7,7 +7,7 @@ import * as toastify from "react-toastify";
 
 import { CheckUrlMutation } from "../../gql/graphql";
 import Home, { URL } from "./Home";
-import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/info-and-error-messages";
 
 jest.mock("react-toastify");
 

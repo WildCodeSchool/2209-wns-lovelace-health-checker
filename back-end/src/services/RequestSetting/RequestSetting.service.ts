@@ -14,7 +14,7 @@ import {
   REQUEST_DOESNT_EXIST,
   UNAUTHORIZED,
   URL_ALREADY_EXISTS,
-} from "../../utils/error-messages";
+} from "../../utils/info-and-error-messages";
 import AlertSettingService from "../AlertSetting/AlertSetting.service";
 
 export default class RequestSettingService extends RequestSettingRepository {

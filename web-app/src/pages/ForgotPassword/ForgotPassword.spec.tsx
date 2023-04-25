@@ -6,7 +6,7 @@ import { MemoryRouter } from "react-router-dom";
 import { AskForNewPasswordMutation } from "../../gql/graphql";
 import ForgotPassword, { ASK_FOR_NEW_PASSWORD } from "./ForgotPassword";
 import * as toastify from "react-toastify";
-import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/info-and-error-messages";
 
 jest.mock("react-toastify");
 

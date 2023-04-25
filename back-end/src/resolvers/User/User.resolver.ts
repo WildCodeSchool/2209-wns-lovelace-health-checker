@@ -25,6 +25,12 @@ import {
   UpdateIdentityArgs,
   UpdatePasswordArgs,
 } from "./User.input";
+import {
+  PASSWORD_CHANGE_SUCCESS,
+  SESSION_NOT_FOUND,
+  SIGN_OUT_SUCCESS,
+  UNABLE_TO_FIND_USER_FROM_CONTEXT,
+} from "../../utils/info-and-error-messages";
 
 @Resolver(User)
 export default class UserResolver {
@@ -60,7 +66,7 @@ export default class UserResolver {
     @Args() { token, password }: ResetPasswordArgs
   ): Promise<string> {
     await UserService.resetPassword(password, token);
-    return "Your password has been updated successfully";
+    return PASSWORD_CHANGE_SUCCESS;
   }
 
   @Mutation(() => User)
@@ -78,7 +84,7 @@ export default class UserResolver {
   async signOut(@Ctx() context: GlobalContext): Promise<string> {
     await UserService.logout(context);
     deleteSessionIdInCookie(context);
-    return "You've been signed out securely";
+    return SIGN_OUT_SUCCESS;
   }
 
   @Authorized()
@@ -93,7 +99,7 @@ export default class UserResolver {
     @Args() { firstname, lastname }: UpdateIdentityArgs,
     @Ctx() context: GlobalContext
   ): Promise<User> {
-    if (!context.user) throw Error("You're not authenticated");
+    if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
     return UserService.updateUserIdentity(context.user, firstname, lastname);
   }
 
@@ -109,9 +115,9 @@ export default class UserResolver {
     }: UpdatePasswordArgs,
     @Ctx() context: GlobalContext
   ): Promise<string> {
-    if (!context.user) throw Error("You're not authenticated");
+    if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
     const currentSessionId = context.sessionId;
-    if (!currentSessionId) throw Error("You're not authenticated");
+    if (!currentSessionId) throw Error(SESSION_NOT_FOUND);
     return UserService.updateUserPassword(
       context.user,
       currentPassword,
@@ -128,7 +134,7 @@ export default class UserResolver {
 
     @Ctx() context: GlobalContext
   ): Promise<string> {
-    if (!context.user) throw Error("You're not authenticated");
+    if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
     return UserService.updateUserEmail(context.user, newEmail);
   }
 
@@ -144,7 +150,7 @@ export default class UserResolver {
     @Arg("currentPassword") currentPassword: string,
     @Ctx() context: GlobalContext
   ): Promise<Boolean> {
-    if (!context.user) throw Error("You're not authenticated");
+    if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
     return UserService.deleteCurrentUser(context.user, currentPassword);
   }
 }
