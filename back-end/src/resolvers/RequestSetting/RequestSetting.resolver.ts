@@ -20,6 +20,11 @@ import {
   GetRequestSettingByIdArgs,
   UpdateRequestSettingArgs,
 } from "./RequestSetting.input";
+import {
+  REQUEST_DOESNT_EXIST,
+  UNABLE_TO_FIND_USER_FROM_CONTEXT,
+  UNAUTHORIZED,
+} from "../../utils/error-messages";
 
 const PAGE_SIZE = 10;
 @Resolver(RequestSetting)
@@ -126,7 +131,7 @@ export default class RequestSettingResolver {
     @Ctx() context: GlobalContext
   ) {
     const user = context.user as User;
-    if (!user) throw Error("Unable to find user from global context");
+    if (!user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
 
     const result =
       await RequestSettingService.getRequestSettingWithLastResultByRequestSettingId(
@@ -134,7 +139,7 @@ export default class RequestSettingResolver {
       );
 
     if (result && result.requestSetting.user.id != user.id)
-      throw Error("Request doesn't exist");
+      throw Error(REQUEST_DOESNT_EXIST);
     else return result;
   }
 
@@ -143,7 +148,7 @@ export default class RequestSettingResolver {
     @Arg("requestId") requestId: string,
     @Ctx() context: GlobalContext
   ): Promise<Boolean> {
-    if (!context.user) throw Error("Unauthorized");
+    if (!context.user) throw Error(UNAUTHORIZED);
     return RequestSettingService.deleteRequestSettingById(
       context.user,
       requestId
