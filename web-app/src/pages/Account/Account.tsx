@@ -49,45 +49,39 @@ const Account = ({
             className={`${styles.logout}`}
             onClick={async () => {
               await signOut();
-            }}
-          >
+            }}>
             Log out
           </span>
         </div>
-        <div className="d-flex gap-5 mt-5">
+        <div
+          className={`d-flex gap-5 mt-5 overflow-scroll ${styles.scrollbar}`}>
           <div
             className={`${
               selectedTab === "informations" && styles.selectedTab
-            }  ${styles.tabContainer}`}
-          >
+            }  ${styles.tabContainer}`}>
             <span
               className={`${styles.tabs} `}
-              onClick={() => setSelectedTab("informations")}
-            >
+              onClick={() => setSelectedTab("informations")}>
               Informations
             </span>
           </div>
           <div
             className={`${selectedTab === "premium" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}
-          >
+            }`}>
             <span
               className={`${styles.tabs} `}
-              onClick={() => setSelectedTab("premium")}
-            >
+              onClick={() => setSelectedTab("premium")}>
               Premium
             </span>
           </div>
           <div
             className={`${selectedTab === "bills" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}
-          >
+            }`}>
             <span
               className={`${styles.tabs} `}
-              onClick={() => setSelectedTab("bills")}
-            >
+              onClick={() => setSelectedTab("bills")}>
               Bills
             </span>
           </div>
