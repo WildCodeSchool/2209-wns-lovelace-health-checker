@@ -1,0 +1,16 @@
+name: Deploy staging on staging
+
+on:
+  workflow_run:
+    workflows: ["build-and-test"]
+    branches: [staging]
+    types:
+      - completed
+
+jobs:
+  deploy-staging-on-staging:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Call webhook to deploy staging branch on staging environment
+        run: curl -v ${{ secrets.URL_WEBHOOK_DEPLOY_STAGING_ON_STAGING }}

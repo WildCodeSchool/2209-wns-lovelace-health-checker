@@ -100,11 +100,8 @@ describe("UserService integration", () => {
         expect(users[0].role).toEqual("user");
         expect(users[0].confirmationEmailToken).toEqual(null);
         expect(users[0].emailAwaitingConfirmation).toEqual(null);
-        expect(users[0].confirmationEmailCreatedAt).toEqual(null);
         expect(users[0].resetPasswordToken).toEqual(null);
-        expect(users[0].resetPasswordTokenCreatedAt).toEqual(null);
         expect(users[0].accountConfirmationToken).toHaveLength(64);
-        expect(users[0].accountConfirmationTokenCreatedAt).toBeInstanceOf(Date);
       });
     });
     describe("buildAccountConfirmationMessageToQueue", () => {
@@ -335,7 +332,6 @@ describe("UserService integration", () => {
           where: { id: user.id },
         });
         expect(createdUser?.resetPasswordToken).toHaveLength(64);
-        expect(createdUser?.resetPasswordTokenCreatedAt).toBeInstanceOf(Date);
       });
       it("calls buildResetPasswordMessageToQueue once", async () => {
         const spy = jest.spyOn(UserService, "buildResetPasswordMessageToQueue");

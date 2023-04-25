@@ -324,4 +324,15 @@ export default class RequestSettingService extends RequestSettingRepository {
       );
     else return new RequestSettingWithLastResult(requestSetting, null);
   };
+
+  static deleteRequestSettingById = async (
+    user: User,
+    requestId: string
+  ): Promise<Boolean> => {
+    const requestSetting = await this.getRequestSettingById(requestId);
+    if (!requestSetting) throw Error("Request doesn't exist");
+    if (requestSetting.user.id !== user.id) throw Error("Unauthorized");
+    await this.deleteRequestSetting(requestSetting);
+    return true;
+  };
 }
