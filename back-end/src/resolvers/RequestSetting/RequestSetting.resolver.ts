@@ -137,4 +137,16 @@ export default class RequestSettingResolver {
       throw Error("Request doesn't exist");
     else return result;
   }
+
+  @Mutation(() => Boolean)
+  deleteRequestSetting(
+    @Arg("requestId") requestId: string,
+    @Ctx() context: GlobalContext
+  ): Promise<Boolean> {
+    if (!context.user) throw Error("Unauthorized");
+    return RequestSettingService.deleteRequestSettingById(
+      context.user,
+      requestId
+    );
+  }
 }

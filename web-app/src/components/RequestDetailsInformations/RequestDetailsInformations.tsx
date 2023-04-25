@@ -1,8 +1,10 @@
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import {
   CheckUrlLaunchedManuallyQuery,
+  DeleteRequestMutation,
+  DeleteRequestMutationVariables,
   GetRequestSettingByIdQuery,
 } from "../../gql/graphql";
 import { AlertType } from "../../utils/alert-types.enum";
@@ -14,6 +16,13 @@ import {
 } from "../../utils/http-error-status-codes.enum";
 import { formatFrequency } from "../../utils/request-frequency.enum";
 import styles from "./RequestDetailsInformations.module.scss";
+import { useNavigate, useParams } from "react-router-dom";
+import { REQUESTS_ROUTE } from "../../routes";
+import {
+  REQUEST_DOESNT_EXIST,
+  SERVER_IS_KO_ERROR_MESSAGE,
+} from "../../utils/error-messages";
+import { UNAUTHORIZED } from "../../utils/error-messages";
 
 export const CHECK_URL_LAUNCHED_MANUALLY = gql`
   query CheckUrlLaunchedManually($checkUrlLaunchedManuallyId: String!) {
@@ -26,6 +35,12 @@ export const CHECK_URL_LAUNCHED_MANUALLY = gql`
       duration
       headers
     }
+  }
+`;
+
+export const DELETE_REQUEST = gql`
+  mutation DeleteRequest($requestId: String!) {
+    deleteRequestSetting(requestId: $requestId)
   }
 `;
 
@@ -44,6 +59,9 @@ const RequestDetailsInformations = ({
   const [specificEmailAlerts, setSpecificEmailAlerts] = useState<number[]>([]);
   const [specificPushAlerts, setSpecificPushAlerts] = useState<number[]>([]);
   const [parsedHeaders, setParsedHeaders] = useState<any[]>();
+
+  const navigate = useNavigate();
+  let { requestId } = useParams();
 
   useEffect(() => {
     if (existingRequest) {
@@ -93,6 +111,41 @@ const RequestDetailsInformations = ({
         refetch();
       },
     });
+
+  const [deleteRequest] = useMutation<
+    DeleteRequestMutation,
+    DeleteRequestMutationVariables
+  >(DELETE_REQUEST, {
+    variables: { requestId: requestId!! },
+    onCompleted: () => {
+      toast.success("Your request has been executed successfully !", {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        toastId: "deletedRequest",
+      });
+      navigate(REQUESTS_ROUTE);
+    },
+    onError: (error) => {
+      switch (error.message) {
+        case REQUEST_DOESNT_EXIST:
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 2,
+          });
+          break;
+        case UNAUTHORIZED:
+          toast.error(error.message, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 3,
+          });
+          break;
+        default:
+          toast.error(SERVER_IS_KO_ERROR_MESSAGE, {
+            position: toast.POSITION.BOTTOM_RIGHT,
+            toastId: 4,
+          });
+      }
+    },
+  });
 
   return (
     <div className={`${styles.contentContainer}`}>
@@ -205,7 +258,6 @@ const RequestDetailsInformations = ({
               disabled={loading}
               type="button"
               onClick={() => {
-                console.log("clicked");
                 checkUrlManually();
               }}
               className={`${styles.btn} ${styles.btnSecondary} mt-4 ${
@@ -355,9 +407,16 @@ const RequestDetailsInformations = ({
           <div className={`${styles.dangerZone}`}>
             <p>
               Once you delete your request, there is no going back. You will
-              loose all related alerts. Please be certain.
+              loose all related history and alerts. Please be certain.
             </p>
-            <button className={`${styles.dangerButton}`}>Delete</button>
+            <button
+              className={`${styles.dangerButton}`}
+              onClick={() => {
+                deleteRequest();
+              }}
+            >
+              Delete
+            </button>
           </div>
         </div>
       </div>

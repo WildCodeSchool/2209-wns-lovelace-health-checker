@@ -49,7 +49,7 @@ export default class Alert {
   @IsDate()
   pushSentAt: Date;
 
-  @ManyToOne(() => RequestResult)
+  @ManyToOne(() => RequestResult, { onDelete: "CASCADE" })
   @Field(() => RequestResult)
   requestResult: RequestResult;
 }

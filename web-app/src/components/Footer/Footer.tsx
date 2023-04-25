@@ -17,7 +17,7 @@ const Footer = () => {
           <a href={HOMEPAGE_ROUTE}>Sales and refunds</a>
         </li>
       </ul>
-      <p className={styles.copyright}>©2022 Health Check</p>
+      <p className={styles.copyright}>©2023 Health Check</p>
     </footer>
   );
 };
