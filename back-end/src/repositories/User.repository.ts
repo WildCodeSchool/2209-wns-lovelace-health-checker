@@ -18,6 +18,10 @@ export default class UserRepository {
     return this.repository.findOneBy({ email });
   }
 
+  static findById(id: string): Promise<User | null> {
+    return this.repository.findOneBy({ id: id });
+  }
+
   static async clearRepository(): Promise<void> {
     await this.repository.delete({});
   }

@@ -28,11 +28,22 @@ export default class AlertSettingRepository {
     await this.repository.remove(alertSettings);
   }
 
-  static async getAlertsByRequestSettingId(
+  static async getAlertSettingsByRequestSettingId(
     id: string
   ): Promise<AlertSetting[]> {
     return this.repository.find({
       where: { requestSetting: { id: id } },
+    });
+  }
+
+  static async getAlertSettingsByRequestSettingIdAndHttpStatusCode(
+    id: string, statusCode: number
+  ): Promise<AlertSetting[]> {
+    return this.repository.find({
+      where: {
+        requestSetting: { id: id },
+        httpStatusCode: statusCode,
+      },
     });
   }
 }

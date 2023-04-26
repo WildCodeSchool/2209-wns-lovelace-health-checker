@@ -1,9 +1,24 @@
+import Alert from "../../entities/Alert.entity";
+import AlertSetting, { AlertType } from "../../entities/AlertSetting.entity";
 import RequestResult from "../../entities/RequestResult.entity";
 import RequestSetting from "../../entities/RequestSetting.entity";
 import User from "../../entities/User.entity";
+import {
+  sendMessageOnAlertEmailQueue,
+  sendMessageOnAlertPushQueue,
+} from "../../rabbitmq/providers";
 import RequestResultRepository from "../../repositories/RequestResult.repository";
+import AlertService from "../Alert/Alert.service";
+import AlertSettingService from "../AlertSetting/AlertSetting.service";
+import RequestSettingService from "../RequestSetting/RequestSetting.service";
 
 export default class RequestResultService extends RequestResultRepository {
+  public static getRequestResultById = async (
+    id: string
+  ): Promise<RequestResult | null> => {
+    return await RequestResultRepository.getRequestResultById(id);
+  };
+
   private static checkUrl = async (
     requestSetting: RequestSetting,
     isHomepageRequest: boolean = true
@@ -88,11 +103,57 @@ export default class RequestResultService extends RequestResultRepository {
     return response;
   };
 
-  // Rabbit comnsumers will use this method
+  // Rabbit consumers will use this method
   public static checkUrlOfAutomatedRequest = async (
-    requestSettingFromMessage: RequestSetting
+    message: RequestSetting
   ): Promise<void> => {
-    this.checkUrlOfRequestSettingByRequestSetting(requestSettingFromMessage);
+    const toCheckForExistanceRequestSetting: RequestSetting =
+      message as RequestSetting;
+    const requestSetting = await RequestSettingService.getRequestSettingById(
+      toCheckForExistanceRequestSetting.id
+    );
+    if (requestSetting && requestSetting.isActive) {
+      const requestResult: RequestResult =
+        await this.checkUrlOfRequestSettingByRequestSetting(requestSetting);
+      // getIsAvailable() return false if status is 4xx or 5xx
+      if (!requestResult.getIsAvailable() && requestResult.statusCode) {
+        // We look for alertSettings linked to the requestSettingFromMessage
+        const alertSettings: AlertSetting[] =
+          await AlertSettingService.getAlertSettingsByRequestSettingIdAndHttpStatusCode(
+            requestSetting.id,
+            requestResult.statusCode
+          );
+        // If we find at least 1 alertSetting
+        if (alertSettings.length) {
+          // We create an alert
+          const alert: Alert = await AlertService.createAlert(requestResult);
+          if (alert) {
+            // Then we send a message for each alertSetting found
+            alertSettings.forEach((alertSetting) => {
+              if (alertSetting.type === AlertType.EMAIL) {
+                // If preventAlertUntil is older than now
+                if (
+                  alertSetting.preventAlertUntil === null ||
+                  alertSetting.preventAlertUntil.getTime() < Date.now()
+                ) {
+                  // Send requestResult as message to queue
+                  sendMessageOnAlertEmailQueue(requestResult);
+                }
+              } else if (alertSetting.type === AlertType.PUSH) {
+                // If preventAlertUntil is older than now
+                if (
+                  alertSetting.preventAlertUntil === null ||
+                  alertSetting.preventAlertUntil.getTime() < Date.now()
+                ) {
+                  // Send requestResult as message to queue
+                  sendMessageOnAlertPushQueue(requestResult);
+                }
+              }
+            });
+          }
+        }
+      }
+    }
   };
 
   public static checkUrlOfRequestSettingByRequestSetting = async (
