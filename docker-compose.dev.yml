@@ -33,6 +33,7 @@ services:
       - ./back-end/src:/app/src
     depends_on:
       - database
+      - rabbitmq
 
   web-app:
     build:
@@ -53,7 +54,7 @@ services:
   database:
     image: postgres:14.5-alpine
     environment:
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - database-content:/var/lib/postgresql/data
     expose:
