@@ -1,3 +1,5 @@
+import RequestResult from "../entities/RequestResult.entity";
+import RequestSetting from "../entities/RequestSetting.entity";
 import { channel } from "./config";
 
 export const sendMessageOnAccountCreationEmailQueue = async (data: any) => {
@@ -21,7 +23,17 @@ export const sendMessageOnResetEmailQueue = async (data: any) => {
   console.log("A new message was sent to 'reset-email' queue");
 };
 
-export const sendMessageOnAutomatedRequestQueue = async (data: any) => {
+export const sendMessageOnAutomatedRequestQueue = async (data: RequestSetting) => {
   await channel.sendToQueue("automated-request", Buffer.from(JSON.stringify(data)));
   console.log("A new message was sent to 'automated-request' queue");
+};
+
+export const sendMessageOnAlertEmailQueue = async (data: RequestResult) => {
+  await channel.sendToQueue("alert-email", Buffer.from(JSON.stringify(data)));
+  console.log("A new message was sent to 'alert-email' queue");
+};
+
+export const sendMessageOnAlertPushQueue = async (data: RequestResult) => {
+  await channel.sendToQueue("alert-push", Buffer.from(JSON.stringify(data)));
+  console.log("A new message was sent to 'alert-push' queue");
 };

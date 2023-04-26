@@ -20,6 +20,12 @@ export default class RequestResultRepository {
     return this.repository.save(requestResult);
   };
 
+  protected static getRequestResultById = async (
+    id: string
+  ): Promise<RequestResult | null> => {
+    return this.repository.findOne({ where: { id: id } });
+  };
+
   static async getMostRecentByRequestSettingId(
     requestSettingId: string
   ): Promise<RequestResult | null> {
