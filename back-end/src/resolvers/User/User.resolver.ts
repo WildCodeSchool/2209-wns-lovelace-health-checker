@@ -29,7 +29,6 @@ import {
   PASSWORD_CHANGE_SUCCESS,
   SESSION_NOT_FOUND,
   SIGN_OUT_SUCCESS,
-  UNABLE_TO_FIND_USER_FROM_CONTEXT,
 } from "../../utils/info-and-error-messages";
 
 @Resolver(User)
@@ -99,8 +98,11 @@ export default class UserResolver {
     @Args() { firstname, lastname }: UpdateIdentityArgs,
     @Ctx() context: GlobalContext
   ): Promise<User> {
-    if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
-    return UserService.updateUserIdentity(context.user, firstname, lastname);
+    return UserService.updateUserIdentity(
+      context.user as User,
+      firstname,
+      lastname
+    );
   }
 
   @Authorized()
@@ -115,11 +117,10 @@ export default class UserResolver {
     }: UpdatePasswordArgs,
     @Ctx() context: GlobalContext
   ): Promise<string> {
-    if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
     const currentSessionId = context.sessionId;
     if (!currentSessionId) throw Error(SESSION_NOT_FOUND);
     return UserService.updateUserPassword(
-      context.user,
+      context.user as User,
       currentPassword,
       newPassword,
       disconnectMe,
@@ -134,8 +135,7 @@ export default class UserResolver {
 
     @Ctx() context: GlobalContext
   ): Promise<string> {
-    if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
-    return UserService.updateUserEmail(context.user, newEmail);
+    return UserService.updateUserEmail(context.user as User, newEmail);
   }
 
   @Mutation(() => Boolean)
@@ -145,12 +145,12 @@ export default class UserResolver {
     return UserService.confirmEmail(confirmationToken);
   }
 
+  @Authorized()
   @Mutation(() => Boolean)
   deleteUser(
     @Arg("currentPassword") currentPassword: string,
     @Ctx() context: GlobalContext
   ): Promise<Boolean> {
-    if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
-    return UserService.deleteCurrentUser(context.user, currentPassword);
+    return UserService.deleteCurrentUser(context.user as User, currentPassword);
   }
 }

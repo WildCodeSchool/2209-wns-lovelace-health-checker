@@ -340,7 +340,7 @@ export default class RequestSettingService extends RequestSettingRepository {
   ): Promise<Boolean> => {
     const requestSetting = await this.getRequestSettingById(requestId);
     if (!requestSetting) throw Error(REQUEST_DOESNT_EXIST);
-    if (requestSetting.user.id !== user.id) throw Error(UNAUTHORIZED);
+    this.checkIfRequestBelongsToUserByRequestSetting(user, requestSetting);
     await this.deleteRequestSetting(requestSetting);
     return true;
   };
