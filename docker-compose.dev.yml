@@ -13,7 +13,7 @@ services:
       context: ./back-end
       target: dev
     environment:
-      DATABASE_URL: postgres://postgres:password@database:5432/postgres
+      DATABASE_URL: ${DATABASE_URL}
       TEST_DATABASE_URL: postgres://postgres:password@test-database:5432/postgres
       SERVER_PORT: ${SERVER_PORT}
       RABBIT_AMQP_URL: ${RABBIT_AMQP_URL}
