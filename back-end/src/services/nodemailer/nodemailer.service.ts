@@ -96,3 +96,25 @@ export const sendResetEmail = (
     })
     .catch((err) => console.log(err));
 };
+
+export const sendAlertEmail = (
+  name: string,
+  email: string,
+  requestSettingUrl: string,
+  statusCode: number,
+  requestResultDate: string,
+  preventUntilDate: string
+) => {
+  transport
+    .sendMail({
+      from: `Health Check <${NODEMAILER_USER}>`,
+      to: email,
+      subject: `[Health Check] Error notification`,
+      html: `<p>Hello ${name},</p>
+          <p>The url ${requestSettingUrl} responded with the status code ${statusCode} on ${requestResultDate}.</p>
+          <p>You got this email because you set the request to send an email alert for this status code.</p>
+          <p>You can modify the settings of this request in order not to send email alerts.</p>
+          <p>You will not receive another email alert for this request and for the status code ${statusCode} until ${preventUntilDate}.</p>`,
+    })
+    .catch((err) => console.log(err));
+};

@@ -16,6 +16,7 @@ import {
 
 import AlertSetting from "./AlertSetting.entity";
 import User from "./User.entity";
+import RequestResult from "./RequestResult.entity";
 
 export enum Frequency {
   THIRTY_DAYS = 2592000,
@@ -103,8 +104,16 @@ export default class RequestSetting {
   @OneToMany(
     () => AlertSetting,
     (alertSetting) => alertSetting.requestSetting,
-    { lazy: true, onDelete: "CASCADE" }
+    { lazy: true }
   )
   @Field(() => [AlertSetting])
   alerts: AlertSetting[];
+
+  @OneToMany(
+    () => RequestResult,
+    (requestResult) => requestResult.requestSetting,
+    { lazy: true }
+  )
+  @Field(() => [RequestResult])
+  results: RequestResult[];
 }

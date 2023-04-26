@@ -6,6 +6,15 @@ import PageOfRequestSettingWithLastResult from "../../models/PageOfRequestSettin
 import RequestSettingWithLastResult from "../../models/RequestSettingWithLastResult";
 import RequestResultRepository from "../../repositories/RequestResult.repository";
 import RequestSettingRepository from "../../repositories/RequestSetting.repository";
+import {
+  ALERTS_ONLY_FOR_PREMIUM_USERS,
+  FREQUENCY_ONLY_FOR_PREMIUM_USERS,
+  INCORRECT_HEADER_FORMAT,
+  NAME_ALREADY_EXISTS,
+  REQUEST_DOESNT_EXIST,
+  UNAUTHORIZED,
+  URL_ALREADY_EXISTS,
+} from "../../utils/info-and-error-messages";
 import AlertSettingService from "../AlertSetting/AlertSetting.service";
 
 export default class RequestSettingService extends RequestSettingRepository {
@@ -84,7 +93,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     user: User,
     requestSetting: RequestSetting
   ) => {
-    if (requestSetting?.user.id !== user.id) throw Error("Unauthorized");
+    if (requestSetting?.user.id !== user.id) throw Error(UNAUTHORIZED);
   };
 
   static checkIfRequestBelongsToUserByRequestSettingId = async (
@@ -106,7 +115,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     const requestSetting = await RequestSettingService.getRequestSettingById(
       requestSettingId
     );
-    if (!requestSetting) throw Error("Request doesn't exist");
+    if (!requestSetting) throw Error(REQUEST_DOESNT_EXIST);
     return requestSetting;
   };
 
@@ -202,7 +211,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     const URLAlreadyExists = userSettingRequests
       .filter((request) => request.id !== id)
       .some((request: RequestSetting) => request.url === url);
-    if (URLAlreadyExists) throw Error("This URL already exists");
+    if (URLAlreadyExists) throw Error(URL_ALREADY_EXISTS);
 
     // For request update case, we exclude current request
     const nameAlreadyExists = userSettingRequests
@@ -211,7 +220,7 @@ export default class RequestSettingService extends RequestSettingRepository {
         (request: RequestSetting) =>
           request.name === name && request.name !== null
       );
-    if (nameAlreadyExists) throw Error("This name already exists");
+    if (nameAlreadyExists) throw Error(NAME_ALREADY_EXISTS);
   };
 
   static checkIfGivenFrequencyIsPremiumFrequency = (
@@ -235,7 +244,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     const headersFormatIsCorrect = this.headerHasAllHaveProperties(
       JSON.parse(headers)
     );
-    if (!headersFormatIsCorrect) throw Error("Headers format is incorrect");
+    if (!headersFormatIsCorrect) throw Error(INCORRECT_HEADER_FORMAT);
   };
 
   static checkIfNonPremiumUserTryToUsePremiumFrequency = async (
@@ -246,7 +255,7 @@ export default class RequestSettingService extends RequestSettingRepository {
       user.role === Role.USER &&
       this.checkIfGivenFrequencyIsPremiumFrequency(frequency)
     )
-      throw Error("This frequency is only useable by Premium users");
+      throw Error(FREQUENCY_ONLY_FOR_PREMIUM_USERS);
   };
 
   static checkIfNonPremiumUserTryToUseCustomError = async (
@@ -258,7 +267,7 @@ export default class RequestSettingService extends RequestSettingRepository {
       user.role === Role.USER &&
       (customEmailErrors?.length || customPushErrors?.length)
     )
-      throw Error("Non Premium users can't use custom error alerts");
+      throw Error(ALERTS_ONLY_FOR_PREMIUM_USERS);
   };
 
   static getPageOfRequestSettingWithLastResult = async (
@@ -312,7 +321,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     const requestSetting = await RequestSettingRepository.getRequestSettingById(
       id
     );
-    if (!requestSetting) throw Error("Request not found");
+    if (!requestSetting) throw Error(REQUEST_DOESNT_EXIST);
 
     const lastRequestResult =
       await RequestResultRepository.getMostRecentByRequestSettingId(id);
@@ -323,5 +332,16 @@ export default class RequestSettingService extends RequestSettingRepository {
         lastRequestResult
       );
     else return new RequestSettingWithLastResult(requestSetting, null);
+  };
+
+  static deleteRequestSettingById = async (
+    user: User,
+    requestId: string
+  ): Promise<Boolean> => {
+    const requestSetting = await this.getRequestSettingById(requestId);
+    if (!requestSetting) throw Error(REQUEST_DOESNT_EXIST);
+    this.checkIfRequestBelongsToUserByRequestSetting(user, requestSetting);
+    await this.deleteRequestSetting(requestSetting);
+    return true;
   };
 }

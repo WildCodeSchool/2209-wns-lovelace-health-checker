@@ -28,13 +28,10 @@ export default class RequestResultResolver {
     @Args() { id }: checkUrlLaunchedManuallyArgs,
     @Ctx() context: GlobalContext
   ): Promise<RequestResult> {
-    const user = context.user as User;
-    if (!user) throw Error("Unable to find user from global context");
-
     const requestSetting =
       await RequestSettingService.getRequestSettingByIdOrThrowNotFoundError(id);
     await RequestSettingService.checkIfRequestBelongsToUserByRequestSetting(
-      user,
+      context.user as User,
       requestSetting
     );
     return await RequestResultService.checkUrlOfRequestSettingByRequestSetting(
