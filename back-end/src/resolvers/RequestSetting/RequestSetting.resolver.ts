@@ -23,18 +23,18 @@ import {
 import {
   REQUEST_DOESNT_EXIST,
   UNABLE_TO_FIND_USER_FROM_CONTEXT,
-  UNAUTHORIZED,
 } from "../../utils/info-and-error-messages";
 
 const PAGE_SIZE = 10;
+
 @Resolver(RequestSetting)
 export default class RequestSettingResolver {
   @Authorized()
   @Query(() => Boolean)
-  async checkIfNonPremiumUserHasReachedMaxRequestsCount(
+  async failIfNonPremiumUserHasReachedMaxRequestsCount(
     @Ctx() context: GlobalContext
   ): Promise<boolean> {
-    return RequestSettingService.checkIfNonPremiumUserHasReachedMaxRequestsCount(
+    return RequestSettingService.failIfNonPremiumUserHasReachedMaxRequestsCount(
       context.user as User
     );
   }
@@ -91,9 +91,6 @@ export default class RequestSettingResolver {
     }: UpdateRequestSettingArgs,
     @Ctx() context: GlobalContext
   ): Promise<RequestSetting> {
-    const user = context.user as User;
-    if (!user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
-
     return await RequestSettingService.updateRequest(
       id,
       url,
@@ -105,7 +102,7 @@ export default class RequestSettingResolver {
       allErrorsEnabledPush,
       customEmailErrors,
       customPushErrors,
-      user
+      context.user as User
     );
   }
 
@@ -113,14 +110,12 @@ export default class RequestSettingResolver {
   getPageOfRequestSettingWithLastResult(
     @Arg("pageNumber", () => Int) pageNumber: number,
     @Ctx() context: GlobalContext
-    // @Arg("userId", () => String) userId: string
   ): Promise<PageOfRequestSettingWithLastResult> {
-    if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
+    const user = context.user as User;
     return RequestSettingService.getPageOfRequestSettingWithLastResult(
       PAGE_SIZE,
       pageNumber,
-      // userId
-      context.user?.id
+      user.id
     );
   }
 
@@ -131,7 +126,6 @@ export default class RequestSettingResolver {
     @Ctx() context: GlobalContext
   ) {
     const user = context.user as User;
-    if (!user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
 
     const result =
       await RequestSettingService.getRequestSettingWithLastResultByRequestSettingId(
@@ -143,14 +137,14 @@ export default class RequestSettingResolver {
     else return result;
   }
 
+  @Authorized()
   @Mutation(() => Boolean)
   deleteRequestSetting(
     @Arg("requestId") requestId: string,
     @Ctx() context: GlobalContext
   ): Promise<Boolean> {
-    if (!context.user) throw Error(UNAUTHORIZED);
     return RequestSettingService.deleteRequestSettingById(
-      context.user,
+      context.user as User,
       requestId
     );
   }

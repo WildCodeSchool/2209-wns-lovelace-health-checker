@@ -27,28 +27,28 @@ const setEmailAlerts = () => {
     });
 };
 
-const checkIfHeadersAreRightFormatted = () => {
+const failIfHeadersAreBadlyFormatted = () => {
   return jest
-    .spyOn(RequestSettingService, "checkIfHeadersAreRightFormatted")
+    .spyOn(RequestSettingService, "failIfHeadersAreBadlyFormatted")
     .mockImplementation((data: any) => {
       return data;
     });
 };
 
-const checkIfNonPremiumUserTryToUsePremiumFrequency = () => {
+const failIfNonPremiumUserTryToUsePremiumFrequency = () => {
   return jest
     .spyOn(
       RequestSettingService,
-      "checkIfNonPremiumUserTryToUsePremiumFrequency"
+      "failIfNonPremiumUserTryToUsePremiumFrequency"
     )
     .mockImplementation((data: any) => {
       return data;
     });
 };
 
-const checkIfNonPremiumUserTryToUseCustomError = () => {
+const failIfNonPremiumUserTryToUseCustomError = () => {
   return jest
-    .spyOn(RequestSettingService, "checkIfNonPremiumUserTryToUseCustomError")
+    .spyOn(RequestSettingService, "failIfNonPremiumUserTryToUseCustomError")
     .mockImplementation((data: any) => {
       return data;
     });
@@ -62,11 +62,11 @@ const createRequest = () => {
     });
 };
 
-const checkIfNonPremiumUserHasReachedMaxRequestsCount = () => {
+const failIfNonPremiumUserHasReachedMaxRequestsCount = () => {
   return jest
     .spyOn(
       RequestSettingService,
-      "checkIfNonPremiumUserHasReachedMaxRequestsCount"
+      "failIfNonPremiumUserHasReachedMaxRequestsCount"
     )
     .mockImplementation((user: User) => {
       return Promise.resolve(false);
@@ -102,7 +102,7 @@ describe("RequestService integration", () => {
   });
 
   describe("createRequest", () => {
-    it("calls checkForBlockingCases once", async () => {});
+    it("calls failIfBlockingCases once", async () => {});
     describe("if there's no validation error", () => {
       it("calls saveRequestSetting once", () => {});
       it("creates a new request in database", async () => {
@@ -133,7 +133,7 @@ describe("RequestService integration", () => {
       it("calls setEmailAlerts once", async () => {});
     });
 
-    // TODO : move into checkForBlockingCases tests
+    // TODO : move into failIfBlockingCases tests
     describe("non Premium user try to use Premium features", () => {
       describe("non Premium user uses Premium frequency", () => {
         it("displays 'This frequency is only useable by Premium users' error message", () => {});
@@ -144,7 +144,7 @@ describe("RequestService integration", () => {
     });
   });
 
-  describe("checkIfNonPremiumUserHasReachedMaxRequestsCount", () => {
+  describe("failIfNonPremiumUserHasReachedMaxRequestsCount", () => {
     describe("non-premium used has reached requests limit", () => {
       it("throws error message", () => {});
     });
@@ -156,7 +156,7 @@ describe("RequestService integration", () => {
     });
   });
 
-  describe("checkIfURLOrNameAreAlreadyUsed", () => {
+  describe("failIfURLOrNameAreAlreadyUsed", () => {
     it("calls getByUserId once", () => {});
     describe("URL is already used", () => {
       it("displays 'This URL already exists' error message", () => {});
@@ -166,7 +166,7 @@ describe("RequestService integration", () => {
     });
   });
 
-  describe("headerHasAllHaveProperties", () => {
+  describe("checkIfHeadersHasAllProperties", () => {
     describe("headers format is incorrect", () => {
       it("returns false", () => {});
     });
@@ -175,29 +175,29 @@ describe("RequestService integration", () => {
     });
   });
 
-  describe("checkIfHeadersAreRightFormatted", () => {
-    it("calls headerHasAllHaveProperties once", () => {});
+  describe("failIfHeadersAreBadlyFormatted", () => {
+    it("calls checkIfHeadersHasAllProperties once", () => {});
     describe("headers aren't right formatted", () => {
       it("throws 'Headers format is incorrect' error message", () => {});
     });
   });
 
-  describe("checkIfNonPremiumUserTryToUsePremiumFrequency", () => {
+  describe("failIfNonPremiumUserTryToUsePremiumFrequency", () => {
     describe("if user's role is 'user'", () => {
-      it("calls checkIfGivenFrequencyIsPremiumFrequency once", () => {});
+      it("calls failIfGivenFrequencyIsPremiumFrequency once", () => {});
       describe("user tries to use Premium frequency", () => {
         it("throws 'This frequency is only useable by Premium users' error message", () => {});
       });
     });
   });
 
-  describe("checkIfNonPremiumUserTryToUseCustomError", () => {
+  describe("failIfNonPremiumUserTryToUseCustomError", () => {
     describe("if user's role is 'user' and there's Premium custom errors", () => {
       it("throws 'Non Premium users can't use custom error alerts", () => {});
     });
   });
 
-  describe("checkIfGivenFrequencyIsPremiumFrequency", () => {
+  describe("failIfGivenFrequencyIsPremiumFrequency", () => {
     describe("with Premium frequency", () => {
       it("returns true", () => {});
     });

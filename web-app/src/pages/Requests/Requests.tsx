@@ -15,7 +15,7 @@ import styles from "./Requests.module.scss";
 
 const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
   query CheckIfNonPremiumUserHasReachedMaxRequestsCount {
-    checkIfNonPremiumUserHasReachedMaxRequestsCount
+    failIfNonPremiumUserHasReachedMaxRequestsCount
   }
 `;
 
@@ -102,7 +102,8 @@ const Requests = () => {
           <h1 className={`${styles.pageTitle}`}>Requests</h1>
           <button
             className={`${styles.createBtn}`}
-            onClick={navigateToRequestCreationPage}>
+            onClick={navigateToRequestCreationPage}
+          >
             Create
           </button>
         </div>
@@ -110,19 +111,22 @@ const Requests = () => {
           <div
             className={`${
               selectedTab === "informations" && styles.selectedTab
-            }  ${styles.tabContainer}`}>
+            }  ${styles.tabContainer}`}
+          >
             <span className={`${styles.tabs} `}>All</span>
           </div>
           <div
             className={`${selectedTab === "premium" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}>
+            }`}
+          >
             <span className={`${styles.tabs} `}>Active</span>
           </div>
           <div
             className={`${selectedTab === "bills" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}>
+            }`}
+          >
             <span className={`${styles.tabs} `}>Inactive</span>
           </div>
         </div>

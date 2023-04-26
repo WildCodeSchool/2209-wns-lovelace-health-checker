@@ -30,7 +30,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     customPushErrors: number[] | undefined,
     user: User
   ): Promise<RequestSetting> => {
-    await this.checkForBlockingCases(
+    await this.failIfBlockingCases(
       user,
       url,
       name,
@@ -66,7 +66,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     return savedRequestSetting;
   };
 
-  static checkForBlockingCases = async (
+  static failIfBlockingCases = async (
     user: User,
     url: string,
     name: string | undefined,
@@ -77,36 +77,33 @@ export default class RequestSettingService extends RequestSettingRepository {
     id?: string
   ) => {
     if (headers) {
-      await this.checkIfHeadersAreRightFormatted(headers);
+      await this.failIfHeadersAreBadlyFormatted(headers);
     }
-    await this.checkIfNonPremiumUserTryToUsePremiumFrequency(user, frequency);
-    await this.checkIfNonPremiumUserTryToUseCustomError(
+    await this.failIfNonPremiumUserTryToUsePremiumFrequency(user, frequency);
+    await this.failIfNonPremiumUserTryToUseCustomError(
       user,
       customEmailErrors,
       customPushErrors
     );
-    await this.checkIfNonPremiumUserHasReachedMaxRequestsCount(user);
-    await this.checkIfURLOrNameAreAlreadyUsed(user, url, name, id);
+    await this.failIfNonPremiumUserHasReachedMaxRequestsCount(user);
+    await this.failIfURLOrNameAreAlreadyUsed(user, url, name, id);
   };
 
-  static checkIfRequestBelongsToUserByRequestSetting = async (
+  static failIfRequestSettingIsNotOwnedByUser = async (
     user: User,
     requestSetting: RequestSetting
   ) => {
     if (requestSetting?.user.id !== user.id) throw Error(UNAUTHORIZED);
   };
 
-  static checkIfRequestBelongsToUserByRequestSettingId = async (
+  static failIfRequestNotBelongsToUserByRequestSettingId = async (
     user: User,
     requestSettingId: string
   ) => {
     const requestSetting = await this.getRequestSettingByIdOrThrowNotFoundError(
       requestSettingId
     );
-    await this.checkIfRequestBelongsToUserByRequestSetting(
-      user,
-      requestSetting
-    );
+    await this.failIfRequestSettingIsNotOwnedByUser(user, requestSetting);
   };
 
   static getRequestSettingByIdOrThrowNotFoundError = async (
@@ -141,12 +138,9 @@ export default class RequestSettingService extends RequestSettingRepository {
     const toUpdateRequestSetting =
       await this.getRequestSettingByIdOrThrowNotFoundError(id);
 
-    this.checkIfRequestBelongsToUserByRequestSetting(
-      user,
-      toUpdateRequestSetting
-    );
+    this.failIfRequestSettingIsNotOwnedByUser(user, toUpdateRequestSetting);
 
-    await this.checkForBlockingCases(
+    await this.failIfBlockingCases(
       user,
       url,
       name,
@@ -181,7 +175,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     return updatedRequestSetting;
   };
 
-  static checkIfNonPremiumUserHasReachedMaxRequestsCount = async (
+  static failIfNonPremiumUserHasReachedMaxRequestsCount = async (
     user: User
   ) => {
     if (user.role === Role.USER) {
@@ -198,7 +192,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     return false;
   };
 
-  static checkIfURLOrNameAreAlreadyUsed = async (
+  static failIfURLOrNameAreAlreadyUsed = async (
     user: User,
     url: string,
     name: string | undefined,
@@ -223,7 +217,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     if (nameAlreadyExists) throw Error(NAME_ALREADY_EXISTS);
   };
 
-  static checkIfGivenFrequencyIsPremiumFrequency = (
+  static failIfGivenFrequencyIsPremiumFrequency = (
     frequency: number
   ): boolean => {
     return (
@@ -232,7 +226,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     );
   };
 
-  static headerHasAllHaveProperties = async (array: any[]) => {
+  static checkIfHeadersHasAllProperties = async (array: any[]) => {
     return array.every(function (element) {
       return (
         element.hasOwnProperty("property") && element.hasOwnProperty("value")
@@ -240,25 +234,25 @@ export default class RequestSettingService extends RequestSettingRepository {
     });
   };
 
-  static checkIfHeadersAreRightFormatted = async (headers: string) => {
-    const headersFormatIsCorrect = this.headerHasAllHaveProperties(
+  static failIfHeadersAreBadlyFormatted = async (headers: string) => {
+    const headersFormatIsCorrect = this.checkIfHeadersHasAllProperties(
       JSON.parse(headers)
     );
     if (!headersFormatIsCorrect) throw Error(INCORRECT_HEADER_FORMAT);
   };
 
-  static checkIfNonPremiumUserTryToUsePremiumFrequency = async (
+  static failIfNonPremiumUserTryToUsePremiumFrequency = async (
     user: User,
     frequency: Frequency
   ) => {
     if (
       user.role === Role.USER &&
-      this.checkIfGivenFrequencyIsPremiumFrequency(frequency)
+      this.failIfGivenFrequencyIsPremiumFrequency(frequency)
     )
       throw Error(FREQUENCY_ONLY_FOR_PREMIUM_USERS);
   };
 
-  static checkIfNonPremiumUserTryToUseCustomError = async (
+  static failIfNonPremiumUserTryToUseCustomError = async (
     user: User,
     customEmailErrors: number[] | undefined,
     customPushErrors: number[] | undefined
@@ -337,10 +331,10 @@ export default class RequestSettingService extends RequestSettingRepository {
   static deleteRequestSettingById = async (
     user: User,
     requestId: string
-  ): Promise<Boolean> => {
+  ): Promise<boolean> => {
     const requestSetting = await this.getRequestSettingById(requestId);
     if (!requestSetting) throw Error(REQUEST_DOESNT_EXIST);
-    if (requestSetting.user.id !== user.id) throw Error(UNAUTHORIZED);
+    this.failIfRequestSettingIsNotOwnedByUser(user, requestSetting);
     await this.deleteRequestSetting(requestSetting);
     return true;
   };
