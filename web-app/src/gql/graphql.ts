@@ -181,6 +181,7 @@ export type QueryGetRequestSettingByIdArgs = {
 
 export type RequestResult = {
   __typename?: 'RequestResult';
+  alerts: Array<RequestResult>;
   createdAt: Scalars['DateTime'];
   duration?: Maybe<Scalars['Float']>;
   getIsAvailable: Scalars['Boolean'];
@@ -200,6 +201,7 @@ export type RequestSetting = {
   id: Scalars['ID'];
   isActive: Scalars['Boolean'];
   name?: Maybe<Scalars['String']>;
+  results: Array<RequestResult>;
   updatedAt?: Maybe<Scalars['DateTime']>;
   url: Scalars['String'];
 };

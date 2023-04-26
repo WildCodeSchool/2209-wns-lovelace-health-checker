@@ -893,8 +893,7 @@ const RequestCreation = ({
 
             {/* Push */}
 
-            {/* No push */}
-            <div className="form-check mb-2">
+            {/* <div className="form-check mb-2">
               <input
                 className="form-check-input"
                 type="radio"
@@ -912,7 +911,7 @@ const RequestCreation = ({
               </label>
             </div>
 
-            {/* All push */}
+            
             <div className="form-check mb-2">
               <input
                 className="form-check-input"
@@ -931,7 +930,7 @@ const RequestCreation = ({
               </label>
             </div>
 
-            {/* Specific push */}
+            
             <div
               title={
                 role === Role.PREMIUM
@@ -979,7 +978,7 @@ const RequestCreation = ({
                 onPushSpecificErrorChange(selectedErrors);
                 setPushAlerts(AlertChoices.SPECIFIC);
               }}
-            />
+            /> */}
           </div>
         </div>
 
