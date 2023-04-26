@@ -7,7 +7,7 @@ import * as toastify from "react-toastify";
 import * as router from "react-router";
 
 import { ResetPasswordMutation } from "../../gql/graphql";
-import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/info-and-error-messages";
 import ResetPassword, { RESET_PASSWORD } from "./ResetPassword";
 import {
   RESET_PASSWORD_ROUTE,
