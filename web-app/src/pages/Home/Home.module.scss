@@ -20,6 +20,7 @@
     padding-left: variables.$height-md;
     color: variables.$neutral-800;
     border: none;
+    border-radius: 0;
     border-top-left-radius: variables.$border-radius-xs;
     border-bottom-left-radius: variables.$border-radius-xs;
     @media (min-width: variables.$mobile-breakpoint) {
@@ -35,6 +36,7 @@
     border-top-right-radius: variables.$border-radius-xs;
     border-bottom-right-radius: variables.$border-radius-xs;
     border: none;
+    color: variables.$primary-800;
     @include clickable;
     @media (min-width: variables.$mobile-breakpoint) {
       margin-top: 0;
