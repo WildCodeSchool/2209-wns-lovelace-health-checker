@@ -1,3 +1,4 @@
+import { Like } from "typeorm";
 import RequestSetting, {
   Frequency,
 } from "../../entities/RequestSetting.entity";
@@ -261,21 +262,78 @@ export default class RequestSettingService extends RequestSettingRepository {
       throw Error("Non Premium users can't use custom error alerts");
   };
 
+  // static getPageOfRequestSettingWithLastResult = async (
+  //   pageSize: number,
+  //   pageNumber: number,
+  //   userId: string
+  // ): Promise<PageOfRequestSettingWithLastResult> => {
+  //   const [requestSettings, totalCount] = await this.repository.findAndCount({
+  //     where: { user: { id: userId } },
+  //     take: pageSize,
+  //     skip: (pageNumber - 1) * pageSize,
+  //     order: {
+  //       createdAt: "DESC",
+  //     },
+  //   });
+
+  //   const numberOfRemainingItems = totalCount - pageNumber * pageSize;
+  //   const requestSettingsWithLastResult = await Promise.all(
+  //     requestSettings.map(async (requestSetting) => {
+  //       const lastRequestResult =
+  //         await RequestResultRepository.getMostRecentByRequestSettingId(
+  //           requestSetting.id
+  //         );
+  //       if (lastRequestResult)
+  //         return new RequestSettingWithLastResult(
+  //           requestSetting,
+  //           lastRequestResult
+  //         );
+  //       else return new RequestSettingWithLastResult(requestSetting, null);
+  //     })
+  //   );
+
+  //   return {
+  //     totalCount,
+  //     nextPageNumber: numberOfRemainingItems > 0 ? pageNumber + 1 : null,
+  //     requestSettingsWithLastResult,
+  //   };
+  // };
+
+  // Chat GPT generated method to filter and sort
   static getPageOfRequestSettingWithLastResult = async (
-    pageSize: number,
-    pageNumber: number,
-    userId: string
+    filterOptions: any
   ): Promise<PageOfRequestSettingWithLastResult> => {
-    const [requestSettings, totalCount] = await this.repository.findAndCount({
-      where: { user: { id: userId } },
-      take: pageSize,
-      skip: (pageNumber - 1) * pageSize,
-      order: {
-        createdAt: "DESC",
-      },
+    const { first, rows, page, sortField, sortOrder, filters } = filterOptions;
+    const userId = filters.user.id;
+
+    const take = rows;
+    const skip = (page - 1) * rows;
+
+    let where: any = { user: { id: userId } };
+
+    // apply filters
+    Object.keys(filters).forEach((key) => {
+      if (key !== "user" && filters[key].value) {
+        where[key] = Like(`%${filters[key].value}%`);
+      }
     });
 
-    const numberOfRemainingItems = totalCount - pageNumber * pageSize;
+    let order: any = {};
+    // apply sorting
+    if (sortField && sortOrder) {
+      order[sortField] = sortOrder.toUpperCase();
+    } else {
+      order.createdAt = "DESC";
+    }
+
+    const [requestSettings, totalCount] = await this.repository.findAndCount({
+      where,
+      take,
+      skip,
+      order,
+    });
+
+    const numberOfRemainingItems = totalCount - page * rows;
     const requestSettingsWithLastResult = await Promise.all(
       requestSettings.map(async (requestSetting) => {
         const lastRequestResult =
@@ -293,7 +351,7 @@ export default class RequestSettingService extends RequestSettingRepository {
 
     return {
       totalCount,
-      nextPageNumber: numberOfRemainingItems > 0 ? pageNumber + 1 : null,
+      nextPageNumber: numberOfRemainingItems > 0 ? page + 1 : null,
       requestSettingsWithLastResult,
     };
   };

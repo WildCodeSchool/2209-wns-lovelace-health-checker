@@ -1,0 +1,78 @@
+@use "../../variables.scss";
+@import "../../components.scss";
+
+.loader {
+  @include loader;
+}
+
+.available {
+  color: variables.$green-1000;
+  font-size: variables.$font-sm;
+}
+.notAvailable {
+  color: variables.$red-1000;
+  font-size: variables.$font-sm;
+}
+.createdAt {
+  div {
+    justify-content: center;
+    text-align: center;
+  }
+}
+.header {
+  background-color: variables.$primary-200 !important;
+  color: variables.$primary-1000 !important;
+  font-weight: variables.$font-weight-500 !important;
+  div {
+    .p-column-filter-menu {
+      margin-left: none !important;
+      font-size: 5px !important;
+    }
+    button > span {
+      font-size: variables.$font-xs !important;
+    }
+  }
+}
+
+.header > div > div {
+  margin-left: 4px !important;
+}
+
+.primary {
+  color: variables.$primary-1000;
+}
+
+.table {
+  box-shadow: 0 0 4px 2px rgba(0, 0, 0, 0.1);
+  border-radius: variables.$border-radius-sm;
+  overflow: hidden;
+  font-size: variables.$font-dataTable !important;
+}
+
+.table > .p-datatable .p-datatable-loading-overlay {
+  z-index: 1 !important;
+}
+
+.hidden {
+  overflow: hidden;
+  &.url {
+    max-width: 230px;
+    text-overflow: ellipsis;
+  }
+  &.createdAt {
+    white-space: nowrap;
+  }
+  &.name {
+    max-width: 130px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.actions {
+  @include clickable;
+  color: variables.$primary-1000;
+  &:hover {
+    color: variables.$primary-500;
+  }
+}

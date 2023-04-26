@@ -12,6 +12,7 @@ import {
 } from "../../gql/graphql";
 import { REQUEST_CREATION_ROUTE } from "../../routes";
 import styles from "./Requests.module.scss";
+import LazyDataTable from "../../components/LazyDataTable/LazyDataTable";
 
 const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
   query CheckIfNonPremiumUserHasReachedMaxRequestsCount {
@@ -133,7 +134,7 @@ const Requests = () => {
             pageNumber={pageNumber}
             setPageNumber={setPageNumber}
           /> */}
-          <DataTableComponent
+          <LazyDataTable
             requests={formattedData}
             loading={loading}
             pageNumber={pageNumber}
