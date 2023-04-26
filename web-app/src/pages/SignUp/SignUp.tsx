@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
 import { SignUpMutation, SignUpMutationVariables } from "../../gql/graphql";
 import { SIGN_IN_ROUTE, TERMS_ROUTE } from "../../routes";
-import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/info-and-error-messages";
 import {
   EMAIL_IS_REQUIRED_ERROR_MESSAGE,
   EMAIL_MAX_LENGTH,

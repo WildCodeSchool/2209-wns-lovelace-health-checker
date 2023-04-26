@@ -11,7 +11,7 @@ import { REQUESTS_ROUTE } from "../../routes";
 import {
   REQUEST_DOESNT_EXIST,
   SERVER_IS_KO_ERROR_MESSAGE,
-} from "../../utils/error-messages";
+} from "../../utils/info-and-error-messages";
 import RequestCreation from "../RequestCreation/RequestCreation";
 
 import styles from "./RequestDetails.module.scss";

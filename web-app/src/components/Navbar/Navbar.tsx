@@ -44,9 +44,14 @@ const Navbar = (props: any) => {
         <div
           className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
         >
-          <i className={`bi bi-search ${styles.bi}`}></i>
-          <Link className={styles.navlink} to={HOMEPAGE_ROUTE}>
-            Search
+          <Link
+            className={`${styles.navlink} ${
+              selectedTab === "search" && styles.selectedLink
+            }`}
+            to={HOMEPAGE_ROUTE}
+          >
+            <i className={`bi bi-search ${styles.bi}`}></i>
+            <p className={`m-0 ${styles.linkLabel}`}>Search</p>
           </Link>
         </div>
 
@@ -54,9 +59,14 @@ const Navbar = (props: any) => {
           <div
             className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
           >
-            <i className={`bi bi-list-ul ${styles.bi}`}></i>
-            <Link className={styles.navlink} to={REQUESTS_ROUTE}>
-              Requests
+            <Link
+              className={`${styles.navlink} ${
+                selectedTab === "requests" && styles.selectedLink
+              }`}
+              to={REQUESTS_ROUTE}
+            >
+              <i className={`bi bi-list-ul ${styles.bi}`}></i>
+              <p className={`m-0 ${styles.linkLabel}`}>Requests</p>
             </Link>
           </div>
         ) : (
@@ -66,9 +76,14 @@ const Navbar = (props: any) => {
         <div
           className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
         >
-          <i className={`bi bi-bookmark-check ${styles.biBookmarkCheck}`}></i>
-          <Link className={styles.navlink} to={PREMIUM_ROUTE}>
-            Premium
+          <Link
+            className={`${styles.navlink} ${
+              selectedTab === "premium" && styles.selectedLink
+            }`}
+            to={PREMIUM_ROUTE}
+          >
+            <i className={`bi bi-bookmark-check ${styles.biBookmarkCheck}`}></i>
+            <p className={`m-0 ${styles.linkLabel}`}>Premium</p>
           </Link>
         </div>
 
@@ -76,9 +91,14 @@ const Navbar = (props: any) => {
           <div
             className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
           >
-            <i className={`bi bi-person-plus ${styles.bi}`}></i>
-            <Link className={styles.navlink} to={SIGN_UP_ROUTE}>
-              Sign up
+            <Link
+              className={`${styles.navlink} ${
+                selectedTab === "sign-up" && styles.selectedLink
+              }`}
+              to={SIGN_UP_ROUTE}
+            >
+              <i className={`bi bi-person-plus ${styles.bi}`}></i>
+              <p className={`m-0 ${styles.linkLabel}`}>Sign Up</p>
             </Link>
           </div>
         ) : (
@@ -89,9 +109,14 @@ const Navbar = (props: any) => {
           <div
             className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
           >
-            <i className={`bi bi-box-arrow-in-right ${styles.bi}`}></i>
-            <Link className={styles.navlink} to={SIGN_IN_ROUTE}>
-              Sign in
+            <Link
+              className={`${styles.navlink} ${
+                selectedTab === "sign-in" && styles.selectedLink
+              }`}
+              to={SIGN_IN_ROUTE}
+            >
+              <i className={`bi bi-box-arrow-in-right ${styles.bi}`}></i>
+              <p className={`m-0 ${styles.linkLabel}`}>Sign In</p>
             </Link>
           </div>
         ) : (
@@ -102,9 +127,14 @@ const Navbar = (props: any) => {
           <div
             className={`col-3 d-flex flex-column align-items-center ${styles.navElement}`}
           >
-            <i className={`bi bi-person ${styles.bi}`}></i>
-            <Link className={styles.navlink} to={ACCOUNT_ROUTE}>
-              Account
+            <Link
+              className={`${styles.navlink} ${
+                selectedTab === "account" && styles.selectedLink
+              }`}
+              to={ACCOUNT_ROUTE}
+            >
+              <i className={`bi bi-person ${styles.bi}`}></i>
+              <p className={`m-0 ${styles.linkLabel}`}>Account</p>
             </Link>
           </div>
         ) : (
@@ -121,11 +151,7 @@ const Navbar = (props: any) => {
         </Link>
 
         <div className="d-flex align-items-center  h-100">
-          <div
-            className={`${styles.navElement} ${
-              selectedTab === "search" && styles.selectedTab
-            }`}
-          >
+          <div className={styles.navElement}>
             <Link
               className={`${styles.navlink} ${
                 selectedTab === "search" && styles.selectedLink
@@ -138,11 +164,7 @@ const Navbar = (props: any) => {
           </div>
 
           {isLogged ? (
-            <div
-              className={`${styles.navElement} ${
-                selectedTab === "requests" && styles.selectedTab
-              } `}
-            >
+            <div className={styles.navElement}>
               <Link
                 className={`${styles.navlink} ${
                   selectedTab === "requests" && styles.selectedLink
@@ -157,11 +179,7 @@ const Navbar = (props: any) => {
             <></>
           )}
 
-          <div
-            className={`${styles.navElement} ${
-              selectedTab === "premium" && styles.selectedTab
-            } `}
-          >
+          <div className={styles.navElement}>
             <Link
               className={`${styles.navlink} ${
                 selectedTab === "premium" && styles.selectedLink
@@ -174,11 +192,7 @@ const Navbar = (props: any) => {
           </div>
 
           {isLogged ? (
-            <div
-              className={`${styles.navElement} ${
-                selectedTab === "account" && styles.selectedTab
-              } `}
-            >
+            <div className={styles.navElement}>
               <Link
                 className={`${styles.navlink} ${
                   selectedTab === "account" && styles.selectedLink

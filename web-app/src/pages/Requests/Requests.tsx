@@ -106,7 +106,7 @@ const Requests = () => {
             Create
           </button>
         </div>
-        <div className="d-flex gap-5 mt-5">
+        <div className={`d-flex gap-5 mt-5 ${styles.scrollbar}`}>
           <div
             className={`${
               selectedTab === "informations" && styles.selectedTab

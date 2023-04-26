@@ -8,7 +8,7 @@ import {
   ResetPasswordMutation,
   ResetPasswordMutationVariables,
 } from "../../gql/graphql";
-import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/error-messages";
+import { SERVER_IS_KO_ERROR_MESSAGE } from "../../utils/info-and-error-messages";
 import styles from "./ResetPassword.module.scss";
 import { PASSWORD_REG_EXP } from "../../utils/regular-expressions";
 import {

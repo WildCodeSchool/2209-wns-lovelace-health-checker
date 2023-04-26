@@ -25,6 +25,11 @@ import {
   UpdateIdentityArgs,
   UpdatePasswordArgs,
 } from "./User.input";
+import {
+  PASSWORD_CHANGE_SUCCESS,
+  SESSION_NOT_FOUND,
+  SIGN_OUT_SUCCESS,
+} from "../../utils/info-and-error-messages";
 
 @Resolver(User)
 export default class UserResolver {
@@ -60,7 +65,7 @@ export default class UserResolver {
     @Args() { token, password }: ResetPasswordArgs
   ): Promise<string> {
     await UserService.resetPassword(password, token);
-    return "Your password has been updated successfully";
+    return PASSWORD_CHANGE_SUCCESS;
   }
 
   @Mutation(() => User)
@@ -78,7 +83,7 @@ export default class UserResolver {
   async signOut(@Ctx() context: GlobalContext): Promise<string> {
     await UserService.logout(context);
     deleteSessionIdInCookie(context);
-    return "You've been signed out securely";
+    return SIGN_OUT_SUCCESS;
   }
 
   @Authorized()
@@ -93,8 +98,11 @@ export default class UserResolver {
     @Args() { firstname, lastname }: UpdateIdentityArgs,
     @Ctx() context: GlobalContext
   ): Promise<User> {
-    if (!context.user) throw Error("You're not authenticated");
-    return UserService.updateUserIdentity(context.user, firstname, lastname);
+    return UserService.updateUserIdentity(
+      context.user as User,
+      firstname,
+      lastname
+    );
   }
 
   @Authorized()
@@ -109,11 +117,10 @@ export default class UserResolver {
     }: UpdatePasswordArgs,
     @Ctx() context: GlobalContext
   ): Promise<string> {
-    if (!context.user) throw Error("You're not authenticated");
     const currentSessionId = context.sessionId;
-    if (!currentSessionId) throw Error("You're not authenticated");
+    if (!currentSessionId) throw Error(SESSION_NOT_FOUND);
     return UserService.updateUserPassword(
-      context.user,
+      context.user as User,
       currentPassword,
       newPassword,
       disconnectMe,
@@ -128,8 +135,7 @@ export default class UserResolver {
 
     @Ctx() context: GlobalContext
   ): Promise<string> {
-    if (!context.user) throw Error("You're not authenticated");
-    return UserService.updateUserEmail(context.user, newEmail);
+    return UserService.updateUserEmail(context.user as User, newEmail);
   }
 
   @Mutation(() => Boolean)
@@ -139,12 +145,12 @@ export default class UserResolver {
     return UserService.confirmEmail(confirmationToken);
   }
 
+  @Authorized()
   @Mutation(() => Boolean)
   deleteUser(
     @Arg("currentPassword") currentPassword: string,
     @Ctx() context: GlobalContext
   ): Promise<Boolean> {
-    if (!context.user) throw Error("You're not authenticated");
-    return UserService.deleteCurrentUser(context.user, currentPassword);
+    return UserService.deleteCurrentUser(context.user as User, currentPassword);
   }
 }

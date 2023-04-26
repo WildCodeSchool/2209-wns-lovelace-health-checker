@@ -2,12 +2,10 @@ export function getErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
   return String(error);
 }
-
+/* ERROR */
 export const SERVER_IS_KO_ERROR_MESSAGE =
   "Oops, it seems that something went wrong. Please try again";
-
 export const UNAUTHORIZED = "Unauthorized";
-
 export const REQUEST_DOESNT_EXIST = "Request doesn't exist";
 export const URL_ALREADY_EXISTS = "This URL already exists";
 export const NAME_ALREADY_EXISTS = "This name already exists";

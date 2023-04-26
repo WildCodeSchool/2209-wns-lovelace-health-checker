@@ -13,46 +13,67 @@ import {
   PASSWORD_REG_EXP,
   FIRSTNAME_AND_LASTNAME_REG_EXP,
 } from "../../utils/regular-expressions";
+import {
+  EMAIL_MAX_LENGTH,
+  EMAIL_MAX_LENGTH_ERROR_MESSAGE,
+  FIRSTNAME_MAX_LENGTH,
+  FIRSTNAME_MAX_LENGTH_ERROR_MESSAGE,
+  FIRSTNAME_MIN_LENGTH,
+  FIRSTNAME_MIN_LENGTH_ERROR_MESSAGE,
+  FIRSTNAME_PATTERN_ERROR_MESSAGE,
+  LASTNAME_MAX_LENGTH,
+  LASTNAME_MAX_LENGTH_ERROR_MESSAGE,
+  LASTNAME_MIN_LENGTH,
+  LASTNAME_MIN_LENGTH_ERROR_MESSAGE,
+  LASTNAME_PATTERN_ERROR_MESSAGE,
+  PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE,
+  PASSWORD_PATTERN_ERROR_MESSAGE,
+} from "../../utils/form-validations";
 
 @ArgsType()
 export class SignUpArgs {
   @Field()
   @IsNotEmpty()
-  @MinLength(2, {
-    message: "First name must have at least 2 characters",
+  @MinLength(FIRSTNAME_MIN_LENGTH, {
+    message: FIRSTNAME_MIN_LENGTH_ERROR_MESSAGE,
   })
-  @MaxLength(100, { message: "First name must have maximum 100 characters" })
+  @MaxLength(FIRSTNAME_MAX_LENGTH, {
+    message: FIRSTNAME_MAX_LENGTH_ERROR_MESSAGE,
+  })
   @Matches(FIRSTNAME_AND_LASTNAME_REG_EXP, {
-    message: "First name must not contain numbers or special characters",
+    message: FIRSTNAME_PATTERN_ERROR_MESSAGE,
   })
   firstname: string;
 
   @Field()
   @IsNotEmpty()
-  @MinLength(2, { message: "Last name must have at least 2 characters" })
-  @MaxLength(100, { message: "Last name must have maximum 100 characters" })
+  @MinLength(LASTNAME_MIN_LENGTH, {
+    message: LASTNAME_MIN_LENGTH_ERROR_MESSAGE,
+  })
+  @MaxLength(LASTNAME_MAX_LENGTH, {
+    message: LASTNAME_MAX_LENGTH_ERROR_MESSAGE,
+  })
   @Matches(FIRSTNAME_AND_LASTNAME_REG_EXP, {
-    message: "Last name must not contain numbers or special characters",
+    message: LASTNAME_PATTERN_ERROR_MESSAGE,
   })
   lastname: string;
 
   @Field()
-  @IsEmail({ message: "Email format is incorrect" })
-  @MaxLength(320, {
-    message: "Email must have maximum 320 characters",
+  @IsEmail()
+  @MaxLength(EMAIL_MAX_LENGTH, {
+    message: EMAIL_MAX_LENGTH_ERROR_MESSAGE,
   })
   email: string;
 
   @Field()
   @Matches(PASSWORD_REG_EXP, {
-    message:
-      "Password must have at least 8 characters, one upper case, one lower case, and one number",
+    message: PASSWORD_PATTERN_ERROR_MESSAGE,
   })
   password: string;
 
   @Field()
   @Match("password", {
-    message: "Passwords don't match",
+    message: PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE,
   })
   passwordConfirmation: string;
 }
@@ -90,14 +111,13 @@ export class ResetPasswordArgs {
 
   @Field()
   @Matches(PASSWORD_REG_EXP, {
-    message:
-      "Password must have at least 8 characters, one upper case, one lower case, and one number",
+    message: PASSWORD_PATTERN_ERROR_MESSAGE,
   })
   password: string;
 
   @Field()
   @Match("password", {
-    message: "Passwords don't match",
+    message: PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE,
   })
   passwordConfirmation: string;
 }
@@ -124,14 +144,13 @@ export class UpdatePasswordArgs {
 
   @Field()
   @Matches(PASSWORD_REG_EXP, {
-    message:
-      "Password must have at least 8 characters, one upper case, one lower case, and one number",
+    message: PASSWORD_PATTERN_ERROR_MESSAGE,
   })
   newPassword: string;
 
   @Field()
   @Match("newPassword", {
-    message: "Passwords don't match",
+    message: PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE,
   })
   newPasswordConfirmation: string;
 
