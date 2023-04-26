@@ -70,6 +70,27 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
+  static updatePreventAlertUntilOfAlertSettingByType = async (
+    preventAlertUntil: Date,
+    requestSetting: RequestSetting,
+    type: AlertType,
+    httpStatusCode : number
+  ): Promise<void> => {
+    const alertSettings: AlertSetting[] =
+      await AlertSettingRepository.getAlertSettingsByRequestSettingId(
+        requestSetting.id
+      );
+    alertSettings.forEach((alertSetting) => {
+      if (
+        alertSetting.type === type &&
+        alertSetting.httpStatusCode === httpStatusCode
+      ) {
+        alertSetting.preventAlertUntil = preventAlertUntil;
+        AlertSettingRepository.saveAlertSetting(alertSetting);
+      }
+    });
+  };
+
   static updateAlerts = async (
     updatedRequestSetting: RequestSetting,
     customEmailErrors: number[] | undefined,
@@ -78,7 +99,7 @@ export default class AlertSettingService extends AlertSettingRepository {
     allErrorsEnabledPush: boolean
   ) => {
     const existingAlerts: AlertSetting[] =
-      await AlertSettingRepository.getAlertsByRequestSettingId(
+      await AlertSettingRepository.getAlertSettingsByRequestSettingId(
         updatedRequestSetting.id
       );
 
