@@ -1,4 +1,5 @@
 @use "../../variables.scss";
+@import "../../components.scss";
 
 .navbar {
   height: variables.$height-lg;
@@ -33,9 +34,6 @@
       align-items: center;
       height: 100%;
       padding: 0 16px;
-      &.selectedTab {
-        background-color: variables.$primary-200;
-      }
     }
     .btnPrimary {
       width: 80px;
@@ -64,29 +62,39 @@
 }
 
 .logo {
+  @include clickable;
   width: 45px;
   height: 50px;
-  cursor: pointer;
 }
 
 .bi {
-  cursor: pointer;
+  @include clickable;
   color: #ffffff;
+  font-size: 14px;
 }
 
 .biBookmarkCheck {
-  cursor: pointer;
+  @include clickable;
   color: variables.$yellow-1000;
+  font-size: 14px;
 }
 
 .navlink {
   font-size: 10px;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   @media (min-width: variables.$mobile-breakpoint) {
     font-size: 14px;
   }
   &.selectedLink {
-    color: variables.$primary-1000;
+    color: variables.$primary-200;
+    font-weight: 800;
+  }
+  .linkLabel {
+    color: white;
   }
 }
 
