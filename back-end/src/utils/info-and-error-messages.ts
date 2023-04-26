@@ -4,8 +4,6 @@ export function getErrorMessage(error: unknown) {
 }
 
 /* ERROR */
-export const UNABLE_TO_FIND_USER_FROM_CONTEXT =
-  "Unable to find user from global context";
 export const UNAUTHORIZED = "Unauthorized";
 export const REQUEST_DOESNT_EXIST = "Request doesn't exist";
 export const URL_ALREADY_EXISTS = "This URL already exists";
