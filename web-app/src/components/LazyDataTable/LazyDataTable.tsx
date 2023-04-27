@@ -1,7 +1,6 @@
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import {
   DataTable,
-  DataTableFilterEvent,
   DataTableFilterMeta,
   DataTablePageEvent,
   DataTableSortEvent,
@@ -19,23 +18,21 @@ import {
 } from "../../utils/request-frequency.enum";
 import { formatDateString } from "../../utils/date";
 import { REQUESTS_ROUTE } from "../../routes";
-
-interface DataTableProps {
-  requests: Request[];
-  loading: boolean;
-  pageNumber: number;
-  setPageNumber: (pageNumber: number) => void;
-  totalCount: number;
-  refetch: (variables: any) => void;
-}
+import { gql, useQuery } from "@apollo/client";
+import {
+  GetPageOfRequestSettingWithLastResultQuery,
+  GetPageOfRequestSettingWithLastResultQueryVariables,
+} from "../../gql/graphql";
+import { toast } from "react-toastify";
+import { UNABLE_TO_FETCH_REQUESTS_FROM_DATABASE } from "../../utils/info-and-error-messages";
 
 interface Request {
-  createdAt: string;
+  createdAt: any;
   frequency: Frequency;
   id: string;
-  isAvailable: boolean;
-  name: string | undefined;
-  statusCode: number;
+  isAvailable: boolean | undefined;
+  name: string | null | undefined;
+  statusCode: number | null | undefined;
   url: string;
 }
 
@@ -43,12 +40,58 @@ interface LazyTableState {
   first: number;
   rows: number;
   page: number;
-  sortField?: string;
-  sortOrder?: 1 | 0 | -1 | null | undefined;
-  filters: DataTableFilterMeta;
+  sortField: string;
+  sortOrder: 1 | 0 | -1 | null | undefined;
+  filters: Filter[];
 }
 
-const LazyDataTable = (pageOfRequestSettingWithLastResult: DataTableProps) => {
+interface Filter {
+  field: string;
+  operator: FilterOperator;
+  constraints: FilterConstraint[];
+}
+
+interface FilterConstraint {
+  value: string;
+  matchMode: FilterMatchMode;
+}
+
+const GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT_FILTERED = gql`
+  query GetPageOfRequestSettingWithLastResult(
+    $first: Int!
+    $rows: Int!
+    $page: Int!
+    $sortField: String!
+    $sortOrder: Int!
+    $filters: [Filter!]
+  ) {
+    getPageOfRequestSettingWithLastResult(
+      first: $first
+      rows: $rows
+      page: $page
+      sortField: $sortField
+      sortOrder: $sortOrder
+      filters: $filters
+    ) {
+      totalCount
+      requestSettingsWithLastResult {
+        requestResult {
+          getIsAvailable
+          statusCode
+          createdAt
+        }
+        requestSetting {
+          id
+          url
+          name
+          frequency
+        }
+      }
+    }
+  }
+`;
+
+const LazyDataTable = () => {
   const getFrequencies = () => {
     const enumFrequencies = Object.values(Frequency).filter(
       (f) => typeof f === "number"
@@ -62,91 +105,110 @@ const LazyDataTable = (pageOfRequestSettingWithLastResult: DataTableProps) => {
   const [selectedFrequency, setSelectedFrequency] = useState<string | null>(
     null
   );
-
-  const [loading, setLoading] = useState<boolean>(false);
   const [totalRecords, setTotalRecords] = useState<number>(0);
-  const [requests, setRequests] = useState<Request[]>([
-    {
-      createdAt: "",
-      frequency: Frequency.FIFTEEN_MINUTES,
-      id: "1234",
-      isAvailable: true,
-      name: "test",
-      statusCode: 200,
-      url: "https://www.google.com",
-    },
-  ]);
+  const [requests, setRequests] = useState<Request[]>();
+  const [tableFilters, setTableFilters] = useState<DataTableFilterMeta>();
   const [lazyState, setlazyState] = useState<LazyTableState>({
     first: 0,
     rows: 10,
     page: 1,
     sortField: "createdAt",
     sortOrder: 1,
-    filters: {
-      url: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: "http", matchMode: FilterMatchMode.CONTAINS }],
-      },
-      name: {
-        operator: FilterOperator.AND,
-        constraints: [{ value: "test", matchMode: FilterMatchMode.CONTAINS }],
-      },
-      frequency: {
-        operator: FilterOperator.OR,
-        constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
-      },
-    },
+    filters: [],
   });
 
   getFrequencies();
 
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   initFilters();
-  // }, []);
+  const { refetch, loading } = useQuery<
+    GetPageOfRequestSettingWithLastResultQuery,
+    GetPageOfRequestSettingWithLastResultQueryVariables
+  >(GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT_FILTERED, {
+    variables: {
+      first: lazyState.first,
+      rows: lazyState.rows,
+      page: lazyState.page,
+      sortField: lazyState.sortField,
+      sortOrder: lazyState.sortOrder ? lazyState.sortOrder : 1,
+      filters: lazyState.filters,
+    },
+    onCompleted: (data) => {
+      setRequests(
+        data?.getPageOfRequestSettingWithLastResult.requestSettingsWithLastResult.map(
+          (item) => {
+            return {
+              createdAt: item.requestResult?.createdAt,
+              frequency: item.requestSetting.frequency,
+              id: item.requestSetting.id,
+              isAvailable: item.requestResult?.getIsAvailable,
+              name: item.requestSetting.name,
+              statusCode: item.requestResult?.statusCode,
+              url: item.requestSetting.url,
+            };
+          }
+        )
+      );
+      setTotalRecords(data?.getPageOfRequestSettingWithLastResult.totalCount);
+    },
+    onError: () => {
+      toast.error(UNABLE_TO_FETCH_REQUESTS_FROM_DATABASE);
+    },
+  });
 
-  // useEffect(() => {
-  //   loadLazyData();
-  // }, [lazyState]);
-
-  const loadLazyData = () => {
-    setLoading(true);
-
-    if (pageOfRequestSettingWithLastResult) {
-      setTotalRecords(pageOfRequestSettingWithLastResult.totalCount);
-      setRequests(pageOfRequestSettingWithLastResult.requests);
-    }
-
-    setLoading(false);
-  };
-
-  console.log(lazyState);
+  useEffect(() => {
+    refetch({
+      first: lazyState.first,
+      rows: lazyState.rows,
+      page: lazyState.page,
+      sortField: lazyState.sortField,
+      sortOrder: lazyState.sortOrder ? lazyState.sortOrder : 1,
+      filters: lazyState.filters,
+    });
+  }, [lazyState, refetch]);
 
   const onPage = (event: DataTablePageEvent) => {
     setlazyState({
       ...lazyState,
       first: event.first,
       rows: event.rows,
-      page: event.page ? +1 : 1,
+      page: event.page ? event.page + 1 : 1,
     });
   };
 
   const onSort = (event: DataTableSortEvent) => {
-    // console.log(event);
     setlazyState({
       ...lazyState,
       sortField: event.sortField,
       sortOrder: event.sortOrder,
     });
-    // console.log(lazyState);
   };
 
-  const onFilter = (event: DataTableFilterEvent) => {
+  const onFilter = (event: any) => {
+    const newFilters: Filter[] = [];
+    for (const field in event.filters) {
+      const filterMeta = event.filters[field];
+      const operator = filterMeta.operator || FilterOperator.AND;
+      const constraints = [];
+
+      for (const constraint of filterMeta.constraints) {
+        if (constraint.value !== null) {
+          const { value, matchMode } = constraint;
+          constraints.push({ value, matchMode });
+        }
+      }
+
+      if (constraints.length > 0) {
+        newFilters.push({ field, operator, constraints });
+      }
+    }
+
+    setTableFilters(event.filters);
+
     setlazyState({
       ...lazyState,
       first: 0,
-      filters: event.filters,
+      filters: newFilters,
     });
   };
 
@@ -158,7 +220,6 @@ const LazyDataTable = (pageOfRequestSettingWithLastResult: DataTableProps) => {
         value={selectedFrequency}
         options={frequencies}
         onChange={(e: DropdownChangeEvent) => {
-          console.log(parseTimeString(e.value));
           options.filterCallback(parseTimeString(e.value), options.index);
           setSelectedFrequency(e.value);
         }}
@@ -223,29 +284,6 @@ const LazyDataTable = (pageOfRequestSettingWithLastResult: DataTableProps) => {
 
   return (
     <>
-      {/* <DataTable
-        value={pageOfRequestSettingWithLastResult.requests}
-        loading={pageOfRequestSettingWithLastResult.loading}
-        filterDisplay="menu"
-        dataKey="id"
-        lazy
-        paginator
-        rows={10}
-        rowsPerPageOptions={[5, 10, 20]}
-        totalRecords={pageOfRequestSettingWithLastResult.totalCount}
-        // paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-        // currentPageReportTemplate="{first} to {last} of {totalRecords}"
-        onPage={(e: any) => {
-          console.log(e);
-          pageOfRequestSettingWithLastResult.setPageNumber(
-            e.page ? e.page + 1 : 1
-          );
-          pageOfRequestSettingWithLastResult.refetch({
-            pageNumber: pageOfRequestSettingWithLastResult.pageNumber,
-          });
-        }}
-        className={`${styles.table}`}
-        filters={filters}> */}
       <DataTable
         value={requests}
         lazy
@@ -254,16 +292,17 @@ const LazyDataTable = (pageOfRequestSettingWithLastResult: DataTableProps) => {
         paginator
         className={`${styles.table}`}
         first={lazyState.first}
-        rows={10}
+        rows={lazyState.rows}
         totalRecords={totalRecords}
         onPage={onPage}
         onSort={onSort}
         sortField={lazyState.sortField}
         sortOrder={lazyState.sortOrder}
         onFilter={onFilter}
-        filters={lazyState.filters}
+        filters={tableFilters}
         loading={loading}>
         <Column
+          filter={false}
           headerClassName={`${styles.header}`}
           bodyClassName={`text-center ${styles.primary}`}
           body={iconBodyTemplate}></Column>
@@ -279,6 +318,7 @@ const LazyDataTable = (pageOfRequestSettingWithLastResult: DataTableProps) => {
           field="name"
           header="Name"
           filter
+          sortable
           headerClassName={`${styles.header}`}
           body={nameBodyTemplate}
           bodyClassName={`${styles.primary} ${styles.hidden} ${styles.name}`}></Column>
@@ -291,6 +331,7 @@ const LazyDataTable = (pageOfRequestSettingWithLastResult: DataTableProps) => {
           body={frequencyBodyTemplate}
           bodyClassName={`text-center ${styles.primary}`}></Column>
         <Column
+          filter={false}
           field="createdAt"
           header="Last Result"
           headerClassName={`${styles.header}`}
@@ -298,12 +339,14 @@ const LazyDataTable = (pageOfRequestSettingWithLastResult: DataTableProps) => {
           body={createdAtBodyTemplate}
           bodyClassName={`text-center ${styles.primary} ${styles.hidden} ${styles.createdAt}`}></Column>
         <Column
+          filter={false}
           field="isAvailable"
           header="Availability"
           headerClassName={`${styles.header}`}
           body={isAvailableBodyTemplate}
           bodyClassName="text-center"></Column>
         <Column
+          filter={false}
           field="statusCode"
           header="Status"
           body={statusCodeBodyTemplate}

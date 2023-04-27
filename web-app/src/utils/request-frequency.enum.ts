@@ -31,7 +31,7 @@ export const formatFrequency = (frequency: number): string => {
   }
 };
 
-export const parseTimeString = (timeString: string): number => {
+export const parseTimeString = (timeString: string): string => {
   if (typeof timeString !== "string") {
     timeString = formatFrequency(timeString);
   }
@@ -41,16 +41,16 @@ export const parseTimeString = (timeString: string): number => {
   switch (unitString) {
     case "sec":
     case "secs":
-      return value;
+      return value.toString();
     case "min":
     case "mins":
-      return value * 60;
+      return (value * 60).toString();
     case "hr":
     case "hrs":
-      return value * 60 * 60;
+      return (value * 60 * 60).toString();
     case "day":
     case "days":
-      return value * 60 * 60 * 24;
+      return (value * 60 * 60 * 24).toString();
     default:
       throw new Error(`Invalid time unit: ${unitString}`);
   }
