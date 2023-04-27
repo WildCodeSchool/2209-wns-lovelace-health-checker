@@ -1,4 +1,4 @@
-import { compareSync, hashSync } from "bcryptjs";
+import { compareSync } from "bcryptjs";
 import {
   closeConnection,
   getDatabase,
@@ -59,6 +59,7 @@ describe("UserService integration", () => {
   });
 
   afterAll(async () => {
+    await truncateAllTables();
     await closeConnection();
   });
 
