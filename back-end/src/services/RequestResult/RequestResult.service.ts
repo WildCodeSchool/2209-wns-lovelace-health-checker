@@ -22,7 +22,7 @@ export default class RequestResultService extends RequestResultRepository {
 
   private static checkUrl = async (
     requestSetting: RequestSetting,
-    isHomepageRequest: boolean = true
+    isHomepageRequest: boolean = false
   ) => {
     try {
       let response;
@@ -96,14 +96,22 @@ export default class RequestResultService extends RequestResultRepository {
       });
       clearTimeout(id);
     } else if (headersArrayString) {
-      const parsedHeadersArray: any[] = JSON.parse(headersArrayString);
-      const headers: any = {};
-      parsedHeadersArray.forEach((e) => (headers[e.property] = e.value));
+      const headers =
+        this.convertHeadersArrayStringToHeaders(headersArrayString);
       response = await fetch(url, { headers: headers });
     } else {
       response = await fetch(url);
     }
     return response;
+  };
+
+  private static convertHeadersArrayStringToHeaders = (
+    headersArrayString: string
+  ): any => {
+    const parsedHeadersArray: any[] = JSON.parse(headersArrayString);
+    const headers: any = {};
+    parsedHeadersArray.forEach((e) => (headers[e.property] = e.value));
+    return headers;
   };
 
   // Rabbit consumers will use this method
