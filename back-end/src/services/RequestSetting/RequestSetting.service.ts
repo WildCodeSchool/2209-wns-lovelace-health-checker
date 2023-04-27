@@ -4,6 +4,7 @@ import RequestSetting, {
 import User, { Role } from "../../entities/User.entity";
 import PageOfRequestSettingWithLastResult from "../../models/PageOfRequestSettingWithLastResult";
 import RequestSettingWithLastResult from "../../models/RequestSettingWithLastResult";
+import { HeaderElement } from "../../models/header-element.model";
 import RequestResultRepository from "../../repositories/RequestResult.repository";
 import RequestSettingRepository from "../../repositories/RequestSetting.repository";
 import {
@@ -77,7 +78,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     id?: string
   ) => {
     if (headers) {
-      await this.checkIfHeadersAreRightFormatted(headers);
+      await this.throwErrorIfHeadersAreBadlyFormatted(headers);
     }
     await this.checkIfNonPremiumUserTryToUsePremiumFrequency(user, frequency);
     await this.checkIfNonPremiumUserTryToUseCustomError(
@@ -225,6 +226,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     if (nameAlreadyExists) throw Error(NAME_ALREADY_EXISTS);
   };
 
+  // OK
   static checkIfGivenFrequencyIsPremiumFrequency = (
     frequency: number
   ): boolean => {
@@ -234,21 +236,26 @@ export default class RequestSettingService extends RequestSettingRepository {
     );
   };
 
-  static headerHasAllHaveProperties = async (array: any[]) => {
-    return array.every(function (element) {
+  // OK
+  static failIfHeadersNotHaveKeysPropertyAndValue = (
+    array: HeaderElement[]
+  ) => {
+    return array.every((headerElement: HeaderElement) => {
       return (
-        element.hasOwnProperty("property") && element.hasOwnProperty("value")
+        headerElement.hasOwnProperty("property") &&
+        headerElement.hasOwnProperty("value")
       );
     });
   };
 
-  static checkIfHeadersAreRightFormatted = async (headers: string) => {
-    const headersFormatIsCorrect = this.headerHasAllHaveProperties(
-      JSON.parse(headers)
-    );
+  // OK
+  static throwErrorIfHeadersAreBadlyFormatted = async (headers: string) => {
+    const headersFormatIsCorrect =
+      this.failIfHeadersNotHaveKeysPropertyAndValue(JSON.parse(headers));
     if (!headersFormatIsCorrect) throw Error(INCORRECT_HEADER_FORMAT);
   };
 
+  // OK
   static checkIfNonPremiumUserTryToUsePremiumFrequency = async (
     user: User,
     frequency: Frequency
@@ -260,6 +267,7 @@ export default class RequestSettingService extends RequestSettingRepository {
       throw Error(FREQUENCY_ONLY_FOR_PREMIUM_USERS);
   };
 
+  // OK
   static checkIfNonPremiumUserTryToUseCustomError = async (
     user: User,
     customEmailErrors: number[] | undefined,
@@ -272,6 +280,7 @@ export default class RequestSettingService extends RequestSettingRepository {
       throw Error(ALERTS_ONLY_FOR_PREMIUM_USERS);
   };
 
+  // TODO : test this method
   static getPageOfRequestSettingWithLastResult = async (
     pageSize: number,
     pageNumber: number,
@@ -309,7 +318,8 @@ export default class RequestSettingService extends RequestSettingRepository {
     };
   };
 
-  public static getRequestSettingsByFrequency = async (
+  // OK
+  static getRequestSettingsByFrequency = async (
     frequency: Frequency
   ): Promise<RequestSetting[]> => {
     return await RequestSettingRepository.getRequestSettingsByFrequency(
@@ -317,25 +327,27 @@ export default class RequestSettingService extends RequestSettingRepository {
     );
   };
 
+  // OK
   static getRequestSettingWithLastResultByRequestSettingId = async (
     id: string
   ): Promise<RequestSettingWithLastResult | void> => {
     const requestSetting = await RequestSettingRepository.getRequestSettingById(
       id
     );
-    if (!requestSetting) throw Error(REQUEST_DOESNT_EXIST);
+    if (requestSetting) {
+      const lastRequestResult =
+        await RequestResultRepository.getMostRecentByRequestSettingId(id);
 
-    const lastRequestResult =
-      await RequestResultRepository.getMostRecentByRequestSettingId(id);
-
-    if (lastRequestResult)
-      return new RequestSettingWithLastResult(
-        requestSetting,
-        lastRequestResult
-      );
-    else return new RequestSettingWithLastResult(requestSetting, null);
+      if (lastRequestResult)
+        return new RequestSettingWithLastResult(
+          requestSetting,
+          lastRequestResult
+        );
+      else return new RequestSettingWithLastResult(requestSetting, null);
+    }
   };
 
+  // OK
   static deleteRequestSettingById = async (
     user: User,
     requestId: string

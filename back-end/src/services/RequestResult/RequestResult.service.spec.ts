@@ -4,6 +4,7 @@ import {
   closeConnection,
   getDatabase,
   initializeRepositories,
+  truncateAllTables,
 } from "../../database/utils";
 import RequestResult from "../../entities/RequestResult.entity";
 
@@ -12,7 +13,13 @@ beforeAll(async () => {
   await initializeRepositories();
 });
 
+beforeEach(async () => {
+  await truncateAllTables();
+  jest.clearAllMocks();
+});
+
 afterAll(async () => {
+  await truncateAllTables();
   await closeConnection();
 });
 
