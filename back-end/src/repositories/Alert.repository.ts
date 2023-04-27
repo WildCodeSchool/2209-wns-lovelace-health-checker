@@ -14,6 +14,14 @@ export default class AlertRepository {
     return this.repository.save(alert);
   }
 
+  protected static findAlertByRequestResultId(
+    requestResultId: string
+  ): Promise<Alert | null> {
+    return this.repository.findOne({
+      where: { requestResult: { id: requestResultId } },
+    });
+  }
+
   static async clearRepository(): Promise<void> {
     await this.repository.delete({});
   }

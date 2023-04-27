@@ -13,7 +13,7 @@ services:
       context: ./back-end
       target: dev
     environment:
-      DATABASE_URL: postgres://postgres:password@database:5432/postgres
+      DATABASE_URL: ${DATABASE_URL}
       TEST_DATABASE_URL: postgres://postgres:password@test-database:5432/postgres
       SERVER_PORT: ${SERVER_PORT}
       RABBIT_AMQP_URL: ${RABBIT_AMQP_URL}
@@ -25,6 +25,7 @@ services:
       RESET_EMAIL_ROUTE: ${RESET_EMAIL_ROUTE}
       REQUEST_TIMEOUT: ${REQUEST_TIMEOUT}
       RESET_PASSWORD_EXPIRATION_DELAY: ${RESET_PASSWORD_EXPIRATION_DELAY}
+      PREVENT_ALERT_DELAY: ${PREVENT_ALERT_DELAY}
       NON_PREMIUM_MAX_AUTHORIZED_REQUESTS: ${NON_PREMIUM_MAX_AUTHORIZED_REQUESTS}
     ports:
       - 4069:4069
@@ -32,6 +33,7 @@ services:
       - ./back-end/src:/app/src
     depends_on:
       - database
+      - rabbitmq
 
   web-app:
     build:
@@ -52,7 +54,7 @@ services:
   database:
     image: postgres:14.5-alpine
     environment:
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - database-content:/var/lib/postgresql/data
     expose:

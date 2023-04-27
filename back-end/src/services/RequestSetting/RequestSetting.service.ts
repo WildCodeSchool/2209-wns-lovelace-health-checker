@@ -1,4 +1,4 @@
-import { LessThanOrEqual, MoreThan, Raw } from "typeorm";
+import { Raw } from "typeorm";
 
 import RequestSetting, {
   Frequency,
@@ -219,7 +219,9 @@ export default class RequestSettingService extends RequestSettingRepository {
     toUpdateRequestSetting.url = url;
     toUpdateRequestSetting.frequency = frequency;
     toUpdateRequestSetting.isActive = isActive;
-    toUpdateRequestSetting.name = name;
+    if (name === undefined) {
+      toUpdateRequestSetting.name = "";
+    } else toUpdateRequestSetting.name = name;
     if (headers === undefined) {
       toUpdateRequestSetting.headers = "";
     } else toUpdateRequestSetting.headers = headers;
@@ -530,7 +532,7 @@ export default class RequestSettingService extends RequestSettingRepository {
   ): Promise<Boolean> => {
     const requestSetting = await this.getRequestSettingById(requestId);
     if (!requestSetting) throw Error(REQUEST_DOESNT_EXIST);
-    if (requestSetting.user.id !== user.id) throw Error(UNAUTHORIZED);
+    this.checkIfRequestBelongsToUserByRequestSetting(user, requestSetting);
     await this.deleteRequestSetting(requestSetting);
     return true;
   };

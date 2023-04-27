@@ -1,12 +1,19 @@
+import { AlertType } from "../entities/AlertSetting.entity";
+import RequestResult from "../entities/RequestResult.entity";
 import RequestSetting from "../entities/RequestSetting.entity";
+import User from "../entities/User.entity";
+import AlertService from "../services/Alert/Alert.service";
+import AlertSettingService from "../services/AlertSetting/AlertSetting.service";
 import {
   resendConfirmationEmail,
+  sendAlertEmail,
   sendConfirmationEmail,
   sendResetEmail,
   sendResetPasswordEmail,
 } from "../services/nodemailer/nodemailer.service";
 import RequestResultService from "../services/RequestResult/RequestResult.service";
 import RequestSettingService from "../services/RequestSetting/RequestSetting.service";
+import UserService from "../services/User/User.service";
 import { channel } from "./config";
 
 export const onMessageOnAccountCreationEmailQueue = async () => {
@@ -82,16 +89,76 @@ export const onMessageOnAutomatedRequestQueue = async () => {
     let parsedMessage = JSON.parse(
       String.fromCharCode.apply(String, message.content)
     );
+    await RequestResultService.checkUrlOfAutomatedRequest(parsedMessage);
+    channel.ack(message);
+  });
+};
 
-    const toCheckForExistanceRequestSetting: RequestSetting =
-      parsedMessage as RequestSetting;
-
-    const requestSetting = await RequestSettingService.getRequestSettingById(
-      toCheckForExistanceRequestSetting.id
+export const onMessageOnAlertEmailQueue = async () => {
+  channel.consume("alert-email", async (message: any) => {
+    console.log("Start consuming message on queue alert-email.");
+    let parsedMessage = JSON.parse(
+      String.fromCharCode.apply(String, message.content)
     );
+    const toCheckForExistanceRequestResult = parsedMessage as RequestResult;
+    const requestResult: RequestResult | null =
+      await RequestResultService.getRequestResultById(
+        toCheckForExistanceRequestResult.id
+      );
+    if (requestResult && requestResult.statusCode) {
+      const requestSetting: RequestSetting | null =
+        await RequestSettingService.getRequestSettingById(
+          toCheckForExistanceRequestResult.requestSetting.id
+        );
+      if (requestSetting) {
+        const user: User | null = await UserService.getUserById(
+          requestSetting.user.id
+        );
+        let PREVENT_ALERT_DELAY: number | undefined;
+        if (!isNaN(Number(process.env.PREVENT_ALERT_DELAY))) {
+          PREVENT_ALERT_DELAY = Number(process.env.PREVENT_ALERT_DELAY);
+        }
+        const thirtyMinutesLaterDate = new Date(
+          new Date().getTime() +
+            (PREVENT_ALERT_DELAY ? PREVENT_ALERT_DELAY : 30 * 60 * 1000)
+        );
+        if (user) {
+          sendAlertEmail(
+            user.firstname,
+            user.email,
+            requestSetting.url,
+            requestResult.statusCode,
+            requestResult.createdAt.toUTCString(),
+            thirtyMinutesLaterDate.toUTCString()
+          );
+          const alert = await AlertService.findAlertByRequestResultId(
+            requestResult.id
+          );
+          if (alert) {
+            alert.emailSentAt = new Date();
+            alert.isEmailSent = true;
+            await AlertService.updateAlert(alert);
+            AlertSettingService.updatePreventAlertUntilOfAlertSettingByType(
+              thirtyMinutesLaterDate,
+              requestSetting,
+              AlertType.EMAIL,
+              requestResult.statusCode
+            );
+          }
+        }
+      }
+    }
+    channel.ack(message);
+  });
+};
 
-    if (requestSetting && requestSetting.isActive)
-      await RequestResultService.checkUrlOfAutomatedRequest(requestSetting);
+export const onMessageOnAlertPushQueue = async () => {
+  channel.consume("alert-push", async (message: any) => {
+    console.log("Start consuming message on queue alert-push.");
+    let parsedMessage = JSON.parse(
+      String.fromCharCode.apply(String, message.content)
+    );
+    // TODO: Handle push notifications / refactor with onMessageOnAlertEmailQueue()
     channel.ack(message);
   });
 };

@@ -116,4 +116,19 @@ export default class RequestSetting {
   )
   @Field(() => [RequestResult])
   results: RequestResult[];
+
+  isRequestPremium(): boolean {
+    const premiumFrequencies: Frequency[] = [
+      Frequency.FIVE_SECONDS,
+      Frequency.FIFTEEN_SECONDS,
+      Frequency.THIRTY_SECONDS,
+      Frequency.ONE_MINUTE,
+      Frequency.FIFTEEN_MINUTES,
+      Frequency.THIRTY_MINUTES,
+    ];
+    if (premiumFrequencies.includes(this.frequency)) {
+      return true;
+    }
+    return false;
+  }
 }

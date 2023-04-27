@@ -17,7 +17,6 @@ import { toast, ToastContainer } from "react-toastify";
 import styles from "./App.module.scss";
 import Footer from "./components/Footer/Footer";
 import Navbar from "./components/Navbar/Navbar";
-import NavLogo from "./components/NavLogo/NavLogo";
 import { MyProfileQuery } from "./gql/graphql";
 import Account from "./pages/Account/Account";
 import AccountConfirmation from "./pages/AccountConfirmation/AccountConfirmation";
@@ -88,7 +87,6 @@ function App() {
   return (
     <main className={`container p-0 ${styles.main}`}>
       <div className={styles.content}>
-        <NavLogo />
         <Navbar logged={isLogged} />
         <Routes>
           <Route path={HOMEPAGE_ROUTE} element={<Home />} />

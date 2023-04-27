@@ -370,15 +370,15 @@ const RequestDetailsInformations = ({
                     </span>
                   )}
                 </p>
-                <p>
+                <p className="m-0">
                   {specificEmailAlerts.length > 0 &&
                     specificEmailAlerts.join(", ")}
                 </p>
 
-                <hr />
+                {/* <hr /> */}
 
                 {/* Push */}
-                <div className={`${styles.label}`}>
+                {/* <div className={`${styles.label}`}>
                   Push notification on error 4XX and 5XX
                 </div>
                 <p className={`${styles.value}`}>
@@ -425,7 +425,7 @@ const RequestDetailsInformations = ({
                 <p className="m-0">
                   {specificPushAlerts.length > 0 &&
                     specificPushAlerts.join(", ")}
-                </p>
+                </p> */}
               </div>
             </div>
           </div>

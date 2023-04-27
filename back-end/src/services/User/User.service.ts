@@ -60,6 +60,10 @@ export default class UserService extends UserRepository {
     return savedUser;
   }
 
+  public static getUserById(id: string) {
+    return UserRepository.findById(id);
+  }
+
   static buildAccountConfirmationMessageToQueue(
     user: User,
     isResent?: boolean
