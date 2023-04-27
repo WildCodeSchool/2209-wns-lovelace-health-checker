@@ -1,17 +1,13 @@
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
-import { useEffect, useState } from "react";
+import { gql, useLazyQuery } from "@apollo/client";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { toast } from "react-toastify";
-import DataTableComponent from "../../components/DataTable/DataTableComponent";
 
-import {
-  CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery,
-  GetPageOfRequestSettingWithLastResultQuery,
-  GetPageOfRequestSettingWithLastResultQueryVariables,
-} from "../../gql/graphql";
+import { CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery } from "../../gql/graphql";
 import { REQUEST_CREATION_ROUTE } from "../../routes";
 import styles from "./Requests.module.scss";
+import LazyDataTable from "../../components/LazyDataTable/LazyDataTable";
 
 const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
   query CheckIfNonPremiumUserHasReachedMaxRequestsCount {
@@ -19,31 +15,7 @@ const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
   }
 `;
 
-const GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT = gql`
-  query GetPageOfRequestSettingWithLastResult($pageNumber: Int!) {
-    getPageOfRequestSettingWithLastResult(pageNumber: $pageNumber) {
-      totalCount
-      nextPageNumber
-      requestSettingsWithLastResult {
-        requestSetting {
-          id
-          name
-          url
-          frequency
-        }
-        requestResult {
-          getIsAvailable
-          statusCode
-          createdAt
-        }
-      }
-    }
-  }
-`;
-
 const Requests = () => {
-  const [pageNumber, setPageNumber] = useState(1);
-  const [formattedData, setFormattedData] = useState<any>([]);
   const navigate = useNavigate();
 
   const [checkUserMaxRequestsBeforeNavigate] =
@@ -62,36 +34,9 @@ const Requests = () => {
       }
     );
 
-  const { data, loading, refetch } = useQuery<
-    GetPageOfRequestSettingWithLastResultQuery,
-    GetPageOfRequestSettingWithLastResultQueryVariables
-  >(GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT, {
-    variables: {
-      pageNumber: pageNumber,
-    },
-    fetchPolicy: "cache-and-network",
-  });
-
-  if (!loading) console.log(data);
-
   const navigateToRequestCreationPage = () => {
     checkUserMaxRequestsBeforeNavigate();
   };
-
-  useEffect(() => {
-    setFormattedData(
-      data?.getPageOfRequestSettingWithLastResult.requestSettingsWithLastResult.map(
-        (item) => {
-          return {
-            ...item.requestSetting,
-            isAvailable: item.requestResult?.getIsAvailable,
-            statusCode: item.requestResult?.statusCode,
-            createdAt: item.requestResult?.createdAt,
-          };
-        }
-      )
-    );
-  }, [data]);
 
   const [selectedTab] = useState("informations");
 
@@ -127,20 +72,7 @@ const Requests = () => {
           </div>
         </div>
         <div className={`${styles.tableContainer}`}>
-          {/* <RequestsTable
-            requests={data}
-            loading={loading}
-            pageNumber={pageNumber}
-            setPageNumber={setPageNumber}
-          /> */}
-          <DataTableComponent
-            requests={formattedData}
-            loading={loading}
-            pageNumber={pageNumber}
-            setPageNumber={setPageNumber}
-            totalCount={data?.getPageOfRequestSettingWithLastResult.totalCount}
-            refetch={refetch}
-          />
+          <LazyDataTable />
         </div>
       </div>
     </>

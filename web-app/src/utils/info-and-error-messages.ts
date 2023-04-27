@@ -17,3 +17,5 @@ export const FREQUENCY_ONLY_FOR_PREMIUM_USERS =
 export const ALERTS_ONLY_FOR_PREMIUM_USERS =
   "Non Premium users can't use custom error alerts";
 export const INCORRECT_HEADER_FORMAT = "Headers format is incorrect";
+export const UNABLE_TO_FETCH_REQUESTS_FROM_DATABASE =
+  "Unable to get requests ! Please try again";

@@ -1,3 +1,5 @@
+import { Raw } from "typeorm";
+
 import RequestSetting, {
   Frequency,
 } from "../../entities/RequestSetting.entity";
@@ -17,6 +19,63 @@ import {
   URL_ALREADY_EXISTS,
 } from "../../utils/info-and-error-messages";
 import AlertSettingService from "../AlertSetting/AlertSetting.service";
+import { LazyTableStateArgs } from "../../resolvers/RequestSetting/RequestSetting.input";
+
+interface LazyTableState {
+  first: number;
+  rows: number;
+  page: number;
+  sortField?: string;
+  sortOrder?: 1 | 0 | -1 | null | undefined;
+  filters?: DataTableFilterMeta;
+}
+
+interface DataTableFilterMeta {
+  /**
+   * Extra options.
+   */
+  [key: string]: DataTableFilterMetaData | DataTableOperatorFilterMetaData;
+}
+
+interface DataTableOperatorFilterMetaData {
+  /**
+   * Operator to use for filtering.
+   */
+  operator: string;
+  /**
+   * Operator to use for filtering.
+   */
+  constraints: DataTableFilterMetaData[];
+}
+
+interface DataTableFilterMetaData {
+  /**
+   * Value to filter against.
+   */
+  value: any;
+  /**
+   * Type of filter match.
+   */
+  matchMode:
+    | "startsWith"
+    | "contains"
+    | "notContains"
+    | "endsWith"
+    | "equals"
+    | "notEquals"
+    | "in"
+    | "lt"
+    | "lte"
+    | "gt"
+    | "gte"
+    | "between"
+    | "dateIs"
+    | "dateIsNot"
+    | "dateBefore"
+    | "dateAfter"
+    | "custom"
+    | undefined;
+}
 
 export default class RequestSettingService extends RequestSettingRepository {
   static createRequest = async (
@@ -282,38 +341,168 @@ export default class RequestSettingService extends RequestSettingRepository {
 
   // TODO : test this method
   static getPageOfRequestSettingWithLastResult = async (
-    pageSize: number,
-    pageNumber: number,
-    userId: string
+    userId: string,
+    lazyTableState: LazyTableStateArgs
   ): Promise<PageOfRequestSettingWithLastResult> => {
+    let { first, rows, page, sortField, sortOrder, filters } = lazyTableState;
+    let where = {
+      user: { id: userId },
+      // frequency: MoreThan(Frequency.FIVE_SECONDS),
+      // url: Raw((alias) => `${alias} LIKE '%.com%' AND ${alias} LIKE '%t%'`),
+      // name: Raw((alias) => `${alias} LIKE '%tter%'`),
+    };
+
+    const take = rows;
+    const skip = (page - 1) * rows;
+    const order: { [key: string]: string } = {};
+    if (sortField) {
+      order[sortField] = sortOrder === 1 ? "ASC" : "DESC";
+    }
+
+    // filters = [
+    //   {
+    //     field: "url",
+    //     operator: "and",
+    //     constraints: [
+    //       {
+    //         matchMode: "contains",
+    //         value: ".com",
+    //       },
+    //       {
+    //         matchMode: "contains",
+    //         value: "l",
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     field: "name",
+    //     operator: "or",
+    //     constraints: [
+    //       {
+    //         matchMode: "contains",
+    //         value: "l",
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     field: "frequency",
+    //     operator: "or",
+    //     constraints: [
+    //       {
+    //         matchMode: "lt",
+    //         value: "8000",
+    //       },
+    //     ],
+    //   },
+    // ];
+
+    if (filters) {
+      for (const filter of filters) {
+        if (filter.operator === "or") {
+          where = {
+            ...where,
+            [filter.field]: Raw((alias) => {
+              return filter.constraints
+                .map((constraint) => {
+                  switch (constraint.matchMode) {
+                    case "contains":
+                      return `${alias} LIKE '%${constraint.value}%'`;
+                    case "notContains":
+                      return `${alias} NOT LIKE '%${constraint.value}%'`;
+                    case "startsWith":
+                      return `${alias} LIKE '${constraint.value}%'`;
+                    case "endsWith":
+                      return `${alias} LIKE '%${constraint.value}'`;
+                    case "equals":
+                      return `${alias} = '${constraint.value}'`;
+                    case "notEquals":
+                      return `${alias} <> '${constraint.value}'`;
+                    case "in":
+                      return `${alias} IN (${constraint.value})`;
+                    case "lt":
+                      return `${alias} < ${constraint.value}`;
+                    case "lte":
+                      return `${alias} <= ${constraint.value}`;
+                    case "gt":
+                      return `${alias} > ${constraint.value}`;
+                    case "gte":
+                      return `${alias} >= ${constraint.value}`;
+                    default:
+                      throw new Error(
+                        `Invalid matchMode: ${constraint.matchMode}`
+                      );
+                  }
+                })
+                .join(" OR ");
+            }),
+          };
+        } else if (filter.operator === "and") {
+          where = {
+            ...where,
+            [filter.field]: Raw((alias) => {
+              return filter.constraints
+                .map((constraint) => {
+                  switch (constraint.matchMode) {
+                    case "contains":
+                      return `${alias} LIKE '%${constraint.value}%'`;
+                    case "notContains":
+                      return `${alias} NOT LIKE '%${constraint.value}%'`;
+                    case "startsWith":
+                      return `${alias} LIKE '${constraint.value}%'`;
+                    case "endsWith":
+                      return `${alias} LIKE '%${constraint.value}'`;
+                    case "equals":
+                      return `${alias} = '${constraint.value}'`;
+                    case "notEquals":
+                      return `${alias} <> '${constraint.value}'`;
+                    case "in":
+                      return `${alias} IN (${constraint.value})`;
+                    case "lt":
+                      return `${alias} < ${constraint.value}`;
+                    case "lte":
+                      return `${alias} <= ${constraint.value}`;
+                    case "gt":
+                      return `${alias} > ${constraint.value}`;
+                    case "gte":
+                      return `${alias} >= ${constraint.value}`;
+                    default:
+                      throw new Error(
+                        `Invalid matchMode: ${constraint.matchMode}`
+                      );
+                  }
+                })
+                .join(" AND ");
+            }),
+          };
+        }
+      }
+    }
+
     const [requestSettings, totalCount] = await this.repository.findAndCount({
-      where: { user: { id: userId } },
-      take: pageSize,
-      skip: (pageNumber - 1) * pageSize,
-      order: {
-        createdAt: "DESC",
-      },
+      where,
+      take,
+      skip,
+      order,
     });
 
-    const numberOfRemainingItems = totalCount - pageNumber * pageSize;
     const requestSettingsWithLastResult = await Promise.all(
       requestSettings.map(async (requestSetting) => {
         const lastRequestResult =
           await RequestResultRepository.getMostRecentByRequestSettingId(
             requestSetting.id
           );
-        if (lastRequestResult)
+        if (lastRequestResult) {
           return new RequestSettingWithLastResult(
             requestSetting,
             lastRequestResult
           );
-        else return new RequestSettingWithLastResult(requestSetting, null);
+        }
+        return new RequestSettingWithLastResult(requestSetting, null);
       })
     );
 
     return {
       totalCount,
-      nextPageNumber: numberOfRemainingItems > 0 ? pageNumber + 1 : null,
       requestSettingsWithLastResult,
     };
   };

@@ -3,7 +3,6 @@ import {
   Args,
   Authorized,
   Ctx,
-  Int,
   Mutation,
   Query,
   Resolver,
@@ -18,11 +17,11 @@ import RequestSettingService from "../../services/RequestSetting/RequestSetting.
 import {
   CreateRequestSettingArgs,
   GetRequestSettingByIdArgs,
+  LazyTableStateArgs,
   UpdateRequestSettingArgs,
 } from "./RequestSetting.input";
 import { REQUEST_DOESNT_EXIST } from "../../utils/info-and-error-messages";
 
-const PAGE_SIZE = 10;
 @Resolver(RequestSetting)
 export default class RequestSettingResolver {
   @Authorized()
@@ -102,14 +101,13 @@ export default class RequestSettingResolver {
   @Authorized()
   @Query(() => PageOfRequestSettingWithLastResult)
   getPageOfRequestSettingWithLastResult(
-    @Arg("pageNumber", () => Int) pageNumber: number,
+    @Args() lazyEvent: LazyTableStateArgs,
     @Ctx() context: GlobalContext
   ): Promise<PageOfRequestSettingWithLastResult> {
-    const user = context.user as User;
+    // if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
     return RequestSettingService.getPageOfRequestSettingWithLastResult(
-      PAGE_SIZE,
-      pageNumber,
-      user.id
+      context.user?.id as string,
+      lazyEvent
     );
   }
 
