@@ -19,18 +19,18 @@ import User from "./User.entity";
 import RequestResult from "./RequestResult.entity";
 
 export enum Frequency {
-  THIRTY_DAYS = 2592000,
-  SEVEN_DAYS = 604800,
-  ONE_DAY = 86400,
-  TWELVE_HOURS = 43200,
-  SIX_HOURS = 21600,
-  ONE_HOUR = 3600,
-  THIRTY_MINUTES = 1800,
-  FIFTEEN_MINUTES = 900,
-  ONE_MINUTE = 60,
-  THIRTY_SECONDS = 30,
-  FIFTEEN_SECONDS = 15,
   FIVE_SECONDS = 5,
+  FIFTEEN_SECONDS = 15,
+  THIRTY_SECONDS = 30,
+  ONE_MINUTE = 60,
+  FIFTEEN_MINUTES = 900,
+  THIRTY_MINUTES = 1800,
+  ONE_HOUR = 3600,
+  SIX_HOURS = 21600,
+  TWELVE_HOURS = 43200,
+  ONE_DAY = 86400,
+  SEVEN_DAYS = 604800,
+  THIRTY_DAYS = 2592000,
 }
 
 @Entity("request_setting")
@@ -79,7 +79,7 @@ export default class RequestSetting {
   @IsNotEmpty()
   url: string;
 
-  @Column({ type: "enum", enum: Frequency, default: Frequency.ONE_HOUR })
+  @Column({ type: "int", enum: Frequency, default: Frequency.ONE_HOUR })
   @Field()
   @IsNotEmpty()
   frequency: Frequency;

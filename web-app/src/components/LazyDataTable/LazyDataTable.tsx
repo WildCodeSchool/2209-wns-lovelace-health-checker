@@ -1,5 +1,11 @@
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
-import { DataTable } from "primereact/datatable";
+import {
+  DataTable,
+  DataTableFilterEvent,
+  DataTableFilterMeta,
+  DataTablePageEvent,
+  DataTableSortEvent,
+} from "primereact/datatable";
 import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
 import { useEffect, useState } from "react";
 import { FilterMatchMode, FilterOperator } from "primereact/api";
@@ -19,7 +25,7 @@ interface DataTableProps {
   loading: boolean;
   pageNumber: number;
   setPageNumber: (pageNumber: number) => void;
-  totalCount: number | undefined;
+  totalCount: number;
   refetch: (variables: any) => void;
 }
 
@@ -33,6 +39,15 @@ interface Request {
   url: string;
 }
 
+interface LazyTableState {
+  first: number;
+  rows: number;
+  page: number;
+  sortField?: string;
+  sortOrder?: 1 | 0 | -1 | null | undefined;
+  filters: DataTableFilterMeta;
+}
+
 const LazyDataTable = (pageOfRequestSettingWithLastResult: DataTableProps) => {
   const getFrequencies = () => {
     const enumFrequencies = Object.values(Frequency).filter(
@@ -43,37 +58,97 @@ const LazyDataTable = (pageOfRequestSettingWithLastResult: DataTableProps) => {
     });
   };
 
-  const [filters, setFilters] = useState<any>({});
   const [frequencies] = useState(getFrequencies());
   const [selectedFrequency, setSelectedFrequency] = useState<string | null>(
     null
   );
 
-  getFrequencies();
-  console.log(pageOfRequestSettingWithLastResult);
-
-  const navigate = useNavigate();
-
-  const initFilters = () => {
-    setFilters({
+  const [loading, setLoading] = useState<boolean>(false);
+  const [totalRecords, setTotalRecords] = useState<number>(0);
+  const [requests, setRequests] = useState<Request[]>([
+    {
+      createdAt: "",
+      frequency: Frequency.FIFTEEN_MINUTES,
+      id: "1234",
+      isAvailable: true,
+      name: "test",
+      statusCode: 200,
+      url: "https://www.google.com",
+    },
+  ]);
+  const [lazyState, setlazyState] = useState<LazyTableState>({
+    first: 0,
+    rows: 10,
+    page: 1,
+    sortField: "createdAt",
+    sortOrder: 1,
+    filters: {
       url: {
         operator: FilterOperator.AND,
-        constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+        constraints: [{ value: "http", matchMode: FilterMatchMode.CONTAINS }],
       },
       name: {
         operator: FilterOperator.AND,
-        constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
+        constraints: [{ value: "test", matchMode: FilterMatchMode.CONTAINS }],
       },
       frequency: {
         operator: FilterOperator.OR,
         constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
       },
+    },
+  });
+
+  getFrequencies();
+
+  const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   initFilters();
+  // }, []);
+
+  // useEffect(() => {
+  //   loadLazyData();
+  // }, [lazyState]);
+
+  const loadLazyData = () => {
+    setLoading(true);
+
+    if (pageOfRequestSettingWithLastResult) {
+      setTotalRecords(pageOfRequestSettingWithLastResult.totalCount);
+      setRequests(pageOfRequestSettingWithLastResult.requests);
+    }
+
+    setLoading(false);
+  };
+
+  console.log(lazyState);
+
+  const onPage = (event: DataTablePageEvent) => {
+    setlazyState({
+      ...lazyState,
+      first: event.first,
+      rows: event.rows,
+      page: event.page ? +1 : 1,
     });
   };
 
-  useEffect(() => {
-    initFilters();
-  }, []);
+  const onSort = (event: DataTableSortEvent) => {
+    // console.log(event);
+    setlazyState({
+      ...lazyState,
+      sortField: event.sortField,
+      sortOrder: event.sortOrder,
+    });
+    // console.log(lazyState);
+  };
+
+  const onFilter = (event: DataTableFilterEvent) => {
+    setlazyState({
+      ...lazyState,
+      first: 0,
+      filters: event.filters,
+    });
+  };
 
   const frequenciesFilterTemplate = (
     options: ColumnFilterElementTemplateOptions
@@ -148,7 +223,7 @@ const LazyDataTable = (pageOfRequestSettingWithLastResult: DataTableProps) => {
 
   return (
     <>
-      <DataTable
+      {/* <DataTable
         value={pageOfRequestSettingWithLastResult.requests}
         loading={pageOfRequestSettingWithLastResult.loading}
         filterDisplay="menu"
@@ -170,7 +245,24 @@ const LazyDataTable = (pageOfRequestSettingWithLastResult: DataTableProps) => {
           });
         }}
         className={`${styles.table}`}
-        filters={filters}>
+        filters={filters}> */}
+      <DataTable
+        value={requests}
+        lazy
+        filterDisplay="menu"
+        dataKey="id"
+        paginator
+        className={`${styles.table}`}
+        first={lazyState.first}
+        rows={10}
+        totalRecords={totalRecords}
+        onPage={onPage}
+        onSort={onSort}
+        sortField={lazyState.sortField}
+        sortOrder={lazyState.sortOrder}
+        onFilter={onFilter}
+        filters={lazyState.filters}
+        loading={loading}>
         <Column
           headerClassName={`${styles.header}`}
           bodyClassName={`text-center ${styles.primary}`}
@@ -179,6 +271,7 @@ const LazyDataTable = (pageOfRequestSettingWithLastResult: DataTableProps) => {
           field="url"
           header="URL"
           filter
+          sortable
           body={urlBodyTemplate}
           headerClassName={`${styles.header}`}
           bodyClassName={`${styles.primary} ${styles.hidden} ${styles.url}`}></Column>

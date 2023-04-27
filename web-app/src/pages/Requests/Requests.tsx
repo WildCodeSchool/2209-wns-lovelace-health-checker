@@ -73,7 +73,7 @@ const Requests = () => {
     fetchPolicy: "cache-and-network",
   });
 
-  if (!loading) console.log(data);
+  // if (!loading) console.log(data);
 
   const navigateToRequestCreationPage = () => {
     checkUserMaxRequestsBeforeNavigate();
@@ -139,7 +139,7 @@ const Requests = () => {
             loading={loading}
             pageNumber={pageNumber}
             setPageNumber={setPageNumber}
-            totalCount={data?.getPageOfRequestSettingWithLastResult.totalCount}
+            totalCount={13}
             refetch={refetch}
           />
         </div>

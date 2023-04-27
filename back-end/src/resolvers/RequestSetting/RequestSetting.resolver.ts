@@ -3,7 +3,6 @@ import {
   Args,
   Authorized,
   Ctx,
-  Int,
   Mutation,
   Query,
   Resolver,
@@ -18,6 +17,7 @@ import RequestSettingService from "../../services/RequestSetting/RequestSetting.
 import {
   CreateRequestSettingArgs,
   GetRequestSettingByIdArgs,
+  LazyTableStateArgs,
   UpdateRequestSettingArgs,
 } from "./RequestSetting.input";
 import {
@@ -27,6 +27,63 @@ import {
 } from "../../utils/info-and-error-messages";
 
 const PAGE_SIZE = 10;
+
+interface DataTableFilterMeta {
+  /**
+   * Extra options.
+   */
+  [key: string]: DataTableFilterMetaData | DataTableOperatorFilterMetaData;
+}
+
+interface DataTableOperatorFilterMetaData {
+  /**
+   * Operator to use for filtering.
+   */
+  operator: string;
+  /**
+   * Operator to use for filtering.
+   */
+  constraints: DataTableFilterMetaData[];
+}
+
+interface DataTableFilterMetaData {
+  /**
+   * Value to filter against.
+   */
+  value: any;
+  /**
+   * Type of filter match.
+   */
+  matchMode:
+    | "startsWith"
+    | "contains"
+    | "notContains"
+    | "endsWith"
+    | "equals"
+    | "notEquals"
+    | "in"
+    | "lt"
+    | "lte"
+    | "gt"
+    | "gte"
+    | "between"
+    | "dateIs"
+    | "dateIsNot"
+    | "dateBefore"
+    | "dateAfter"
+    | "custom"
+    | undefined;
+}
+
+type lazyEvent = {
+  first: number;
+  rows: number;
+  page: number;
+  sortField: string;
+  sortOrder: 1 | 0 | -1 | null;
+  filters: any;
+};
+
 @Resolver(RequestSetting)
 export default class RequestSettingResolver {
   @Authorized()
@@ -111,16 +168,14 @@ export default class RequestSettingResolver {
 
   @Query(() => PageOfRequestSettingWithLastResult)
   getPageOfRequestSettingWithLastResult(
-    @Arg("pageNumber", () => Int) pageNumber: number,
+    @Args() lazyEvent: LazyTableStateArgs,
     @Ctx() context: GlobalContext
     // @Arg("userId", () => String) userId: string
   ): Promise<PageOfRequestSettingWithLastResult> {
-    if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
+    // if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
     return RequestSettingService.getPageOfRequestSettingWithLastResult(
-      PAGE_SIZE,
-      pageNumber,
-      // userId
-      context.user?.id
+      "2dcce9e0-57b2-4f3c-baf5-7907ad164fb9", //context.user?.id,
+      lazyEvent
     );
   }
 
