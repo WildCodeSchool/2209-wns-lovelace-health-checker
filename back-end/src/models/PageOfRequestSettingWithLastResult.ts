@@ -6,9 +6,6 @@ class PageOfRequestSettingWithLastResult {
   @Field(() => Int)
   totalCount: number;
 
-  @Field(() => Int, { nullable: true })
-  nextPageNumber: number | null;
-
   @Field(() => [RequestSettingWithLastResult])
   requestSettingsWithLastResult: RequestSettingWithLastResult[];
 }

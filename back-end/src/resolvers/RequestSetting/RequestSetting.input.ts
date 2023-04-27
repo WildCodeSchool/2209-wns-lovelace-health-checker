@@ -10,7 +10,7 @@ import {
   MaxLength,
   MinLength,
 } from "class-validator";
-import { ArgsType, Field } from "type-graphql";
+import { ArgsType, Field, InputType, Int } from "type-graphql";
 import { Frequency } from "../../entities/RequestSetting.entity";
 import {
   INVALID_URL_FORMAT_ERROR_MESSAGE,
@@ -88,4 +88,59 @@ export class GetRequestSettingByIdArgs {
   @Field()
   @IsString()
   id: string;
+}
+
+@ArgsType()
+export class GetPageOfRequestSetting {
+  @Field(() => Int)
+  @IsNumber()
+  @IsNotEmpty()
+  page: number;
+
+  @Field(() => Int)
+  @IsNumber()
+  @IsNotEmpty()
+  limit: number;
+}
+
+@InputType()
+class FilterConstraint {
+  @Field()
+  value: string;
+
+  @Field()
+  matchMode: string;
+}
+
+@InputType()
+class Filter {
+  @Field()
+  operator: string;
+
+  @Field()
+  field: string;
+
+  @Field(() => [FilterConstraint])
+  constraints: FilterConstraint[];
+}
+
+@ArgsType()
+export class LazyTableStateArgs {
+  @Field(() => Int)
+  first: number;
+
+  @Field(() => Int)
+  rows: number;
+
+  @Field(() => Int)
+  page: number;
+
+  @Field()
+  sortField: string;
+
+  @Field(() => Int)
+  sortOrder: number;
+
+  @Field(() => [Filter], { nullable: true })
+  filters?: Filter[];
 }

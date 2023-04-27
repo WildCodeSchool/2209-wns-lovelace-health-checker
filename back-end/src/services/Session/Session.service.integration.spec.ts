@@ -30,6 +30,7 @@ describe("SessionService integration", () => {
   });
 
   afterAll(async () => {
+    await truncateAllTables();
     await closeConnection();
   });
 
