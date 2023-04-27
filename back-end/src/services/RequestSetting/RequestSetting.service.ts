@@ -160,7 +160,9 @@ export default class RequestSettingService extends RequestSettingRepository {
     toUpdateRequestSetting.url = url;
     toUpdateRequestSetting.frequency = frequency;
     toUpdateRequestSetting.isActive = isActive;
-    toUpdateRequestSetting.name = name;
+    if (name === undefined) {
+      toUpdateRequestSetting.name = "";
+    } else toUpdateRequestSetting.name = name;
     if (headers === undefined) {
       toUpdateRequestSetting.headers = "";
     } else toUpdateRequestSetting.headers = headers;
