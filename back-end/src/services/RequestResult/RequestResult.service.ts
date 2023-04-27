@@ -2,7 +2,8 @@ import Alert from "../../entities/Alert.entity";
 import AlertSetting, { AlertType } from "../../entities/AlertSetting.entity";
 import RequestResult from "../../entities/RequestResult.entity";
 import RequestSetting from "../../entities/RequestSetting.entity";
-import User from "../../entities/User.entity";
+import User, { Role } from "../../entities/User.entity";
+import { Status } from "../../entities/User.entity";
 import {
   sendMessageOnAlertEmailQueue,
   sendMessageOnAlertPushQueue,
@@ -81,10 +82,10 @@ export default class RequestResultService extends RequestResultRepository {
     timeout: number = process.env.REQUEST_TIMEOUT
       ? parseInt(process.env.REQUEST_TIMEOUT)
       : 15000,
-    headers?: any
+    headersArrayString?: string
   ): Promise<Response> => {
     let response;
-    // Timeout is for homepage request
+    // Timeout is for homepage request, should be set as parameter 0 for non homepage request so we don't enter this if
     if (timeout) {
       const options = { timeout };
       const controller = new AbortController();
@@ -94,9 +95,11 @@ export default class RequestResultService extends RequestResultRepository {
         signal: controller.signal,
       });
       clearTimeout(id);
-    } else if (headers) {
-      // TODO: ajouter les headers
-      response = await fetch(url);
+    } else if (headersArrayString) {
+      const parsedHeadersArray: any[] = JSON.parse(headersArrayString);
+      const headers: any = {};
+      parsedHeadersArray.forEach((e) => (headers[e.property] = e.value));
+      response = await fetch(url, { headers: headers });
     } else {
       response = await fetch(url);
     }
@@ -105,7 +108,7 @@ export default class RequestResultService extends RequestResultRepository {
 
   // Rabbit consumers will use this method
   public static checkUrlOfAutomatedRequest = async (
-    message: RequestSetting
+    message: any
   ): Promise<void> => {
     const toCheckForExistanceRequestSetting: RequestSetting =
       message as RequestSetting;
@@ -113,11 +116,26 @@ export default class RequestResultService extends RequestResultRepository {
       toCheckForExistanceRequestSetting.id
     );
     if (requestSetting && requestSetting.isActive) {
+      // Return if user becomes inactive before message is consumed
+      if (requestSetting.user.status !== Status.ACTIVE) {
+        return;
+      }
+      // Return if user becomes non premium before message is consumed
+      if (requestSetting.isRequestPremium()) {
+        if (
+          !(
+            requestSetting.user.role === Role.PREMIUM ||
+            requestSetting.user.role === Role.ADMIN
+          )
+        ) {
+          return;
+        }
+      }
       const requestResult: RequestResult =
         await this.checkUrlOfRequestSettingByRequestSetting(requestSetting);
       // getIsAvailable() return false if status is 4xx or 5xx
       if (!requestResult.getIsAvailable() && requestResult.statusCode) {
-        // We look for alertSettings linked to the requestSettingFromMessage
+        // We look for alertSettings linked to the requestSetting
         const alertSettings: AlertSetting[] =
           await AlertSettingService.getAlertSettingsByRequestSettingIdAndHttpStatusCode(
             requestSetting.id,

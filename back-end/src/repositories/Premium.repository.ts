@@ -14,6 +14,12 @@ export default class PremiumRepository {
     return this.repository.save(premium);
   }
 
+  protected static getPremiumByUserId = (
+    userId: string
+  ): Promise<Premium | null> => {
+    return this.repository.findOne({ where: { user: { id: userId } } });
+  };
+
   static async clearRepository(): Promise<void> {
     await this.repository.delete({});
   }
