@@ -20,6 +20,7 @@ import {
 } from "../../utils/info-and-error-messages";
 import AlertSettingService from "../AlertSetting/AlertSetting.service";
 import { LazyTableStateArgs } from "../../resolvers/RequestSetting/RequestSetting.input";
+import { AlertType } from "../../entities/AlertSetting.entity";
 
 interface LazyTableState {
   first: number;
@@ -111,16 +112,17 @@ export default class RequestSettingService extends RequestSettingRepository {
 
     const savedRequestSetting = await this.saveRequestSetting(requestSetting);
 
-    await AlertSettingService.setPushAlerts(
-      customPushErrors,
+    await AlertSettingService.setAlertsByType(
+      savedRequestSetting,
+      AlertType.PUSH,
       allErrorsEnabledPush,
-      savedRequestSetting
+      customPushErrors
     );
-
-    await AlertSettingService.setEmailAlerts(
-      customEmailErrors,
+    await AlertSettingService.setAlertsByType(
+      savedRequestSetting,
+      AlertType.EMAIL,
       allErrorsEnabledEmail,
-      savedRequestSetting
+      customEmailErrors
     );
 
     return savedRequestSetting;

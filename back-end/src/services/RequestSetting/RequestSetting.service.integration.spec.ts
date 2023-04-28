@@ -146,10 +146,10 @@ describe("RequestService integration", () => {
 
         expect(existingRequestResult?.url).toBe("https://url.com");
       });
-      it("calls setPushAlerts once", async () => {
-        const setPushAlertsSpy = jest.spyOn(
+      it("calls setAlertsByType twice, once for push and once for email ", async () => {
+        const setAlertsByTypeSpy = jest.spyOn(
           AlertSettingService,
-          "setPushAlerts"
+          "setAlertsByType"
         );
         await RequestSettingService.createRequest(
           url,
@@ -163,26 +163,7 @@ describe("RequestService integration", () => {
           customPushErrors,
           user
         );
-        expect(setPushAlertsSpy).toBeCalledTimes(1);
-      });
-      it("calls setEmailAlerts once", async () => {
-        const setEmailAlertsSpy = jest.spyOn(
-          AlertSettingService,
-          "setEmailAlerts"
-        );
-        await RequestSettingService.createRequest(
-          url,
-          frequency,
-          name,
-          headers,
-          isActive,
-          allErrorsEnabledEmail,
-          allErrorsEnabledPush,
-          customEmailErrors,
-          customPushErrors,
-          user
-        );
-        expect(setEmailAlertsSpy).toBeCalledTimes(1);
+        expect(setAlertsByTypeSpy).toBeCalledTimes(2);
       });
       it("returns created request setting", async () => {
         const requestSetting = await RequestSettingService.createRequest(
