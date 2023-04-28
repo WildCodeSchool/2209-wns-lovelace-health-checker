@@ -285,7 +285,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     if (nameAlreadyExists) throw Error(NAME_ALREADY_EXISTS);
   };
 
-  // OK
   static checkIfGivenFrequencyIsPremiumFrequency = (
     frequency: number
   ): boolean => {
@@ -295,7 +294,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     );
   };
 
-  // OK
   static failIfHeadersNotHaveKeysPropertyAndValue = (
     array: HeaderElement[]
   ) => {
@@ -307,14 +305,12 @@ export default class RequestSettingService extends RequestSettingRepository {
     });
   };
 
-  // OK
   static throwErrorIfHeadersAreBadlyFormatted = async (headers: string) => {
     const headersFormatIsCorrect =
       this.failIfHeadersNotHaveKeysPropertyAndValue(JSON.parse(headers));
     if (!headersFormatIsCorrect) throw Error(INCORRECT_HEADER_FORMAT);
   };
 
-  // OK
   static checkIfNonPremiumUserTryToUsePremiumFrequency = async (
     user: User,
     frequency: Frequency
@@ -326,7 +322,6 @@ export default class RequestSettingService extends RequestSettingRepository {
       throw Error(FREQUENCY_ONLY_FOR_PREMIUM_USERS);
   };
 
-  // OK
   static checkIfNonPremiumUserTryToUseCustomError = async (
     user: User,
     customEmailErrors: number[] | undefined,
@@ -507,7 +502,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     };
   };
 
-  // OK
   static getRequestSettingsByFrequency = async (
     frequency: Frequency
   ): Promise<RequestSetting[]> => {
@@ -516,7 +510,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     );
   };
 
-  // OK
   static getRequestSettingWithLastResultByRequestSettingId = async (
     id: string
   ): Promise<RequestSettingWithLastResult | void> => {
@@ -536,7 +529,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     }
   };
 
-  // OK
   static deleteRequestSettingById = async (
     user: User,
     requestId: string
