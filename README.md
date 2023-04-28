@@ -46,10 +46,27 @@ docker compose -f docker-compose.dev.yml exec web-app npm run test
 ### Run mobile-app with expo
 
 While being in mobile-app folder :
+
 ```
 npx expo start
 ```
+
 or
+
 ```
 npx expo start --tunnel
+```
+
+### Tests launched during GitHub CI process
+
+You have to update variables in `push.yml` on each `.env` variable change which impacts tests. If you don't, some of your tests will fail during CI process.
+
+```
+name: build-and-test
+
+on: push
+
+env:
+  RESET_PASSWORD_EXPIRATION_DELAY: 1800000
+  NON_PREMIUM_MAX_AUTHORIZED_REQUESTS: 20 <==== UPDATE HERE
 ```

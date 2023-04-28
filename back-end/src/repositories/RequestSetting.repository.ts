@@ -31,7 +31,7 @@ export default class RequestSettingRepository {
     });
   };
 
-  protected static getRequestSettingsByUserId = async (
+  static getRequestSettingsByUserId = async (
     id: string
   ): Promise<RequestSetting[]> => {
     return this.repository.find({ where: { user: { id: id } } });

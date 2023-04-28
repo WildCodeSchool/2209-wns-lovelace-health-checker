@@ -1,3 +1,4 @@
+/// <reference types="@types/jest" />;
 import "reflect-metadata";
 
 import { validate } from "class-validator";

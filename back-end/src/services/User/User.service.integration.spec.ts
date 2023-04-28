@@ -1,3 +1,4 @@
+/// <reference types="@types/jest" />;
 import { compareSync } from "bcryptjs";
 import {
   closeConnection,

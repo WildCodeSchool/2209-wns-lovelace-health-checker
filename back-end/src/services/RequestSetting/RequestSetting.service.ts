@@ -20,62 +20,7 @@ import {
 } from "../../utils/info-and-error-messages";
 import AlertSettingService from "../AlertSetting/AlertSetting.service";
 import { LazyTableStateArgs } from "../../resolvers/RequestSetting/RequestSetting.input";
-
-interface LazyTableState {
-  first: number;
-  rows: number;
-  page: number;
-  sortField?: string;
-  sortOrder?: 1 | 0 | -1 | null | undefined;
-  filters?: DataTableFilterMeta;
-}
-
-interface DataTableFilterMeta {
-  /**
-   * Extra options.
-   */
-  [key: string]: DataTableFilterMetaData | DataTableOperatorFilterMetaData;
-}
-
-interface DataTableOperatorFilterMetaData {
-  /**
-   * Operator to use for filtering.
-   */
-  operator: string;
-  /**
-   * Operator to use for filtering.
-   */
-  constraints: DataTableFilterMetaData[];
-}
-
-interface DataTableFilterMetaData {
-  /**
-   * Value to filter against.
-   */
-  value: any;
-  /**
-   * Type of filter match.
-   */
-  matchMode:
-    | "startsWith"
-    | "contains"
-    | "notContains"
-    | "endsWith"
-    | "equals"
-    | "notEquals"
-    | "in"
-    | "lt"
-    | "lte"
-    | "gt"
-    | "gte"
-    | "between"
-    | "dateIs"
-    | "dateIsNot"
-    | "dateBefore"
-    | "dateAfter"
-    | "custom"
-    | undefined;
-}
+import { AlertType } from "../../entities/AlertSetting.entity";
 
 export default class RequestSettingService extends RequestSettingRepository {
   static createRequest = async (
@@ -111,16 +56,17 @@ export default class RequestSettingService extends RequestSettingRepository {
 
     const savedRequestSetting = await this.saveRequestSetting(requestSetting);
 
-    await AlertSettingService.setPushAlerts(
-      customPushErrors,
+    await AlertSettingService.setAlertsByType(
+      savedRequestSetting,
+      AlertType.PUSH,
       allErrorsEnabledPush,
-      savedRequestSetting
+      customPushErrors
     );
-
-    await AlertSettingService.setEmailAlerts(
-      customEmailErrors,
+    await AlertSettingService.setAlertsByType(
+      savedRequestSetting,
+      AlertType.EMAIL,
       allErrorsEnabledEmail,
-      savedRequestSetting
+      customEmailErrors
     );
 
     return savedRequestSetting;
@@ -285,7 +231,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     if (nameAlreadyExists) throw Error(NAME_ALREADY_EXISTS);
   };
 
-  // OK
   static checkIfGivenFrequencyIsPremiumFrequency = (
     frequency: number
   ): boolean => {
@@ -295,7 +240,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     );
   };
 
-  // OK
   static failIfHeadersNotHaveKeysPropertyAndValue = (
     array: HeaderElement[]
   ) => {
@@ -307,14 +251,12 @@ export default class RequestSettingService extends RequestSettingRepository {
     });
   };
 
-  // OK
   static throwErrorIfHeadersAreBadlyFormatted = async (headers: string) => {
     const headersFormatIsCorrect =
       this.failIfHeadersNotHaveKeysPropertyAndValue(JSON.parse(headers));
     if (!headersFormatIsCorrect) throw Error(INCORRECT_HEADER_FORMAT);
   };
 
-  // OK
   static checkIfNonPremiumUserTryToUsePremiumFrequency = async (
     user: User,
     frequency: Frequency
@@ -326,7 +268,6 @@ export default class RequestSettingService extends RequestSettingRepository {
       throw Error(FREQUENCY_ONLY_FOR_PREMIUM_USERS);
   };
 
-  // OK
   static checkIfNonPremiumUserTryToUseCustomError = async (
     user: User,
     customEmailErrors: number[] | undefined,
@@ -344,12 +285,9 @@ export default class RequestSettingService extends RequestSettingRepository {
     userId: string,
     lazyTableState: LazyTableStateArgs
   ): Promise<PageOfRequestSettingWithLastResult> => {
-    let { first, rows, page, sortField, sortOrder, filters } = lazyTableState;
+    let { rows, page, sortField, sortOrder, filters } = lazyTableState;
     let where = {
       user: { id: userId },
-      // frequency: MoreThan(Frequency.FIVE_SECONDS),
-      // url: Raw((alias) => `${alias} LIKE '%.com%' AND ${alias} LIKE '%t%'`),
-      // name: Raw((alias) => `${alias} LIKE '%tter%'`),
     };
 
     const take = rows;
@@ -358,43 +296,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     if (sortField) {
       order[sortField] = sortOrder === 1 ? "ASC" : "DESC";
     }
-
-    // filters = [
-    //   {
-    //     field: "url",
-    //     operator: "and",
-    //     constraints: [
-    //       {
-    //         matchMode: "contains",
-    //         value: ".com",
-    //       },
-    //       {
-    //         matchMode: "contains",
-    //         value: "l",
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     field: "name",
-    //     operator: "or",
-    //     constraints: [
-    //       {
-    //         matchMode: "contains",
-    //         value: "l",
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     field: "frequency",
-    //     operator: "or",
-    //     constraints: [
-    //       {
-    //         matchMode: "lt",
-    //         value: "8000",
-    //       },
-    //     ],
-    //   },
-    // ];
 
     if (filters) {
       for (const filter of filters) {
@@ -507,7 +408,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     };
   };
 
-  // OK
   static getRequestSettingsByFrequency = async (
     frequency: Frequency
   ): Promise<RequestSetting[]> => {
@@ -516,7 +416,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     );
   };
 
-  // OK
   static getRequestSettingWithLastResultByRequestSettingId = async (
     id: string
   ): Promise<RequestSettingWithLastResult | void> => {
@@ -536,7 +435,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     }
   };
 
-  // OK
   static deleteRequestSettingById = async (
     user: User,
     requestId: string

@@ -25,6 +25,11 @@ import {
 } from "../../gql/graphql";
 import { toast } from "react-toastify";
 import { UNABLE_TO_FETCH_REQUESTS_FROM_DATABASE } from "../../utils/info-and-error-messages";
+import {
+  Filter,
+  LazyDataTableProps,
+  LazyTableState,
+} from "../../models/LazyDataTable.model";
 
 interface Request {
   createdAt: any;
@@ -34,26 +39,6 @@ interface Request {
   name: string | null | undefined;
   statusCode: number | null | undefined;
   url: string;
-}
-
-interface LazyTableState {
-  first: number;
-  rows: number;
-  page: number;
-  sortField: string;
-  sortOrder: 1 | 0 | -1 | null | undefined;
-  filters: Filter[];
-}
-
-interface Filter {
-  field: string;
-  operator: FilterOperator;
-  constraints: FilterConstraint[];
-}
-
-interface FilterConstraint {
-  value: string;
-  matchMode: FilterMatchMode;
 }
 
 const GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT_FILTERED = gql`
@@ -91,7 +76,7 @@ const GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT_FILTERED = gql`
   }
 `;
 
-const LazyDataTable = () => {
+const LazyDataTable = (props: { isActive: LazyDataTableProps }) => {
   const getFrequencies = () => {
     const enumFrequencies = Object.values(Frequency).filter(
       (f) => typeof f === "number"
@@ -107,7 +92,35 @@ const LazyDataTable = () => {
   );
   const [totalRecords, setTotalRecords] = useState<number>(0);
   const [requests, setRequests] = useState<Request[]>();
-  const [tableFilters, setTableFilters] = useState<DataTableFilterMeta>();
+  const [tableFilters, setTableFilters] = useState<DataTableFilterMeta>({
+    name: {
+      operator: FilterOperator.AND,
+      constraints: [
+        {
+          value: null,
+          matchMode: FilterMatchMode.STARTS_WITH,
+        },
+      ],
+    },
+    frequency: {
+      operator: FilterOperator.AND,
+      constraints: [
+        {
+          value: null,
+          matchMode: FilterMatchMode.EQUALS,
+        },
+      ],
+    },
+    url: {
+      operator: FilterOperator.AND,
+      constraints: [
+        {
+          value: null,
+          matchMode: FilterMatchMode.STARTS_WITH,
+        },
+      ],
+    },
+  });
   const [lazyState, setlazyState] = useState<LazyTableState>({
     first: 0,
     rows: 10,
@@ -119,6 +132,41 @@ const LazyDataTable = () => {
 
   getFrequencies();
 
+  const { isActive } = props;
+
+  useEffect(() => {
+    if (
+      isActive.isActive.constraints[0].value === "true" ||
+      isActive.isActive.constraints[0].value === "false"
+    ) {
+      setlazyState((prevState) => {
+        return {
+          ...prevState,
+          filters: [
+            ...prevState.filters.filter(
+              (filter) => filter.field !== "isActive"
+            ),
+            {
+              field: "isActive",
+              operator: isActive.isActive.operator,
+              constraints: isActive.isActive.constraints,
+            },
+          ],
+        };
+      });
+    } else {
+      setlazyState((prevState) => {
+        return {
+          ...prevState,
+          filters: [
+            ...prevState.filters.filter(
+              (filter) => filter.field !== "isActive"
+            ),
+          ],
+        };
+      });
+    }
+  }, [isActive]);
   const navigate = useNavigate();
 
   const { refetch, loading } = useQuery<
@@ -225,7 +273,6 @@ const LazyDataTable = () => {
         }}
         placeholder="Select One"
         className="p-column-filter"
-        showClear
       />
     );
   };
@@ -290,6 +337,8 @@ const LazyDataTable = () => {
         filterDisplay="menu"
         dataKey="id"
         paginator
+        paginatorClassName={`${styles.paginator}`}
+        rowsPerPageOptions={[5, 10, 20, 50, 100]}
         className={`${styles.table}`}
         first={lazyState.first}
         rows={lazyState.rows}
@@ -310,6 +359,7 @@ const LazyDataTable = () => {
           field="url"
           header="URL"
           filter
+          maxConstraints={10}
           sortable
           body={urlBodyTemplate}
           headerClassName={`${styles.header}`}
@@ -318,6 +368,7 @@ const LazyDataTable = () => {
           field="name"
           header="Name"
           filter
+          maxConstraints={10}
           sortable
           headerClassName={`${styles.header}`}
           body={nameBodyTemplate}
@@ -327,6 +378,12 @@ const LazyDataTable = () => {
           header="Frequency"
           filter
           filterElement={frequenciesFilterTemplate}
+          filterMatchMode="equals"
+          filterMatchModeOptions={[
+            { label: "Equals", value: FilterMatchMode.EQUALS },
+            { label: "Not equals", value: FilterMatchMode.NOT_EQUALS },
+          ]}
+          maxConstraints={10}
           headerClassName={`${styles.header}`}
           body={frequencyBodyTemplate}
           bodyClassName={`text-center ${styles.primary}`}></Column>

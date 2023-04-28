@@ -36,6 +36,19 @@
 
 .header > div > div {
   margin-left: 4px !important;
+  > button {
+    width: 20px !important;
+    height: 20px !important;
+    > svg {
+      width: 12px !important;
+      height: 12px !important;
+    }
+  }
+}
+
+.header > div > svg {
+  width: 12px !important;
+  height: 12px !important;
 }
 
 .primary {
@@ -47,6 +60,63 @@
   border-radius: variables.$border-radius-sm;
   overflow: hidden;
   font-size: variables.$font-dataTable !important;
+}
+
+ul {
+  flex-direction: column;
+}
+
+@media screen and (max-width: 576px) {
+  .paginator {
+    > button {
+      height: 1rem !important;
+      min-width: 2rem !important;
+    }
+    > span {
+      > button {
+        min-width: 1.2rem !important;
+        height: 1.2rem !important;
+      }
+    }
+    > div {
+      height: 2rem !important;
+      width: 4rem !important;
+      > span {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+      }
+      > div {
+        width: 2rem !important;
+      }
+    }
+  }
+}
+
+.paginator {
+  padding: 12px 0px;
+  > button {
+    height: 2rem !important;
+    min-width: 3rem !important;
+  }
+  > span {
+    > button {
+      min-width: 1.8rem !important;
+      height: 1.8rem !important;
+    }
+  }
+  > div {
+    height: 2rem !important;
+    width: 4rem !important;
+    > span {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+    > div {
+      width: 2rem !important;
+    }
+  }
 }
 
 .table > .p-datatable .p-datatable-loading-overlay {
