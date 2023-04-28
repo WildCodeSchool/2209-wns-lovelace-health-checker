@@ -443,7 +443,7 @@ describe("RequestService integration", () => {
         expect(getRequestSettingsByUserIdSpy).toBeCalledTimes(1);
       });
       describe("if user has reached max requests count", () => {
-        it(`throws 'As a non-premium user you're limited to ${process.env.NON_PREMIUM_MAX_AUTHORIZED_REQUESTS} queries. Delete existing queries to create new ones or subscribe to Premium.'`, async () => {
+        it(`throws 'As a non-premium user you're limited to 20 queries. Delete existing queries to create new ones or subscribe to Premium.'`, async () => {
           const elements = [
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
             20,
@@ -476,7 +476,7 @@ describe("RequestService integration", () => {
               user
             );
           }).rejects.toThrowError(
-            `As a non-premium user you're limited to ${process.env.NON_PREMIUM_MAX_AUTHORIZED_REQUESTS} queries. Delete existing queries to create new ones or subscribe to Premium.`
+            `As a non-premium user you're limited to 20 queries. Delete existing queries to create new ones or subscribe to Premium.`
           );
         });
       });
