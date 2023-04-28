@@ -8,6 +8,8 @@ import { CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery } from "../../gql/
 import { REQUEST_CREATION_ROUTE } from "../../routes";
 import styles from "./Requests.module.scss";
 import LazyDataTable from "../../components/LazyDataTable/LazyDataTable";
+import { FilterMatchMode, FilterOperator } from "primereact/api";
+import { LazyDataTableProps } from "../../models/LazyDataTable.model";
 
 const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
   query CheckIfNonPremiumUserHasReachedMaxRequestsCount {
@@ -17,6 +19,17 @@ const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
 
 const Requests = () => {
   const navigate = useNavigate();
+  const [isActive, setIsActive] = useState<LazyDataTableProps>({
+    isActive: {
+      operator: FilterOperator.AND,
+      constraints: [
+        {
+          value: "",
+          matchMode: FilterMatchMode.EQUALS,
+        },
+      ],
+    },
+  });
 
   const [checkUserMaxRequestsBeforeNavigate] =
     useLazyQuery<CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery>(
@@ -38,7 +51,7 @@ const Requests = () => {
     checkUserMaxRequestsBeforeNavigate();
   };
 
-  const [selectedTab] = useState("informations");
+  const [selectedTab, setSelectedTab] = useState("all");
 
   return (
     <>
@@ -53,26 +66,79 @@ const Requests = () => {
         </div>
         <div className={`d-flex gap-5 mt-5 ${styles.scrollbar}`}>
           <div
-            className={`${
-              selectedTab === "informations" && styles.selectedTab
-            }  ${styles.tabContainer}`}>
-            <span className={`${styles.tabs} `}>All</span>
-          </div>
-          <div
-            className={`${selectedTab === "premium" && styles.selectedTab}  ${
+            className={`${selectedTab === "all" && styles.selectedTab}  ${
               styles.tabContainer
             }`}>
-            <span className={`${styles.tabs} `}>Active</span>
+            <span
+              className={`${styles.tabs} `}
+              onClick={() => {
+                setIsActive({
+                  isActive: {
+                    operator: FilterOperator.AND,
+                    constraints: [
+                      {
+                        value: "",
+                        matchMode: FilterMatchMode.EQUALS,
+                      },
+                    ],
+                  },
+                });
+
+                setSelectedTab("all");
+              }}>
+              All
+            </span>
           </div>
           <div
-            className={`${selectedTab === "bills" && styles.selectedTab}  ${
+            className={`${selectedTab === "active" && styles.selectedTab}  ${
               styles.tabContainer
             }`}>
-            <span className={`${styles.tabs} `}>Inactive</span>
+            <span
+              className={`${styles.tabs}`}
+              onClick={() => {
+                setIsActive({
+                  isActive: {
+                    operator: FilterOperator.AND,
+                    constraints: [
+                      {
+                        value: "true",
+                        matchMode: FilterMatchMode.EQUALS,
+                      },
+                    ],
+                  },
+                });
+
+                setSelectedTab("active");
+              }}>
+              Active
+            </span>
+          </div>
+          <div
+            className={`${selectedTab === "inactive" && styles.selectedTab}  ${
+              styles.tabContainer
+            }`}>
+            <span
+              className={`${styles.tabs} `}
+              onClick={() => {
+                setIsActive({
+                  isActive: {
+                    operator: FilterOperator.AND,
+                    constraints: [
+                      {
+                        value: "false",
+                        matchMode: FilterMatchMode.EQUALS,
+                      },
+                    ],
+                  },
+                });
+                setSelectedTab("inactive");
+              }}>
+              Inactive
+            </span>
           </div>
         </div>
         <div className={`${styles.tableContainer}`}>
-          <LazyDataTable />
+          <LazyDataTable isActive={isActive} />
         </div>
       </div>
     </>
