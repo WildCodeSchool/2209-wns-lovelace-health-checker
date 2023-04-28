@@ -22,62 +22,6 @@ import AlertSettingService from "../AlertSetting/AlertSetting.service";
 import { LazyTableStateArgs } from "../../resolvers/RequestSetting/RequestSetting.input";
 import { AlertType } from "../../entities/AlertSetting.entity";
 
-interface LazyTableState {
-  first: number;
-  rows: number;
-  page: number;
-  sortField?: string;
-  sortOrder?: 1 | 0 | -1 | null | undefined;
-  filters?: DataTableFilterMeta;
-}
-
-interface DataTableFilterMeta {
-  /**
-   * Extra options.
-   */
-  [key: string]: DataTableFilterMetaData | DataTableOperatorFilterMetaData;
-}
-
-interface DataTableOperatorFilterMetaData {
-  /**
-   * Operator to use for filtering.
-   */
-  operator: string;
-  /**
-   * Operator to use for filtering.
-   */
-  constraints: DataTableFilterMetaData[];
-}
-
-interface DataTableFilterMetaData {
-  /**
-   * Value to filter against.
-   */
-  value: any;
-  /**
-   * Type of filter match.
-   */
-  matchMode:
-    | "startsWith"
-    | "contains"
-    | "notContains"
-    | "endsWith"
-    | "equals"
-    | "notEquals"
-    | "in"
-    | "lt"
-    | "lte"
-    | "gt"
-    | "gte"
-    | "between"
-    | "dateIs"
-    | "dateIsNot"
-    | "dateBefore"
-    | "dateAfter"
-    | "custom"
-    | undefined;
-}
-
 export default class RequestSettingService extends RequestSettingRepository {
   static createRequest = async (
     url: string,
@@ -341,12 +285,9 @@ export default class RequestSettingService extends RequestSettingRepository {
     userId: string,
     lazyTableState: LazyTableStateArgs
   ): Promise<PageOfRequestSettingWithLastResult> => {
-    let { first, rows, page, sortField, sortOrder, filters } = lazyTableState;
+    let { rows, page, sortField, sortOrder, filters } = lazyTableState;
     let where = {
       user: { id: userId },
-      // frequency: MoreThan(Frequency.FIVE_SECONDS),
-      // url: Raw((alias) => `${alias} LIKE '%.com%' AND ${alias} LIKE '%t%'`),
-      // name: Raw((alias) => `${alias} LIKE '%tter%'`),
     };
 
     const take = rows;
@@ -355,43 +296,6 @@ export default class RequestSettingService extends RequestSettingRepository {
     if (sortField) {
       order[sortField] = sortOrder === 1 ? "ASC" : "DESC";
     }
-
-    // filters = [
-    //   {
-    //     field: "url",
-    //     operator: "and",
-    //     constraints: [
-    //       {
-    //         matchMode: "contains",
-    //         value: ".com",
-    //       },
-    //       {
-    //         matchMode: "contains",
-    //         value: "l",
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     field: "name",
-    //     operator: "or",
-    //     constraints: [
-    //       {
-    //         matchMode: "contains",
-    //         value: "l",
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     field: "frequency",
-    //     operator: "or",
-    //     constraints: [
-    //       {
-    //         matchMode: "lt",
-    //         value: "8000",
-    //       },
-    //     ],
-    //   },
-    // ];
 
     if (filters) {
       for (const filter of filters) {

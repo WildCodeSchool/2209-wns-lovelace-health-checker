@@ -104,7 +104,6 @@ export default class RequestSettingResolver {
     @Args() lazyEvent: LazyTableStateArgs,
     @Ctx() context: GlobalContext
   ): Promise<PageOfRequestSettingWithLastResult> {
-    // if (!context.user) throw Error(UNABLE_TO_FIND_USER_FROM_CONTEXT);
     return RequestSettingService.getPageOfRequestSettingWithLastResult(
       context.user?.id as string,
       lazyEvent
