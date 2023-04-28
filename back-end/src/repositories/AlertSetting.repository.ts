@@ -10,9 +10,7 @@ export default class AlertSettingRepository {
     this.repository = await getRepository(AlertSetting);
   }
 
-  protected static saveAlertSetting(
-    alertSetting: AlertSetting
-  ): Promise<AlertSetting> {
+  static saveAlertSetting(alertSetting: AlertSetting): Promise<AlertSetting> {
     return this.repository.save(alertSetting);
   }
 
@@ -37,7 +35,8 @@ export default class AlertSettingRepository {
   }
 
   static async getAlertSettingsByRequestSettingIdAndHttpStatusCode(
-    id: string, statusCode: number
+    id: string,
+    statusCode: number
   ): Promise<AlertSetting[]> {
     return this.repository.find({
       where: {
