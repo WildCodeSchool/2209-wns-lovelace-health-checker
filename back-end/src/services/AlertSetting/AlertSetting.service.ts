@@ -2,8 +2,10 @@ import AlertSetting, { AlertType } from "../../entities/AlertSetting.entity";
 import RequestSetting from "../../entities/RequestSetting.entity";
 import AlertSettingRepository from "../../repositories/AlertSetting.repository";
 import { HttpErrorStatusCode } from "../../utils/http-error-status-codes.enum";
+import { UNAUTHORIZED } from "../../utils/info-and-error-messages";
 
 export default class AlertSettingService extends AlertSettingRepository {
+  // OK
   static async createAlertSetting(
     httpStatusCode: number,
     requestSetting: RequestSetting,
@@ -13,38 +15,23 @@ export default class AlertSettingService extends AlertSettingRepository {
     return await this.saveAlertSetting(alertSetting);
   }
 
-  static async setEmailAlerts(
-    customEmailErrors: number[] | undefined,
-    allErrorsEnabledEmail: boolean,
-    createdRequestSetting: RequestSetting
-  ) {
-    if (customEmailErrors && customEmailErrors.length) {
-      this.setCustomAlerts(
-        AlertType.EMAIL,
-        createdRequestSetting,
-        customEmailErrors
-      );
-    } else if (allErrorsEnabledEmail) {
-      this.setAllAlerts(AlertType.EMAIL, createdRequestSetting);
+  // OK, BUT ONE TEST IS BROKEN
+  static setAlertsByType = async (
+    requestSetting: RequestSetting,
+    type: AlertType,
+    allErrorsEnabled: boolean,
+    customErrors: number[] | undefined
+  ) => {
+    if (customErrors && customErrors.length && allErrorsEnabled) {
+      throw Error(UNAUTHORIZED);
+    } else if (customErrors && customErrors.length) {
+      this.setCustomAlerts(type, requestSetting, customErrors);
+    } else if (allErrorsEnabled) {
+      this.setAllAlerts(type, requestSetting);
     }
-  }
+  };
 
-  static async setPushAlerts(
-    customPushErrors: number[] | undefined,
-    allErrorsEnabledPush: boolean,
-    createdRequestSetting: RequestSetting
-  ) {
-    if (customPushErrors && customPushErrors.length) {
-      this.setCustomAlerts(
-        AlertType.PUSH,
-        createdRequestSetting,
-        customPushErrors
-      );
-    } else if (allErrorsEnabledPush) {
-      this.setAllAlerts(AlertType.PUSH, createdRequestSetting);
-    }
-  }
-
+  // OK
   static setCustomAlerts = async (
     type: AlertType,
     requestSetting: RequestSetting,
@@ -55,6 +42,7 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
+  // OK
   static setAllAlerts = async (
     type: AlertType,
     requestSetting: RequestSetting
@@ -70,7 +58,8 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
-  static getAlertListByTypeForGivenRequestSetting = async (
+  // OK
+  static getCompleteAlertListByTypeForGivenRequestSetting = async (
     type: AlertType,
     requestSetting: RequestSetting
   ) => {
@@ -106,12 +95,14 @@ export default class AlertSettingService extends AlertSettingRepository {
     });
   };
 
+  // OK
   static getRequestExistingAlerts = async (requestSetting: RequestSetting) => {
     return await AlertSettingRepository.getAlertSettingsByRequestSettingId(
       requestSetting.id
     );
   };
 
+  // OK
   static getRequestAlertsByType = (alerts: AlertSetting[], type: AlertType) => {
     return alerts.filter((alert) => {
       return alert.type === type;
@@ -170,7 +161,7 @@ export default class AlertSettingService extends AlertSettingRepository {
       if (allErrorsEnabledEmail) {
         // Get all possible alerts
         const emailAlertFullList =
-          await this.getAlertListByTypeForGivenRequestSetting(
+          await this.getCompleteAlertListByTypeForGivenRequestSetting(
             AlertType.EMAIL,
             updatedRequestSetting
           );
@@ -198,7 +189,7 @@ export default class AlertSettingService extends AlertSettingRepository {
       // Check if user wants to activate all push alerts
       if (allErrorsEnabledPush) {
         const pushAlertFullList =
-          await this.getAlertListByTypeForGivenRequestSetting(
+          await this.getCompleteAlertListByTypeForGivenRequestSetting(
             AlertType.PUSH,
             updatedRequestSetting
           );
@@ -223,16 +214,18 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
     // If there's no existing alerts for updated request, just use same methods than request creation
     else {
-      await AlertSettingService.setPushAlerts(
-        customPushErrors,
+      await AlertSettingService.setAlertsByType(
+        updatedRequestSetting,
+        AlertType.PUSH,
         allErrorsEnabledPush,
-        updatedRequestSetting
+        customPushErrors
       );
 
-      await AlertSettingService.setEmailAlerts(
-        customEmailErrors,
+      await AlertSettingService.setAlertsByType(
+        updatedRequestSetting,
+        AlertType.EMAIL,
         allErrorsEnabledEmail,
-        updatedRequestSetting
+        customEmailErrors
       );
     }
   };

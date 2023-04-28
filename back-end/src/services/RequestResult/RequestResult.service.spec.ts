@@ -1,3 +1,4 @@
+/// <reference types="@types/jest" />;
 import RequestResultService from "./RequestResult.service";
 
 import {
