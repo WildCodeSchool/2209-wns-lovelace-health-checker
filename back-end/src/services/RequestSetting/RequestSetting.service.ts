@@ -1,9 +1,12 @@
+import { Raw } from "typeorm";
+
 import RequestSetting, {
   Frequency,
 } from "../../entities/RequestSetting.entity";
 import User, { Role } from "../../entities/User.entity";
 import PageOfRequestSettingWithLastResult from "../../models/PageOfRequestSettingWithLastResult";
 import RequestSettingWithLastResult from "../../models/RequestSettingWithLastResult";
+import { HeaderElement } from "../../models/header-element.model";
 import RequestResultRepository from "../../repositories/RequestResult.repository";
 import RequestSettingRepository from "../../repositories/RequestSetting.repository";
 import {
@@ -16,6 +19,8 @@ import {
   URL_ALREADY_EXISTS,
 } from "../../utils/info-and-error-messages";
 import AlertSettingService from "../AlertSetting/AlertSetting.service";
+import { LazyTableStateArgs } from "../../resolvers/RequestSetting/RequestSetting.input";
+import { AlertType } from "../../entities/AlertSetting.entity";
 
 export default class RequestSettingService extends RequestSettingRepository {
   static createRequest = async (
@@ -51,16 +56,17 @@ export default class RequestSettingService extends RequestSettingRepository {
 
     const savedRequestSetting = await this.saveRequestSetting(requestSetting);
 
-    await AlertSettingService.setPushAlerts(
-      customPushErrors,
+    await AlertSettingService.setAlertsByType(
+      savedRequestSetting,
+      AlertType.PUSH,
       allErrorsEnabledPush,
-      savedRequestSetting
+      customPushErrors
     );
-
-    await AlertSettingService.setEmailAlerts(
-      customEmailErrors,
+    await AlertSettingService.setAlertsByType(
+      savedRequestSetting,
+      AlertType.EMAIL,
       allErrorsEnabledEmail,
-      savedRequestSetting
+      customEmailErrors
     );
 
     return savedRequestSetting;
@@ -77,7 +83,7 @@ export default class RequestSettingService extends RequestSettingRepository {
     id?: string
   ) => {
     if (headers) {
-      await this.checkIfHeadersAreRightFormatted(headers);
+      await this.throwErrorIfHeadersAreBadlyFormatted(headers);
     }
     await this.checkIfNonPremiumUserTryToUsePremiumFrequency(user, frequency);
     await this.checkIfNonPremiumUserTryToUseCustomError(
@@ -160,7 +166,9 @@ export default class RequestSettingService extends RequestSettingRepository {
     toUpdateRequestSetting.url = url;
     toUpdateRequestSetting.frequency = frequency;
     toUpdateRequestSetting.isActive = isActive;
-    toUpdateRequestSetting.name = name;
+    if (name === undefined) {
+      toUpdateRequestSetting.name = "";
+    } else toUpdateRequestSetting.name = name;
     if (headers === undefined) {
       toUpdateRequestSetting.headers = "";
     } else toUpdateRequestSetting.headers = headers;
@@ -232,18 +240,20 @@ export default class RequestSettingService extends RequestSettingRepository {
     );
   };
 
-  static headerHasAllHaveProperties = async (array: any[]) => {
-    return array.every(function (element) {
+  static failIfHeadersNotHaveKeysPropertyAndValue = (
+    array: HeaderElement[]
+  ) => {
+    return array.every((headerElement: HeaderElement) => {
       return (
-        element.hasOwnProperty("property") && element.hasOwnProperty("value")
+        headerElement.hasOwnProperty("property") &&
+        headerElement.hasOwnProperty("value")
       );
     });
   };
 
-  static checkIfHeadersAreRightFormatted = async (headers: string) => {
-    const headersFormatIsCorrect = this.headerHasAllHaveProperties(
-      JSON.parse(headers)
-    );
+  static throwErrorIfHeadersAreBadlyFormatted = async (headers: string) => {
+    const headersFormatIsCorrect =
+      this.failIfHeadersNotHaveKeysPropertyAndValue(JSON.parse(headers));
     if (!headersFormatIsCorrect) throw Error(INCORRECT_HEADER_FORMAT);
   };
 
@@ -270,44 +280,135 @@ export default class RequestSettingService extends RequestSettingRepository {
       throw Error(ALERTS_ONLY_FOR_PREMIUM_USERS);
   };
 
+  // TODO : test this method
   static getPageOfRequestSettingWithLastResult = async (
-    pageSize: number,
-    pageNumber: number,
-    userId: string
+    userId: string,
+    lazyTableState: LazyTableStateArgs
   ): Promise<PageOfRequestSettingWithLastResult> => {
+    let { rows, page, sortField, sortOrder, filters } = lazyTableState;
+    let where = {
+      user: { id: userId },
+    };
+
+    const take = rows;
+    const skip = (page - 1) * rows;
+    const order: { [key: string]: string } = {};
+    if (sortField) {
+      order[sortField] = sortOrder === 1 ? "ASC" : "DESC";
+    }
+
+    if (filters) {
+      for (const filter of filters) {
+        if (filter.operator === "or") {
+          where = {
+            ...where,
+            [filter.field]: Raw((alias) => {
+              return filter.constraints
+                .map((constraint) => {
+                  switch (constraint.matchMode) {
+                    case "contains":
+                      return `${alias} LIKE '%${constraint.value}%'`;
+                    case "notContains":
+                      return `${alias} NOT LIKE '%${constraint.value}%'`;
+                    case "startsWith":
+                      return `${alias} LIKE '${constraint.value}%'`;
+                    case "endsWith":
+                      return `${alias} LIKE '%${constraint.value}'`;
+                    case "equals":
+                      return `${alias} = '${constraint.value}'`;
+                    case "notEquals":
+                      return `${alias} <> '${constraint.value}'`;
+                    case "in":
+                      return `${alias} IN (${constraint.value})`;
+                    case "lt":
+                      return `${alias} < ${constraint.value}`;
+                    case "lte":
+                      return `${alias} <= ${constraint.value}`;
+                    case "gt":
+                      return `${alias} > ${constraint.value}`;
+                    case "gte":
+                      return `${alias} >= ${constraint.value}`;
+                    default:
+                      throw new Error(
+                        `Invalid matchMode: ${constraint.matchMode}`
+                      );
+                  }
+                })
+                .join(" OR ");
+            }),
+          };
+        } else if (filter.operator === "and") {
+          where = {
+            ...where,
+            [filter.field]: Raw((alias) => {
+              return filter.constraints
+                .map((constraint) => {
+                  switch (constraint.matchMode) {
+                    case "contains":
+                      return `${alias} LIKE '%${constraint.value}%'`;
+                    case "notContains":
+                      return `${alias} NOT LIKE '%${constraint.value}%'`;
+                    case "startsWith":
+                      return `${alias} LIKE '${constraint.value}%'`;
+                    case "endsWith":
+                      return `${alias} LIKE '%${constraint.value}'`;
+                    case "equals":
+                      return `${alias} = '${constraint.value}'`;
+                    case "notEquals":
+                      return `${alias} <> '${constraint.value}'`;
+                    case "in":
+                      return `${alias} IN (${constraint.value})`;
+                    case "lt":
+                      return `${alias} < ${constraint.value}`;
+                    case "lte":
+                      return `${alias} <= ${constraint.value}`;
+                    case "gt":
+                      return `${alias} > ${constraint.value}`;
+                    case "gte":
+                      return `${alias} >= ${constraint.value}`;
+                    default:
+                      throw new Error(
+                        `Invalid matchMode: ${constraint.matchMode}`
+                      );
+                  }
+                })
+                .join(" AND ");
+            }),
+          };
+        }
+      }
+    }
+
     const [requestSettings, totalCount] = await this.repository.findAndCount({
-      where: { user: { id: userId } },
-      take: pageSize,
-      skip: (pageNumber - 1) * pageSize,
-      order: {
-        createdAt: "DESC",
-      },
+      where,
+      take,
+      skip,
+      order,
     });
 
-    const numberOfRemainingItems = totalCount - pageNumber * pageSize;
     const requestSettingsWithLastResult = await Promise.all(
       requestSettings.map(async (requestSetting) => {
         const lastRequestResult =
           await RequestResultRepository.getMostRecentByRequestSettingId(
             requestSetting.id
           );
-        if (lastRequestResult)
+        if (lastRequestResult) {
           return new RequestSettingWithLastResult(
             requestSetting,
             lastRequestResult
           );
-        else return new RequestSettingWithLastResult(requestSetting, null);
+        }
+        return new RequestSettingWithLastResult(requestSetting, null);
       })
     );
 
     return {
       totalCount,
-      nextPageNumber: numberOfRemainingItems > 0 ? pageNumber + 1 : null,
       requestSettingsWithLastResult,
     };
   };
 
-  public static getRequestSettingsByFrequency = async (
+  static getRequestSettingsByFrequency = async (
     frequency: Frequency
   ): Promise<RequestSetting[]> => {
     return await RequestSettingRepository.getRequestSettingsByFrequency(
@@ -321,17 +422,17 @@ export default class RequestSettingService extends RequestSettingRepository {
     const requestSetting = await RequestSettingRepository.getRequestSettingById(
       id
     );
-    if (!requestSetting) throw Error(REQUEST_DOESNT_EXIST);
+    if (requestSetting) {
+      const lastRequestResult =
+        await RequestResultRepository.getMostRecentByRequestSettingId(id);
 
-    const lastRequestResult =
-      await RequestResultRepository.getMostRecentByRequestSettingId(id);
-
-    if (lastRequestResult)
-      return new RequestSettingWithLastResult(
-        requestSetting,
-        lastRequestResult
-      );
-    else return new RequestSettingWithLastResult(requestSetting, null);
+      if (lastRequestResult)
+        return new RequestSettingWithLastResult(
+          requestSetting,
+          lastRequestResult
+        );
+      else return new RequestSettingWithLastResult(requestSetting, null);
+    }
   };
 
   static deleteRequestSettingById = async (

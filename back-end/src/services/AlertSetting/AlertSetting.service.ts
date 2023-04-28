@@ -2,8 +2,10 @@ import AlertSetting, { AlertType } from "../../entities/AlertSetting.entity";
 import RequestSetting from "../../entities/RequestSetting.entity";
 import AlertSettingRepository from "../../repositories/AlertSetting.repository";
 import { HttpErrorStatusCode } from "../../utils/http-error-status-codes.enum";
+import { UNAUTHORIZED } from "../../utils/info-and-error-messages";
 
 export default class AlertSettingService extends AlertSettingRepository {
+  // OK
   static async createAlertSetting(
     httpStatusCode: number,
     requestSetting: RequestSetting,
@@ -13,38 +15,23 @@ export default class AlertSettingService extends AlertSettingRepository {
     return await this.saveAlertSetting(alertSetting);
   }
 
-  static async setEmailAlerts(
-    customEmailErrors: number[] | undefined,
-    allErrorsEnabledEmail: boolean,
-    createdRequestSetting: RequestSetting
-  ) {
-    if (customEmailErrors && customEmailErrors.length) {
-      this.setCustomAlerts(
-        AlertType.EMAIL,
-        createdRequestSetting,
-        customEmailErrors
-      );
-    } else if (allErrorsEnabledEmail) {
-      this.setAllAlerts(AlertType.EMAIL, createdRequestSetting);
+  // OK, BUT ONE TEST IS BROKEN
+  static setAlertsByType = async (
+    requestSetting: RequestSetting,
+    type: AlertType,
+    allErrorsEnabled: boolean,
+    customErrors: number[] | undefined
+  ) => {
+    if (customErrors && customErrors.length && allErrorsEnabled) {
+      throw Error(UNAUTHORIZED);
+    } else if (customErrors && customErrors.length) {
+      this.setCustomAlerts(type, requestSetting, customErrors);
+    } else if (allErrorsEnabled) {
+      this.setAllAlerts(type, requestSetting);
     }
-  }
+  };
 
-  static async setPushAlerts(
-    customPushErrors: number[] | undefined,
-    allErrorsEnabledPush: boolean,
-    createdRequestSetting: RequestSetting
-  ) {
-    if (customPushErrors && customPushErrors.length) {
-      this.setCustomAlerts(
-        AlertType.PUSH,
-        createdRequestSetting,
-        customPushErrors
-      );
-    } else if (allErrorsEnabledPush) {
-      this.setAllAlerts(AlertType.PUSH, createdRequestSetting);
-    }
-  }
-
+  // OK
   static setCustomAlerts = async (
     type: AlertType,
     requestSetting: RequestSetting,
@@ -55,6 +42,7 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
+  // OK
   static setAllAlerts = async (
     type: AlertType,
     requestSetting: RequestSetting
@@ -70,11 +58,27 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
+  // OK
+  static getCompleteAlertListByTypeForGivenRequestSetting = async (
+    type: AlertType,
+    requestSetting: RequestSetting
+  ) => {
+    let alertList = [];
+    for (const httpErrorStatusCode in HttpErrorStatusCode) {
+      if (!isNaN(Number(httpErrorStatusCode))) {
+        alertList.push(
+          new AlertSetting(requestSetting, parseInt(httpErrorStatusCode), type)
+        );
+      }
+    }
+    return alertList;
+  };
+
   static updatePreventAlertUntilOfAlertSettingByType = async (
     preventAlertUntil: Date,
     requestSetting: RequestSetting,
     type: AlertType,
-    httpStatusCode : number
+    httpStatusCode: number
   ): Promise<void> => {
     const alertSettings: AlertSetting[] =
       await AlertSettingRepository.getAlertSettingsByRequestSettingId(
@@ -91,6 +95,20 @@ export default class AlertSettingService extends AlertSettingRepository {
     });
   };
 
+  // OK
+  static getRequestExistingAlerts = async (requestSetting: RequestSetting) => {
+    return await AlertSettingRepository.getAlertSettingsByRequestSettingId(
+      requestSetting.id
+    );
+  };
+
+  // OK
+  static getRequestAlertsByType = (alerts: AlertSetting[], type: AlertType) => {
+    return alerts.filter((alert) => {
+      return alert.type === type;
+    });
+  };
+
   static updateAlerts = async (
     updatedRequestSetting: RequestSetting,
     customEmailErrors: number[] | undefined,
@@ -98,96 +116,134 @@ export default class AlertSettingService extends AlertSettingRepository {
     allErrorsEnabledEmail: boolean,
     allErrorsEnabledPush: boolean
   ) => {
-    const existingAlerts: AlertSetting[] =
-      await AlertSettingRepository.getAlertSettingsByRequestSettingId(
-        updatedRequestSetting.id
+    const existingAlerts = await this.getRequestExistingAlerts(
+      updatedRequestSetting
+    );
+
+    if (existingAlerts && existingAlerts.length > 0) {
+      const emailAlerts = this.getRequestAlertsByType(
+        existingAlerts,
+        AlertType.EMAIL
+      );
+      const pushAlerts = this.getRequestAlertsByType(
+        existingAlerts,
+        AlertType.PUSH
       );
 
-    // In case there's existing alerts for the given request
-    if (existingAlerts.length > 0) {
-      const emailAlerts = existingAlerts.filter((alert) => {
-        return alert.type === AlertType.EMAIL;
-      });
+      let customEmailErrorsToAdd: number[] = [];
+      let customEmailErrorsToDelete: AlertSetting[] = [];
+      let customPushErrorsToAdd: number[] = [];
+      let customPushErrorsToDelete: AlertSetting[] = [];
 
-      const pushAlerts = existingAlerts.filter((alert) => {
-        return alert.type === AlertType.PUSH;
-      });
+      // If not all errors are set, check if custom errors are given and we split them into toAdd/toRemove errors by type.
+      if (!allErrorsEnabledEmail) {
+        customEmailErrorsToAdd = this.getErrorCodesToAdd(
+          customEmailErrors,
+          emailAlerts
+        );
+        customEmailErrorsToDelete = this.getErrorCodesToRemove(
+          customEmailErrors,
+          emailAlerts
+        );
+      }
+      if (!allErrorsEnabledPush) {
+        customPushErrorsToAdd = this.getErrorCodesToAdd(
+          customPushErrors,
+          pushAlerts
+        );
+        customPushErrorsToDelete = this.getErrorCodesToRemove(
+          customPushErrors,
+          pushAlerts
+        );
+      }
 
-      // We check if user wants to activate all alerts by type
+      // Check if user wants to activate all email alerts
       if (allErrorsEnabledEmail) {
-        await this.removeAllAlertsAndSetAgain(
-          AlertType.EMAIL,
+        // Get all possible alerts
+        const emailAlertFullList =
+          await this.getCompleteAlertListByTypeForGivenRequestSetting(
+            AlertType.EMAIL,
+            updatedRequestSetting
+          );
+        this.addGivenAlertsThatDontAlreadyExistByType(
+          emailAlertFullList,
           emailAlerts,
-          updatedRequestSetting
-        );
-      }
-
-      if (allErrorsEnabledPush) {
-        await this.removeAllAlertsAndSetAgain(
-          AlertType.PUSH,
-          pushAlerts,
-          updatedRequestSetting
-        );
-      }
-
-      // Then, we check if custom errors are given and we split them into toAdd/toRemove errors by type.
-      let customEmailErrorsToAdd = this.getErrorCodesToAdd(
-        customEmailErrors,
-        emailAlerts
-      );
-      let customEmailErrorsToDelete = this.getErrorCodesToRemove(
-        customEmailErrors,
-        emailAlerts
-      );
-      let customPushErrorsToAdd = this.getErrorCodesToAdd(
-        customPushErrors,
-        pushAlerts
-      );
-      let customPushErrorsToDelete = this.getErrorCodesToRemove(
-        customPushErrors,
-        pushAlerts
-      );
-
-      // Then, we add custom errors
-      if (customEmailErrorsToAdd.length > 0) {
-        await this.addErrorCodes(
           AlertType.EMAIL,
-          customEmailErrorsToAdd,
           updatedRequestSetting
         );
+      } else {
+        // Then, we add custom errors
+        if (customEmailErrorsToAdd.length > 0) {
+          await this.addErrorCodes(
+            AlertType.EMAIL,
+            customEmailErrorsToAdd,
+            updatedRequestSetting
+          );
+        }
+        // And to conclude, we remove expected errors
+        if (customEmailErrorsToDelete.length > 0) {
+          await AlertSettingRepository.remove(customEmailErrorsToDelete);
+        }
       }
 
-      if (customPushErrorsToAdd.length > 0) {
-        await this.addErrorCodes(
+      // Check if user wants to activate all push alerts
+      if (allErrorsEnabledPush) {
+        const pushAlertFullList =
+          await this.getCompleteAlertListByTypeForGivenRequestSetting(
+            AlertType.PUSH,
+            updatedRequestSetting
+          );
+        this.addGivenAlertsThatDontAlreadyExistByType(
+          pushAlertFullList,
+          pushAlerts,
           AlertType.PUSH,
-          customPushErrorsToAdd,
           updatedRequestSetting
         );
-      }
-
-      // And to conclude, we remove expected errors
-      if (customEmailErrorsToDelete.length > 0) {
-        await AlertSettingRepository.remove(customEmailErrorsToDelete);
-      }
-
-      if (customPushErrorsToDelete.length > 0) {
-        await AlertSettingRepository.remove(customPushErrorsToDelete);
+      } else {
+        if (customPushErrorsToAdd.length > 0) {
+          await this.addErrorCodes(
+            AlertType.PUSH,
+            customPushErrorsToAdd,
+            updatedRequestSetting
+          );
+        }
+        if (customPushErrorsToDelete.length > 0) {
+          await AlertSettingRepository.remove(customPushErrorsToDelete);
+        }
       }
     }
     // If there's no existing alerts for updated request, just use same methods than request creation
     else {
-      await AlertSettingService.setPushAlerts(
-        customPushErrors,
+      await AlertSettingService.setAlertsByType(
+        updatedRequestSetting,
+        AlertType.PUSH,
         allErrorsEnabledPush,
-        updatedRequestSetting
+        customPushErrors
       );
 
-      await AlertSettingService.setEmailAlerts(
-        customEmailErrors,
+      await AlertSettingService.setAlertsByType(
+        updatedRequestSetting,
+        AlertType.EMAIL,
         allErrorsEnabledEmail,
-        updatedRequestSetting
+        customEmailErrors
       );
     }
+  };
+
+  static addGivenAlertsThatDontAlreadyExistByType = async (
+    alertList: AlertSetting[],
+    existingAlertList: AlertSetting[],
+    type: AlertType,
+    requestSetting: RequestSetting
+  ) => {
+    alertList.forEach((alert: AlertSetting) => {
+      const isAlreadySet = existingAlertList.find(
+        (alreadySetAlert: AlertSetting) =>
+          alert.httpStatusCode === alreadySetAlert.httpStatusCode
+      );
+      if (!isAlreadySet)
+        this.createAlertSetting(alert.httpStatusCode, requestSetting, type);
+    });
   };
 
   static getErrorCodesToAdd = (
@@ -220,17 +276,6 @@ export default class AlertSettingService extends AlertSettingRepository {
       if (!customErrorFound) errorCodesToDelete.push(alertSetting);
     });
     return errorCodesToDelete;
-  };
-
-  static removeAllAlertsAndSetAgain = async (
-    type: AlertType,
-    existingAlerts: AlertSetting[],
-    requestSetting: RequestSetting
-  ) => {
-    for (const existingAlert of existingAlerts) {
-      await AlertSettingRepository.deleteById(existingAlert.id);
-    }
-    await AlertSettingService.setAllAlerts(type, requestSetting);
   };
 
   static addErrorCodes = async (
