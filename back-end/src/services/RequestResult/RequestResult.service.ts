@@ -2,8 +2,7 @@ import Alert from "../../entities/Alert.entity";
 import AlertSetting, { AlertType } from "../../entities/AlertSetting.entity";
 import RequestResult from "../../entities/RequestResult.entity";
 import RequestSetting from "../../entities/RequestSetting.entity";
-import User, { Role } from "../../entities/User.entity";
-import { Status } from "../../entities/User.entity";
+import User from "../../entities/User.entity";
 import {
   sendMessageOnAlertEmailQueue,
   sendMessageOnAlertPushQueue,
@@ -14,16 +13,10 @@ import AlertSettingService from "../AlertSetting/AlertSetting.service";
 import RequestSettingService from "../RequestSetting/RequestSetting.service";
 
 export default class RequestResultService extends RequestResultRepository {
-  public static getRequestResultById = async (
-    id: string
-  ): Promise<RequestResult | null> => {
-    return await RequestResultRepository.getRequestResultById(id);
-  };
-
   private static checkUrl = async (
     requestSetting: RequestSetting,
     isHomepageRequest: boolean = false
-  ) => {
+  ): Promise<RequestResult> => {
     try {
       let response;
       const startTimer: number = Date.now();
@@ -108,13 +101,20 @@ export default class RequestResultService extends RequestResultRepository {
   private static convertHeadersArrayStringToHeaders = (
     headersArrayString: string
   ): any => {
+    // TODO: type to HeaderElement[]
     const parsedHeadersArray: any[] = JSON.parse(headersArrayString);
     const headers: any = {};
     parsedHeadersArray.forEach((e) => (headers[e.property] = e.value));
     return headers;
   };
 
-  // Rabbit consumers will use this method
+  public static getRequestResultById = async (
+    id: string
+  ): Promise<RequestResult | null> => {
+    return await RequestResultRepository.getRequestResultById(id);
+  };
+
+  // Method used by Rabbit consumers
   public static checkUrlOfAutomatedRequest = async (
     message: any
   ): Promise<void> => {
@@ -124,21 +124,6 @@ export default class RequestResultService extends RequestResultRepository {
       toCheckForExistanceRequestSetting.id
     );
     if (requestSetting && requestSetting.isActive) {
-      // Return if user becomes inactive before message is consumed
-      if (requestSetting.user.status !== Status.ACTIVE) {
-        return;
-      }
-      // Return if user becomes non premium before message is consumed
-      if (requestSetting.isRequestPremium()) {
-        if (
-          !(
-            requestSetting.user.role === Role.PREMIUM ||
-            requestSetting.user.role === Role.ADMIN
-          )
-        ) {
-          return;
-        }
-      }
       const requestResult: RequestResult =
         await this.checkUrlOfRequestSettingByRequestSetting(requestSetting);
       // getIsAvailable() return false if status is 4xx or 5xx
@@ -152,36 +137,27 @@ export default class RequestResultService extends RequestResultRepository {
         // If we find at least 1 alertSetting
         if (alertSettings.length) {
           // We create an alert
-          const alert: Alert = await AlertService.createAlert(requestResult);
-          if (alert) {
-            // Then we send a message for each alertSetting found
-            alertSettings.forEach((alertSetting) => {
+          await AlertService.createAlert(requestResult);
+          // Then we send a message for each alertSetting found
+          alertSettings.forEach((alertSetting) => {
+            // If preventAlertUntil is older than now
+            if (
+              alertSetting.preventAlertUntil === null ||
+              alertSetting.preventAlertUntil.getTime() < Date.now()
+            ) {
               if (alertSetting.type === AlertType.EMAIL) {
-                // If preventAlertUntil is older than now
-                if (
-                  alertSetting.preventAlertUntil === null ||
-                  alertSetting.preventAlertUntil.getTime() < Date.now()
-                ) {
-                  // Send requestResult as message to queue
-                  sendMessageOnAlertEmailQueue(requestResult);
-                }
+                sendMessageOnAlertEmailQueue(requestResult);
               } else if (alertSetting.type === AlertType.PUSH) {
-                // If preventAlertUntil is older than now
-                if (
-                  alertSetting.preventAlertUntil === null ||
-                  alertSetting.preventAlertUntil.getTime() < Date.now()
-                ) {
-                  // Send requestResult as message to queue
-                  sendMessageOnAlertPushQueue(requestResult);
-                }
+                sendMessageOnAlertPushQueue(requestResult);
               }
-            });
-          }
+            }
+          });
         }
       }
     }
   };
 
+  // Method used by manual execution of request and by checkUrlOfAutomatedRequest()
   public static checkUrlOfRequestSettingByRequestSetting = async (
     requestSetting: RequestSetting
   ): Promise<RequestResult> => {
@@ -193,6 +169,7 @@ export default class RequestResultService extends RequestResultRepository {
     return await RequestResultRepository.saveRequestResult(requestResultToSave);
   };
 
+  // Method used by homepage
   public static checkUrlForHomepage = async (
     url: string
   ): Promise<RequestResult> => {
