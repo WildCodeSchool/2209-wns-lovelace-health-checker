@@ -215,14 +215,159 @@ describe("AlertSetting integration", () => {
         expect(setAllAlertsSpy).toBeCalledWith(AlertType.EMAIL, requestSetting); */
       });
     });
+  });
 
-    describe("setCustomAlerts", () => {
-      describe("if two custom errors", () => {
-        it("calls createAlertSetting two times", async () => {
-          const createAlertSettingSpy = jest.spyOn(
-            AlertSettingService,
-            "createAlertSetting"
-          );
+  describe("setCustomAlerts", () => {
+    describe("if two custom errors", () => {
+      it("calls createAlertSetting two times", async () => {
+        const createAlertSettingSpy = jest.spyOn(
+          AlertSettingService,
+          "createAlertSetting"
+        );
+        const requestSetting = await RequestSettingService.createRequest(
+          url,
+          frequency,
+          name,
+          headers,
+          isActive,
+          allErrorsEnabledEmail,
+          allErrorsEnabledPush,
+          customEmailErrors,
+          customPushErrors,
+          user
+        );
+        await AlertSettingService.setCustomAlerts(
+          AlertType.EMAIL,
+          requestSetting,
+          [400, 401]
+        );
+        expect(createAlertSettingSpy).toBeCalledTimes(2);
+      });
+    });
+    describe("if no custom errors", () => {
+      it("not calls createAlertSetting", async () => {
+        const createAlertSettingSpy = jest.spyOn(
+          AlertSettingService,
+          "createAlertSetting"
+        );
+        const requestSetting = await RequestSettingService.createRequest(
+          url,
+          frequency,
+          name,
+          headers,
+          isActive,
+          allErrorsEnabledEmail,
+          allErrorsEnabledPush,
+          customEmailErrors,
+          customPushErrors,
+          user
+        );
+        await AlertSettingService.setCustomAlerts(
+          AlertType.EMAIL,
+          requestSetting,
+          []
+        );
+        expect(createAlertSettingSpy).toBeCalledTimes(0);
+      });
+    });
+  });
+
+  describe("setAllAlerts", () => {
+    it("count of HttpErrorStatusCode for given type equals count of alert settings saved in database", async () => {
+      const httpErrorStatusCodes: any[] = [];
+      for (const httpErrorStatusCode in HttpErrorStatusCode) {
+        if (!isNaN(Number(httpErrorStatusCode)))
+          httpErrorStatusCodes.push(httpErrorStatusCode);
+      }
+      const requestSetting = await RequestSettingService.createRequest(
+        url,
+        frequency,
+        name,
+        headers,
+        isActive,
+        allErrorsEnabledEmail,
+        allErrorsEnabledPush,
+        customEmailErrors,
+        customPushErrors,
+        user
+      );
+      await AlertSettingService.setAllAlerts(AlertType.EMAIL, requestSetting);
+      const createdAlerts = await AlertSettingService.getRequestExistingAlerts(
+        requestSetting
+      );
+      expect(createdAlerts).toHaveLength(httpErrorStatusCodes.length);
+    });
+  });
+
+  describe("getCompleteAlertListByTypeForGivenRequestSetting", () => {
+    it("returns all alerts by type for given request", async () => {
+      const httpErrorStatusCodes: any[] = [];
+      for (const httpErrorStatusCode in HttpErrorStatusCode) {
+        if (!isNaN(Number(httpErrorStatusCode)))
+          httpErrorStatusCodes.push(httpErrorStatusCode);
+      }
+      const requestSetting = await RequestSettingService.createRequest(
+        url,
+        frequency,
+        name,
+        headers,
+        isActive,
+        allErrorsEnabledEmail,
+        allErrorsEnabledPush,
+        customEmailErrors,
+        customPushErrors,
+        user
+      );
+
+      const fullEmailAlertList =
+        await AlertSettingService.getCompleteAlertListByTypeForGivenRequestSetting(
+          AlertType.EMAIL,
+          requestSetting
+        );
+      expect(fullEmailAlertList).toHaveLength(httpErrorStatusCodes.length);
+    });
+  });
+
+  describe("getRequestExistingAlerts", () => {
+    it("calls getAlertSettingsByRequestSettingId once with requestSetting id", async () => {
+      const getAlertSettingsByRequestSettingIdSpy = jest.spyOn(
+        AlertSettingRepository,
+        "getAlertSettingsByRequestSettingId"
+      );
+      const requestSetting = await RequestSettingService.createRequest(
+        url,
+        frequency,
+        name,
+        headers,
+        isActive,
+        allErrorsEnabledEmail,
+        allErrorsEnabledPush,
+        customEmailErrors,
+        customPushErrors,
+        user
+      );
+      await AlertSettingService.getRequestExistingAlerts(requestSetting);
+      expect(getAlertSettingsByRequestSettingIdSpy).toHaveBeenCalledTimes(1);
+      expect(getAlertSettingsByRequestSettingIdSpy).toHaveBeenCalledWith(
+        requestSetting.id
+      );
+    });
+  });
+
+  describe("getRequestAlertsByType", () => {
+    describe("when empty alert array", () => {
+      it("returns empty array", () => {
+        let alerts: AlertSetting[] = [];
+        const result = AlertSettingService.getRequestAlertsByType(
+          alerts,
+          AlertType.EMAIL
+        );
+        expect(result).toHaveLength(0);
+      });
+    });
+    describe("when array is not empty", () => {
+      describe("with two email type's alert", () => {
+        it("result's length equals two", async () => {
           const requestSetting = await RequestSettingService.createRequest(
             url,
             frequency,
@@ -235,160 +380,158 @@ describe("AlertSetting integration", () => {
             customPushErrors,
             user
           );
-          await AlertSettingService.setCustomAlerts(
-            AlertType.EMAIL,
-            requestSetting,
-            [400, 401]
-          );
-          expect(createAlertSettingSpy).toBeCalledTimes(2);
-        });
-      });
-      describe("if no custom errors", () => {
-        it("not calls createAlertSetting", async () => {
-          const createAlertSettingSpy = jest.spyOn(
-            AlertSettingService,
-            "createAlertSetting"
-          );
-          const requestSetting = await RequestSettingService.createRequest(
-            url,
-            frequency,
-            name,
-            headers,
-            isActive,
-            allErrorsEnabledEmail,
-            allErrorsEnabledPush,
-            customEmailErrors,
-            customPushErrors,
-            user
-          );
-          await AlertSettingService.setCustomAlerts(
-            AlertType.EMAIL,
-            requestSetting,
-            []
-          );
-          expect(createAlertSettingSpy).toBeCalledTimes(0);
-        });
-      });
-    });
-
-    describe("setAllAlerts", () => {
-      it("count of HttpErrorStatusCode for given type equals count of alert settings saved in database", async () => {
-        const httpErrorStatusCodes: any[] = [];
-        for (const httpErrorStatusCode in HttpErrorStatusCode) {
-          if (!isNaN(Number(httpErrorStatusCode)))
-            httpErrorStatusCodes.push(httpErrorStatusCode);
-        }
-        const requestSetting = await RequestSettingService.createRequest(
-          url,
-          frequency,
-          name,
-          headers,
-          isActive,
-          allErrorsEnabledEmail,
-          allErrorsEnabledPush,
-          customEmailErrors,
-          customPushErrors,
-          user
-        );
-        await AlertSettingService.setAllAlerts(AlertType.EMAIL, requestSetting);
-        const createdAlerts =
-          await AlertSettingService.getRequestExistingAlerts(requestSetting);
-        expect(createdAlerts).toHaveLength(httpErrorStatusCodes.length);
-      });
-    });
-
-    describe("getCompleteAlertListByTypeForGivenRequestSetting", () => {
-      it("returns all alerts by type for given request", async () => {
-        const httpErrorStatusCodes: any[] = [];
-        for (const httpErrorStatusCode in HttpErrorStatusCode) {
-          if (!isNaN(Number(httpErrorStatusCode)))
-            httpErrorStatusCodes.push(httpErrorStatusCode);
-        }
-        const requestSetting = await RequestSettingService.createRequest(
-          url,
-          frequency,
-          name,
-          headers,
-          isActive,
-          allErrorsEnabledEmail,
-          allErrorsEnabledPush,
-          customEmailErrors,
-          customPushErrors,
-          user
-        );
-
-        const fullEmailAlertList =
-          await AlertSettingService.getCompleteAlertListByTypeForGivenRequestSetting(
-            AlertType.EMAIL,
-            requestSetting
-          );
-        expect(fullEmailAlertList).toHaveLength(httpErrorStatusCodes.length);
-      });
-    });
-
-    describe("getRequestExistingAlerts", () => {
-      it("calls getAlertSettingsByRequestSettingId once with requestSetting id", async () => {
-        const getAlertSettingsByRequestSettingIdSpy = jest.spyOn(
-          AlertSettingRepository,
-          "getAlertSettingsByRequestSettingId"
-        );
-        const requestSetting = await RequestSettingService.createRequest(
-          url,
-          frequency,
-          name,
-          headers,
-          isActive,
-          allErrorsEnabledEmail,
-          allErrorsEnabledPush,
-          customEmailErrors,
-          customPushErrors,
-          user
-        );
-        await AlertSettingService.getRequestExistingAlerts(requestSetting);
-        expect(getAlertSettingsByRequestSettingIdSpy).toHaveBeenCalledTimes(1);
-        expect(getAlertSettingsByRequestSettingIdSpy).toHaveBeenCalledWith(
-          requestSetting.id
-        );
-      });
-    });
-
-    describe("getRequestAlertsByType", () => {
-      describe("when empty alert array", () => {
-        it("returns empty array", () => {
           let alerts: AlertSetting[] = [];
+          alerts.push(new AlertSetting(requestSetting, 400, AlertType.EMAIL));
+          alerts.push(new AlertSetting(requestSetting, 401, AlertType.EMAIL));
           const result = AlertSettingService.getRequestAlertsByType(
             alerts,
             AlertType.EMAIL
           );
-          expect(result).toHaveLength(0);
-        });
-      });
-      describe("when array is not empty", () => {
-        describe("with two email type's alert", () => {
-          it("result's length equals two", async () => {
-            const requestSetting = await RequestSettingService.createRequest(
-              url,
-              frequency,
-              name,
-              headers,
-              isActive,
-              allErrorsEnabledEmail,
-              allErrorsEnabledPush,
-              customEmailErrors,
-              customPushErrors,
-              user
-            );
-            let alerts: AlertSetting[] = [];
-            alerts.push(new AlertSetting(requestSetting, 400, AlertType.EMAIL));
-            alerts.push(new AlertSetting(requestSetting, 401, AlertType.EMAIL));
-            const result = AlertSettingService.getRequestAlertsByType(
-              alerts,
-              AlertType.EMAIL
-            );
-            expect(result).toHaveLength(2);
-          });
+          expect(result).toHaveLength(2);
         });
       });
     });
   });
+
+  describe("updatePreventAlertDateByType", () => {
+    it("calls getAlertSettingsByRequestSettingId once with correct requestSetting ID", async () => {
+      const requestSetting = await RequestSettingService.createRequest(
+        url,
+        frequency,
+        name,
+        headers,
+        isActive,
+        allErrorsEnabledEmail,
+        allErrorsEnabledPush,
+        customEmailErrors,
+        customPushErrors,
+        user
+      );
+      await AlertSettingService.createAlertSetting(
+        400,
+        requestSetting,
+        AlertType.EMAIL
+      );
+      await AlertSettingService.updatePreventAlertDateByType(
+        new Date(),
+        requestSetting,
+        AlertType.EMAIL,
+        400
+      );
+      expect(
+        AlertSettingRepository.getAlertSettingsByRequestSettingId
+      ).toBeCalledTimes(1);
+      expect(
+        AlertSettingRepository.getAlertSettingsByRequestSettingId
+      ).toBeCalledWith(requestSetting.id);
+    });
+    describe("type and httpStatusCode exist for given requestSetting", () => {
+      it("update given requestSetting with preventAlertUntil parameter value", async () => {
+        const requestSetting = await RequestSettingService.createRequest(
+          url,
+          frequency,
+          name,
+          headers,
+          isActive,
+          allErrorsEnabledEmail,
+          allErrorsEnabledPush,
+          customEmailErrors,
+          customPushErrors,
+          user
+        );
+
+        await AlertSettingService.createAlertSetting(
+          400,
+          requestSetting,
+          AlertType.EMAIL
+        );
+
+        const beforeUpdateAlerts =
+          await AlertSettingService.getRequestExistingAlerts(requestSetting);
+
+        expect(beforeUpdateAlerts[0].preventAlertUntil).toEqual(null);
+
+        const preventAlertUntil = new Date();
+        await AlertSettingService.updatePreventAlertDateByType(
+          preventAlertUntil,
+          requestSetting,
+          AlertType.EMAIL,
+          400
+        );
+        const afterUpdateAlerts =
+          await AlertSettingService.getRequestExistingAlerts(requestSetting);
+
+        expect(afterUpdateAlerts[0].preventAlertUntil).toEqual(
+          preventAlertUntil
+        );
+      });
+    });
+  });
+
+  describe("addGivenAlertsThatDontAlreadyExistByType", () => {
+    describe("a not existing alert is given", () => {
+      it("creates new alertSetting linked to requestSetting", async () => {
+        const requestSetting = await RequestSettingService.createRequest(
+          url,
+          frequency,
+          name,
+          headers,
+          isActive,
+          allErrorsEnabledEmail,
+          allErrorsEnabledPush,
+          customEmailErrors,
+          customPushErrors,
+          user
+        );
+
+        const firstAlert = await AlertSettingService.createAlertSetting(
+          400,
+          requestSetting,
+          AlertType.EMAIL
+        );
+
+        const secondAlert = await AlertSettingService.createAlertSetting(
+          401,
+          requestSetting,
+          AlertType.EMAIL
+        );
+
+        const initialAlerts =
+          await AlertSettingService.getRequestExistingAlerts(requestSetting);
+        expect(initialAlerts).toHaveLength(2);
+
+        const firstNewAlert = new AlertSetting(
+          requestSetting,
+          401,
+          AlertType.EMAIL
+        );
+        const secondNewAlert = new AlertSetting(
+          requestSetting,
+          402,
+          AlertType.EMAIL
+        );
+        const existingAlertList = [firstAlert, secondAlert];
+        const alertList = [firstNewAlert, secondNewAlert];
+
+        await AlertSettingService.addGivenAlertsThatDontAlreadyExistByType(
+          alertList,
+          existingAlertList,
+          AlertType.EMAIL,
+          requestSetting
+        );
+
+        const afterUpdateAlerts =
+          await AlertSettingService.getRequestExistingAlerts(requestSetting);
+        expect(afterUpdateAlerts).toHaveLength(3);
+      });
+    });
+  });
+
+  describe("getErrorCodesToAdd", () => {});
+
+  describe("getErrorCodesToRemove", () => {});
+
+  describe("addErrorCodes", () => {});
+
+  describe("updateAlerts", () => {});
 });
