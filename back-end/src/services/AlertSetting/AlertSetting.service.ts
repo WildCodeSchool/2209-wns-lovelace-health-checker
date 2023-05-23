@@ -5,7 +5,6 @@ import { HttpErrorStatusCode } from "../../utils/http-error-status-codes.enum";
 import { UNAUTHORIZED } from "../../utils/info-and-error-messages";
 
 export default class AlertSettingService extends AlertSettingRepository {
-  // OK
   static async createAlertSetting(
     httpStatusCode: number,
     requestSetting: RequestSetting,
@@ -15,7 +14,7 @@ export default class AlertSettingService extends AlertSettingRepository {
     return await this.saveAlertSetting(alertSetting);
   }
 
-  // OK, BUT ONE TEST IS BROKEN
+  // TODO : A test is missing
   static setAlertsByType = async (
     requestSetting: RequestSetting,
     type: AlertType,
@@ -31,7 +30,6 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
-  // OK
   static setCustomAlerts = async (
     type: AlertType,
     requestSetting: RequestSetting,
@@ -42,7 +40,6 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
-  // OK
   static setAllAlerts = async (
     type: AlertType,
     requestSetting: RequestSetting
@@ -58,7 +55,6 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
-  // OK
   static getCompleteAlertListByTypeForGivenRequestSetting = async (
     type: AlertType,
     requestSetting: RequestSetting
@@ -74,7 +70,6 @@ export default class AlertSettingService extends AlertSettingRepository {
     return alertList;
   };
 
-  // OK
   static updatePreventAlertDateByType = async (
     preventAlertUntil: Date,
     requestSetting: RequestSetting,
@@ -96,14 +91,12 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
-  // OK
   static getRequestExistingAlerts = async (requestSetting: RequestSetting) => {
     return await AlertSettingRepository.getAlertSettingsByRequestSettingId(
       requestSetting.id
     );
   };
 
-  // OK
   // Returns the list of all possible alerts filtered by type
   static getRequestAlertsByType = (alerts: AlertSetting[], type: AlertType) => {
     return alerts.filter((alert) => {
@@ -111,6 +104,7 @@ export default class AlertSettingService extends AlertSettingRepository {
     });
   };
 
+  // TODO : Some tests are missing
   static updateAlerts = async (
     updatedRequestSetting: RequestSetting,
     customEmailErrors: number[] | undefined,
@@ -232,7 +226,6 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
-  // OK
   static addGivenAlertsThatDontAlreadyExistByType = async (
     alertList: AlertSetting[],
     existingAlertList: AlertSetting[],
@@ -260,6 +253,8 @@ export default class AlertSettingService extends AlertSettingRepository {
   ): number[] => {
     let errorCodesToAdd: number[] = [];
 
+    if (incomingCustomErrors && !incomingCustomErrors.length) return [];
+
     incomingCustomErrors?.forEach((incomingCustomError: number) => {
       let isAlertSettingFound = existingCustomErrors.find(
         (alertSetting: AlertSetting) =>
@@ -274,16 +269,18 @@ export default class AlertSettingService extends AlertSettingRepository {
     incomingCustomErrors: number[] | undefined,
     existingCustomErrors: AlertSetting[]
   ): AlertSetting[] => {
-    let errorCodesToDelete: AlertSetting[] = [];
+    let errorCodesToRemove: AlertSetting[] = [];
+
+    if (incomingCustomErrors && !incomingCustomErrors.length) return [];
 
     existingCustomErrors?.forEach((alertSetting: AlertSetting) => {
       let customErrorFound = incomingCustomErrors?.find(
         (incomingCustomError: number) =>
           incomingCustomError === alertSetting.httpStatusCode
       );
-      if (!customErrorFound) errorCodesToDelete.push(alertSetting);
+      if (!customErrorFound) errorCodesToRemove.push(alertSetting);
     });
-    return errorCodesToDelete;
+    return errorCodesToRemove;
   };
 
   static addErrorCodes = async (
