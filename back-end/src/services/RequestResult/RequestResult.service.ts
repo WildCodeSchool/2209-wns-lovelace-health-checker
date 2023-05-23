@@ -146,9 +146,9 @@ export default class RequestResultService extends RequestResultRepository {
               alertSetting.preventAlertUntil.getTime() < Date.now()
             ) {
               if (alertSetting.type === AlertType.EMAIL) {
-                sendMessageOnAlertEmailQueue(requestResult);
+                await sendMessageOnAlertEmailQueue(requestResult);
               } else if (alertSetting.type === AlertType.PUSH) {
-                sendMessageOnAlertPushQueue(requestResult);
+                await sendMessageOnAlertPushQueue(requestResult);
               }
             }
           }
