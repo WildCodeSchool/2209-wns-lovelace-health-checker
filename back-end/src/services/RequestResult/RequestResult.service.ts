@@ -139,7 +139,7 @@ export default class RequestResultService extends RequestResultRepository {
           // We create an alert
           await AlertService.createAlert(requestResult);
           // Then we send a message for each alertSetting found
-          alertSettings.forEach((alertSetting) => {
+          for (const alertSetting of alertSettings) {
             // If preventAlertUntil is older than now
             if (
               alertSetting.preventAlertUntil === null ||
@@ -151,7 +151,7 @@ export default class RequestResultService extends RequestResultRepository {
                 sendMessageOnAlertPushQueue(requestResult);
               }
             }
-          });
+          }
         }
       }
     }

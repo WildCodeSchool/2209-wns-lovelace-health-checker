@@ -20,7 +20,7 @@ export default class RequestResultRepository {
     return this.repository.save(requestResult);
   };
 
-  protected static getRequestResultById = async (
+  public static getRequestResultById = async (
     id: string
   ): Promise<RequestResult | null> => {
     return this.repository.findOne({ where: { id: id } });

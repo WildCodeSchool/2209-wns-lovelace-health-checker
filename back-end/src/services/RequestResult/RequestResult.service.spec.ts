@@ -1,6 +1,5 @@
 /// <reference types="@types/jest" />;
 import RequestResultService from "./RequestResult.service";
-
 import {
   closeConnection,
   getDatabase,
@@ -15,6 +14,9 @@ import * as provider from "../../rabbitmq/providers";
 import UserService from "../User/User.service";
 import RequestSettingService from "../RequestSetting/RequestSetting.service";
 import User from "../../entities/User.entity";
+import AlertSettingService from "../AlertSetting/AlertSetting.service";
+import { AlertType } from "../../entities/AlertSetting.entity";
+import RequestResultRepository from "../../repositories/RequestResult.repository";
 
 const sendMessageOnAccountCreationEmailQueue = () => {
   return jest
@@ -41,10 +43,13 @@ let sendMessageOnAccountCreationEmailQueueSpy: jest.SpyInstance<Promise<void>>;
 let sendMessageOnAlertEmailQueueSpy: jest.SpyInstance<Promise<void>>;
 let sendMessageOnAlertPushQueueSpy: jest.SpyInstance<Promise<void>>;
 const url = "https://www.youtube.com";
+const urlWithHeaders = "https://www.youtube.fr";
 const headersArrayString =
   '[{"property":"Content-Type","value":"application/json"}]';
-
+const statusCode: number = 502;
 let user: User;
+let requestSetting: RequestSetting;
+let requestSettingWithHeaders: RequestSetting;
 
 beforeAll(async () => {
   await getDatabase();
@@ -52,13 +57,11 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  Date.now = jest.fn(() => 1487076708000);
   sendMessageOnAccountCreationEmailQueueSpy =
     sendMessageOnAccountCreationEmailQueue();
   sendMessageOnAlertEmailQueueSpy = sendMessageOnAlertEmailQueue();
   sendMessageOnAlertPushQueueSpy = sendMessageOnAlertPushQueue();
-  Date.now = jest.fn(() => 1487076708000);
-
-  await truncateAllTables();
   sendMessageOnAccountCreationEmailQueueSpy =
     sendMessageOnAccountCreationEmailQueue();
   user = await UserService.createUser(
@@ -66,6 +69,30 @@ beforeEach(async () => {
     "Doe",
     "johndoe@email.com",
     "password"
+  );
+  requestSetting = await RequestSettingService.createRequest(
+    url,
+    Frequency.ONE_HOUR,
+    "Test request",
+    undefined,
+    true,
+    false,
+    false,
+    undefined,
+    undefined,
+    user
+  );
+  requestSettingWithHeaders = await RequestSettingService.createRequest(
+    urlWithHeaders,
+    Frequency.ONE_HOUR,
+    "Test request with headers",
+    headersArrayString,
+    true,
+    false,
+    false,
+    undefined,
+    undefined,
+    user
   );
 });
 
@@ -130,18 +157,7 @@ describe("RequestResultService", () => {
           })
         )
       );
-      const requestSetting = await RequestSettingService.createRequest(
-        url,
-        Frequency.ONE_HOUR,
-        "Test request",
-        undefined,
-        true,
-        false,
-        false,
-        undefined,
-        undefined,
-        user
-      );
+
       const requestResult =
         await RequestResultService.checkUrlOfRequestSettingByRequestSetting(
           requestSetting
@@ -162,25 +178,13 @@ describe("RequestResultService", () => {
           })
         )
       );
-      const requestSettingWithHeaders =
-        await RequestSettingService.createRequest(
-          url,
-          Frequency.ONE_HOUR,
-          "Test request",
-          headersArrayString,
-          true,
-          false,
-          false,
-          undefined,
-          undefined,
-          user
-        );
+
       const requestResult =
         await RequestResultService.checkUrlOfRequestSettingByRequestSetting(
           requestSettingWithHeaders
         );
       expect(requestResult).toBeInstanceOf(RequestResult);
-      expect(requestResult.url).toEqual(url);
+      expect(requestResult.url).toEqual(urlWithHeaders);
       expect(requestResult.statusCode).toEqual(200);
       expect(requestResult.duration).toEqual(0);
       expect(requestResult.headers).toEqual(headersArrayString);
@@ -191,18 +195,7 @@ describe("RequestResultService", () => {
       global.fetch = jest.fn(() => {
         throw new TypeError("fetch failed");
       });
-      const requestSetting = await RequestSettingService.createRequest(
-        url,
-        Frequency.ONE_HOUR,
-        "Test request",
-        undefined,
-        true,
-        false,
-        false,
-        undefined,
-        undefined,
-        user
-      );
+
       const requestResult =
         await RequestResultService.checkUrlOfRequestSettingByRequestSetting(
           requestSetting
@@ -217,44 +210,88 @@ describe("RequestResultService", () => {
   });
 
   describe("getRequestResultById", () => {
-    it("should call getRequestResultById() of RequestResultRepository with the right parameter", async () => {});
+    it("should call getRequestResultById() of RequestResultRepository with the right parameter", async () => {
+      const uuid: string = "2bc99799-de46-4e1d-b2ff-da1c0fffd36c";
+      const spy = jest.spyOn(RequestResultRepository, "getRequestResultById");
+      expect(spy).toBeCalledTimes(0);
+      await RequestResultService.getRequestResultById(uuid);
+      expect(spy).toBeCalledTimes(1);
+      expect(spy).toBeCalledWith(uuid);
+    });
+  });
 
-    describe("checkUrlOfAutomatedRequest", () => {
-      it("should call getRequestResultById() of RequestResultRepository with the right parameter", async () => {
-        global.fetch = jest.fn(() =>
-          Promise.resolve(
-            new Response(JSON.stringify({}), {
-              status: 502,
-            })
-          )
-        );
-        const requestSetting = await RequestSettingService.createRequest(
-          url,
-          Frequency.ONE_HOUR,
-          "Test request",
-          undefined,
-          true,
-          false,
-          false,
-          undefined,
-          undefined,
-          user
-        );
-        const parsedRequestSetting = JSON.stringify(requestSetting);
-        const requestResult = new RequestResult(
-          requestSetting,
-          url,
-          undefined,
-          502,
-          0
-        );
-        requestResult.id = "c54e5a01-ea78-4f5c-9b40-9be8af47ea57";
-        // créer des alert settings push & email
+  describe("checkUrlOfAutomatedRequest", () => {
+    it("should send request result to queues", async () => {
+      global.fetch = jest.fn(() =>
+        Promise.resolve(
+          new Response(JSON.stringify({}), {
+            status: statusCode,
+          })
+        )
+      );
 
-        // expect alert to be created
-        // expect sendMessageOnAlertEmailQueueSpy to have been called
-        // expect sendMessageOnAlertPushQueueSpy to have been called
-      });
+      const alertEmail = await AlertSettingService.createAlertSetting(
+        statusCode,
+        requestSetting,
+        AlertType.EMAIL
+      );
+      const alertPush = await AlertSettingService.createAlertSetting(
+        statusCode,
+        requestSetting,
+        AlertType.PUSH
+      );
+      const parsedRequestSetting = JSON.stringify(requestSetting);
+      expect(sendMessageOnAlertEmailQueueSpy).toBeCalledTimes(0);
+      expect(sendMessageOnAlertPushQueueSpy).toBeCalledTimes(0);
+      await RequestResultService.checkUrlOfAutomatedRequest(
+        parsedRequestSetting
+      );
+      expect(sendMessageOnAlertEmailQueueSpy).toBeCalledTimes(1);
+      expect(sendMessageOnAlertPushQueueSpy).toBeCalledTimes(1);
+    });
+
+    it("should not send request result to queues because delay isn't passed", async () => {
+      global.fetch = jest.fn(() =>
+        Promise.resolve(
+          new Response(JSON.stringify({}), {
+            status: statusCode,
+          })
+        )
+      );
+
+      const alertEmail = await AlertSettingService.createAlertSetting(
+        statusCode,
+        requestSetting,
+        AlertType.EMAIL
+      );
+      const alertPush = await AlertSettingService.createAlertSetting(
+        statusCode,
+        requestSetting,
+        AlertType.PUSH
+      );
+      const parsedRequestSetting = JSON.stringify(requestSetting);
+      expect(sendMessageOnAlertEmailQueueSpy).toBeCalledTimes(0);
+      expect(sendMessageOnAlertPushQueueSpy).toBeCalledTimes(0);
+      await AlertSettingService.updatePreventAlertUntilOfAlertSettingByTypeAndHttpStatusCode(
+        new Date(new Date().getTime() + 30 * 60 * 1000),
+        requestSetting,
+        AlertType.EMAIL,
+        statusCode
+      );
+      await AlertSettingService.updatePreventAlertUntilOfAlertSettingByTypeAndHttpStatusCode(
+        new Date(new Date().getTime() + 30 * 60 * 1000),
+        requestSetting,
+        AlertType.PUSH,
+        statusCode
+      );
+      const updatedAlerts = await AlertSettingService.getRequestExistingAlerts(
+        requestSetting
+      );
+      await RequestResultService.checkUrlOfAutomatedRequest(
+        parsedRequestSetting
+      );
+      expect(sendMessageOnAlertEmailQueueSpy).toBeCalledTimes(0);
+      expect(sendMessageOnAlertPushQueueSpy).toBeCalledTimes(0);
     });
   });
 });
