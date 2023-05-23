@@ -138,7 +138,7 @@ export const onMessageOnAlertEmailQueue = async () => {
             alert.emailSentAt = new Date();
             alert.isEmailSent = true;
             await AlertService.updateAlert(alert);
-            await AlertSettingService.updatePreventAlertUntilOfAlertSettingByTypeAndHttpStatusCode(
+            await AlertSettingService.updatePreventAlertDateByType(
               thirtyMinutesLaterDate,
               requestSetting,
               AlertType.EMAIL,

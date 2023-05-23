@@ -74,7 +74,8 @@ export default class AlertSettingService extends AlertSettingRepository {
     return alertList;
   };
 
-  static updatePreventAlertUntilOfAlertSettingByTypeAndHttpStatusCode = async (
+  // OK
+  static updatePreventAlertDateByType = async (
     preventAlertUntil: Date,
     requestSetting: RequestSetting,
     type: AlertType,
@@ -84,15 +85,15 @@ export default class AlertSettingService extends AlertSettingRepository {
       await AlertSettingRepository.getAlertSettingsByRequestSettingId(
         requestSetting.id
       );
-    alertSettings.forEach((alertSetting) => {
+    for (const alertSetting of alertSettings) {
       if (
         alertSetting.type === type &&
         alertSetting.httpStatusCode === httpStatusCode
       ) {
         alertSetting.preventAlertUntil = preventAlertUntil;
-        AlertSettingRepository.saveAlertSetting(alertSetting);
+        await AlertSettingRepository.saveAlertSetting(alertSetting);
       }
-    });
+    }
   };
 
   // OK
@@ -103,6 +104,7 @@ export default class AlertSettingService extends AlertSettingRepository {
   };
 
   // OK
+  // Returns the list of all possible alerts filtered by type
   static getRequestAlertsByType = (alerts: AlertSetting[], type: AlertType) => {
     return alerts.filter((alert) => {
       return alert.type === type;
@@ -230,20 +232,26 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
+  // OK
   static addGivenAlertsThatDontAlreadyExistByType = async (
     alertList: AlertSetting[],
     existingAlertList: AlertSetting[],
     type: AlertType,
     requestSetting: RequestSetting
   ) => {
-    alertList.forEach((alert: AlertSetting) => {
+    for (const alert of alertList) {
       const isAlreadySet = existingAlertList.find(
         (alreadySetAlert: AlertSetting) =>
           alert.httpStatusCode === alreadySetAlert.httpStatusCode
       );
-      if (!isAlreadySet)
-        this.createAlertSetting(alert.httpStatusCode, requestSetting, type);
-    });
+      if (isAlreadySet != undefined) {
+        await this.createAlertSetting(
+          alert.httpStatusCode,
+          requestSetting,
+          type
+        );
+      }
+    }
   };
 
   static getErrorCodesToAdd = (
