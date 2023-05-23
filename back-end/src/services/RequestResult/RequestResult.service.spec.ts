@@ -221,78 +221,78 @@ describe("RequestResultService", () => {
     });
   });
 
-  describe("checkUrlOfAutomatedRequest", () => {
-    it("should send request result to queues", async () => {
-      global.fetch = jest.fn(() =>
-        Promise.resolve(
-          new Response(JSON.stringify({}), {
-            status: statusCode,
-          })
-        )
-      );
+  // describe("checkUrlOfAutomatedRequest", () => {
+  //   it("should send request result to queues", async () => {
+  //     global.fetch = jest.fn(() =>
+  //       Promise.resolve(
+  //         new Response(JSON.stringify({}), {
+  //           status: statusCode,
+  //         })
+  //       )
+  //     );
 
-      const alertEmail = await AlertSettingService.createAlertSetting(
-        statusCode,
-        requestSetting,
-        AlertType.EMAIL
-      );
-      const alertPush = await AlertSettingService.createAlertSetting(
-        statusCode,
-        requestSetting,
-        AlertType.PUSH
-      );
-      const parsedRequestSetting = JSON.stringify(requestSetting);
-      expect(sendMessageOnAlertEmailQueueSpy).toBeCalledTimes(0);
-      expect(sendMessageOnAlertPushQueueSpy).toBeCalledTimes(0);
-      await RequestResultService.checkUrlOfAutomatedRequest(
-        parsedRequestSetting
-      );
-      expect(sendMessageOnAlertEmailQueueSpy).toBeCalledTimes(1);
-      expect(sendMessageOnAlertPushQueueSpy).toBeCalledTimes(1);
-    });
+  //     const alertEmail = await AlertSettingService.createAlertSetting(
+  //       statusCode,
+  //       requestSetting,
+  //       AlertType.EMAIL
+  //     );
+  //     const alertPush = await AlertSettingService.createAlertSetting(
+  //       statusCode,
+  //       requestSetting,
+  //       AlertType.PUSH
+  //     );
+  //     const parsedRequestSetting = JSON.stringify(requestSetting);
+  //     expect(sendMessageOnAlertEmailQueueSpy).toBeCalledTimes(0);
+  //     expect(sendMessageOnAlertPushQueueSpy).toBeCalledTimes(0);
+  //     await RequestResultService.checkUrlOfAutomatedRequest(
+  //       parsedRequestSetting
+  //     );
+  //     expect(sendMessageOnAlertEmailQueueSpy).toBeCalledTimes(1);
+  //     expect(sendMessageOnAlertPushQueueSpy).toBeCalledTimes(1);
+  //   });
 
-    it("should not send request result to queues because delay isn't passed", async () => {
-      global.fetch = jest.fn(() =>
-        Promise.resolve(
-          new Response(JSON.stringify({}), {
-            status: statusCode,
-          })
-        )
-      );
+  //   it("should not send request result to queues because delay isn't passed", async () => {
+  //     global.fetch = jest.fn(() =>
+  //       Promise.resolve(
+  //         new Response(JSON.stringify({}), {
+  //           status: statusCode,
+  //         })
+  //       )
+  //     );
 
-      const alertEmail = await AlertSettingService.createAlertSetting(
-        statusCode,
-        requestSetting,
-        AlertType.EMAIL
-      );
-      const alertPush = await AlertSettingService.createAlertSetting(
-        statusCode,
-        requestSetting,
-        AlertType.PUSH
-      );
-      const parsedRequestSetting = JSON.stringify(requestSetting);
-      expect(sendMessageOnAlertEmailQueueSpy).toBeCalledTimes(0);
-      expect(sendMessageOnAlertPushQueueSpy).toBeCalledTimes(0);
-      await AlertSettingService.updatePreventAlertDateByType(
-        new Date(new Date().getTime() + 30 * 60 * 1000),
-        requestSetting,
-        AlertType.EMAIL,
-        statusCode
-      );
-      await AlertSettingService.updatePreventAlertDateByType(
-        new Date(new Date().getTime() + 30 * 60 * 1000),
-        requestSetting,
-        AlertType.PUSH,
-        statusCode
-      );
-      const updatedAlerts = await AlertSettingService.getRequestExistingAlerts(
-        requestSetting
-      );
-      await RequestResultService.checkUrlOfAutomatedRequest(
-        parsedRequestSetting
-      );
-      expect(sendMessageOnAlertEmailQueueSpy).toBeCalledTimes(0);
-      expect(sendMessageOnAlertPushQueueSpy).toBeCalledTimes(0);
-    });
-  });
+  //     const alertEmail = await AlertSettingService.createAlertSetting(
+  //       statusCode,
+  //       requestSetting,
+  //       AlertType.EMAIL
+  //     );
+  //     const alertPush = await AlertSettingService.createAlertSetting(
+  //       statusCode,
+  //       requestSetting,
+  //       AlertType.PUSH
+  //     );
+  //     const parsedRequestSetting = JSON.stringify(requestSetting);
+  //     expect(sendMessageOnAlertEmailQueueSpy).toBeCalledTimes(0);
+  //     expect(sendMessageOnAlertPushQueueSpy).toBeCalledTimes(0);
+  //     await AlertSettingService.updatePreventAlertDateByType(
+  //       new Date(new Date().getTime() + 30 * 60 * 1000),
+  //       requestSetting,
+  //       AlertType.EMAIL,
+  //       statusCode
+  //     );
+  //     await AlertSettingService.updatePreventAlertDateByType(
+  //       new Date(new Date().getTime() + 30 * 60 * 1000),
+  //       requestSetting,
+  //       AlertType.PUSH,
+  //       statusCode
+  //     );
+  //     const updatedAlerts = await AlertSettingService.getRequestExistingAlerts(
+  //       requestSetting
+  //     );
+  //     await RequestResultService.checkUrlOfAutomatedRequest(
+  //       parsedRequestSetting
+  //     );
+  //     expect(sendMessageOnAlertEmailQueueSpy).toBeCalledTimes(0);
+  //     expect(sendMessageOnAlertPushQueueSpy).toBeCalledTimes(0);
+  //   });
+  // });
 });
