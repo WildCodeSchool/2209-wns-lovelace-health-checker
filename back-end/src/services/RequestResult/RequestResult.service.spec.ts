@@ -222,7 +222,7 @@ describe("RequestResultService", () => {
   });
 
   describe("checkUrlOfAutomatedRequest", () => {
-    /* it("should send request result to queues", async () => {
+    it("should send request result to queues", async () => {
       global.fetch = jest.fn(() =>
         Promise.resolve(
           new Response(JSON.stringify({}), {
@@ -249,7 +249,7 @@ describe("RequestResultService", () => {
       );
       expect(sendMessageOnAlertEmailQueueSpy).toBeCalledTimes(1);
       expect(sendMessageOnAlertPushQueueSpy).toBeCalledTimes(1);
-    }); */
+    });
 
     it("should not send request result to queues because delay isn't passed", async () => {
       global.fetch = jest.fn(() =>
