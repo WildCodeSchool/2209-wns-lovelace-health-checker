@@ -22,9 +22,9 @@ export default class RequestResult {
   ) {
     this.requestSetting = requestSetting;
     this.url = url;
-    this.statusCode = statusCode || undefined;
-    this.duration = duration || undefined;
-    this.headers = headers || undefined;
+    this.statusCode = statusCode ?? undefined;
+    this.duration = duration ?? undefined;
+    this.headers = headers ?? undefined;
     this.createdAt = new Date();
   }
 

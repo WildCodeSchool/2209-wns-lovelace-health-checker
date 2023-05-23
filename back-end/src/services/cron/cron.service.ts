@@ -21,9 +21,9 @@ const sendMessageByFrequency = async (
     if (!isPremiumRequest) {
       requestSettings.sort(compareRequestSettingsByUserRole);
     }
-    requestSettings.forEach((requestSetting) =>
-      sendMessageOnAutomatedRequestQueue(requestSetting)
-    );
+    for (const requestSetting of requestSettings) {
+      sendMessageOnAutomatedRequestQueue(requestSetting);
+    }
   }
 };
 

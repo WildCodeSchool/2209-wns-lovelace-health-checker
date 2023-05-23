@@ -74,7 +74,7 @@ export default class AlertSettingService extends AlertSettingRepository {
     return alertList;
   };
 
-  static updatePreventAlertUntilOfAlertSettingByType = async (
+  static updatePreventAlertUntilOfAlertSettingByTypeAndHttpStatusCode = async (
     preventAlertUntil: Date,
     requestSetting: RequestSetting,
     type: AlertType,
