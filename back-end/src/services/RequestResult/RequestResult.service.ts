@@ -116,12 +116,10 @@ export default class RequestResultService extends RequestResultRepository {
 
   // Method used by Rabbit consumers
   public static checkUrlOfAutomatedRequest = async (
-    message: any
+    parsedMessage: RequestSetting
   ): Promise<void> => {
-    const toCheckForExistanceRequestSetting: RequestSetting =
-      message as RequestSetting;
     const requestSetting = await RequestSettingService.getRequestSettingById(
-      toCheckForExistanceRequestSetting.id
+      parsedMessage.id
     );
     if (requestSetting && requestSetting.isActive) {
       const requestResult: RequestResult =
