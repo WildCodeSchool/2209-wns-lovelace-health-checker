@@ -1,17 +1,15 @@
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
-import { useEffect, useState } from "react";
+import { gql, useLazyQuery } from "@apollo/client";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { toast } from "react-toastify";
-import DataTableComponent from "../../components/DataTable/DataTableComponent";
 
-import {
-  CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery,
-  GetPageOfRequestSettingWithLastResultQuery,
-  GetPageOfRequestSettingWithLastResultQueryVariables,
-} from "../../gql/graphql";
+import { CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery } from "../../gql/graphql";
 import { REQUEST_CREATION_ROUTE } from "../../routes";
 import styles from "./Requests.module.scss";
+import LazyDataTable from "../../components/LazyDataTable/LazyDataTable";
+import { FilterMatchMode, FilterOperator } from "primereact/api";
+import { LazyDataTableProps } from "../../models/LazyDataTable.model";
 
 const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
   query CheckIfNonPremiumUserHasReachedMaxRequestsCount {
@@ -19,32 +17,19 @@ const CHECK_IF_NON_PREMIUM_USER_HAS_REACHED_MAX_REQUESTS_COUNT = gql`
   }
 `;
 
-const GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT = gql`
-  query GetPageOfRequestSettingWithLastResult($pageNumber: Int!) {
-    getPageOfRequestSettingWithLastResult(pageNumber: $pageNumber) {
-      totalCount
-      nextPageNumber
-      requestSettingsWithLastResult {
-        requestSetting {
-          id
-          name
-          url
-          frequency
-        }
-        requestResult {
-          getIsAvailable
-          statusCode
-          createdAt
-        }
-      }
-    }
-  }
-`;
-
 const Requests = () => {
-  const [pageNumber, setPageNumber] = useState(1);
-  const [formattedData, setFormattedData] = useState<any>([]);
   const navigate = useNavigate();
+  const [isActive, setIsActive] = useState<LazyDataTableProps>({
+    isActive: {
+      operator: FilterOperator.AND,
+      constraints: [
+        {
+          value: "",
+          matchMode: FilterMatchMode.EQUALS,
+        },
+      ],
+    },
+  });
 
   const [checkUserMaxRequestsBeforeNavigate] =
     useLazyQuery<CheckIfNonPremiumUserHasReachedMaxRequestsCountQuery>(
@@ -62,38 +47,11 @@ const Requests = () => {
       }
     );
 
-  const { data, loading, refetch } = useQuery<
-    GetPageOfRequestSettingWithLastResultQuery,
-    GetPageOfRequestSettingWithLastResultQueryVariables
-  >(GET_PAGE_OF_REQUEST_SETTING_WITH_LAST_RESULT, {
-    variables: {
-      pageNumber: pageNumber,
-    },
-    fetchPolicy: "cache-and-network",
-  });
-
-  if (!loading) console.log(data);
-
   const navigateToRequestCreationPage = () => {
     checkUserMaxRequestsBeforeNavigate();
   };
 
-  useEffect(() => {
-    setFormattedData(
-      data?.getPageOfRequestSettingWithLastResult.requestSettingsWithLastResult.map(
-        (item) => {
-          return {
-            ...item.requestSetting,
-            isAvailable: item.requestResult?.getIsAvailable,
-            statusCode: item.requestResult?.statusCode,
-            createdAt: item.requestResult?.createdAt,
-          };
-        }
-      )
-    );
-  }, [data]);
-
-  const [selectedTab] = useState("informations");
+  const [selectedTab, setSelectedTab] = useState("all");
 
   return (
     <>
@@ -108,39 +66,79 @@ const Requests = () => {
         </div>
         <div className={`d-flex gap-5 mt-5 ${styles.scrollbar}`}>
           <div
-            className={`${
-              selectedTab === "informations" && styles.selectedTab
-            }  ${styles.tabContainer}`}>
-            <span className={`${styles.tabs} `}>All</span>
-          </div>
-          <div
-            className={`${selectedTab === "premium" && styles.selectedTab}  ${
+            className={`${selectedTab === "all" && styles.selectedTab}  ${
               styles.tabContainer
             }`}>
-            <span className={`${styles.tabs} `}>Active</span>
+            <span
+              className={`${styles.tabs} `}
+              onClick={() => {
+                setIsActive({
+                  isActive: {
+                    operator: FilterOperator.AND,
+                    constraints: [
+                      {
+                        value: "",
+                        matchMode: FilterMatchMode.EQUALS,
+                      },
+                    ],
+                  },
+                });
+
+                setSelectedTab("all");
+              }}>
+              All
+            </span>
           </div>
           <div
-            className={`${selectedTab === "bills" && styles.selectedTab}  ${
+            className={`${selectedTab === "active" && styles.selectedTab}  ${
               styles.tabContainer
             }`}>
-            <span className={`${styles.tabs} `}>Inactive</span>
+            <span
+              className={`${styles.tabs}`}
+              onClick={() => {
+                setIsActive({
+                  isActive: {
+                    operator: FilterOperator.AND,
+                    constraints: [
+                      {
+                        value: "true",
+                        matchMode: FilterMatchMode.EQUALS,
+                      },
+                    ],
+                  },
+                });
+
+                setSelectedTab("active");
+              }}>
+              Active
+            </span>
+          </div>
+          <div
+            className={`${selectedTab === "inactive" && styles.selectedTab}  ${
+              styles.tabContainer
+            }`}>
+            <span
+              className={`${styles.tabs} `}
+              onClick={() => {
+                setIsActive({
+                  isActive: {
+                    operator: FilterOperator.AND,
+                    constraints: [
+                      {
+                        value: "false",
+                        matchMode: FilterMatchMode.EQUALS,
+                      },
+                    ],
+                  },
+                });
+                setSelectedTab("inactive");
+              }}>
+              Inactive
+            </span>
           </div>
         </div>
         <div className={`${styles.tableContainer}`}>
-          {/* <RequestsTable
-            requests={data}
-            loading={loading}
-            pageNumber={pageNumber}
-            setPageNumber={setPageNumber}
-          /> */}
-          <DataTableComponent
-            requests={formattedData}
-            loading={loading}
-            pageNumber={pageNumber}
-            setPageNumber={setPageNumber}
-            totalCount={data?.getPageOfRequestSettingWithLastResult.totalCount}
-            refetch={refetch}
-          />
+          <LazyDataTable isActive={isActive} />
         </div>
       </div>
     </>

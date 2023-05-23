@@ -101,6 +101,7 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
+  await truncateAllTables();
   await closeConnection();
 });
 

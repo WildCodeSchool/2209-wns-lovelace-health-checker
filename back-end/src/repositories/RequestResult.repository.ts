@@ -14,7 +14,7 @@ export default class RequestResultRepository {
     await this.repository.delete({});
   };
 
-  protected static saveRequestResult = (
+  static saveRequestResult = (
     requestResult: RequestResult
   ): Promise<RequestResult> => {
     return this.repository.save(requestResult);

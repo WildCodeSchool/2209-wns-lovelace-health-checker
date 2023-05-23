@@ -1,4 +1,5 @@
-import { compareSync, hashSync } from "bcryptjs";
+/// <reference types="@types/jest" />;
+import { compareSync } from "bcryptjs";
 import {
   closeConnection,
   getDatabase,
@@ -59,6 +60,7 @@ describe("UserService integration", () => {
   });
 
   afterAll(async () => {
+    await truncateAllTables();
     await closeConnection();
   });
 

@@ -1,3 +1,4 @@
+/// <reference types="@types/jest" />;
 import {
   closeConnection,
   getDatabase,
@@ -30,6 +31,7 @@ describe("SessionService integration", () => {
   });
 
   afterAll(async () => {
+    await truncateAllTables();
     await closeConnection();
   });
 
