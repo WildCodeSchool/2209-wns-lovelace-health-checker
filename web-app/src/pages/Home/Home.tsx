@@ -182,7 +182,7 @@ const Home = () => {
           <div className="col-12 col-md-6">
             <h2>A tool for managing websites</h2>
             <p>
-              You can test as many sites as you want. With your account, set the
+              You can test your websites easily. Register to be able to set the
               testing frequency for each site and be notified automatically if
               any of the ones you monitor are unavailable.
             </p>
@@ -202,9 +202,9 @@ const Home = () => {
           <div className="col-12 col-md-6">
             <h2>Go further with Premium</h2>
             <p>
-              Customized alerts only for specific error codes, better management
-              of testing frequency, grouped actions to save time and many other
-              great features with Premium.
+              You'll unlock customized alerts for chosen error codes and have
+              more testing frequency possibilities. With Premium, your
+              experience will be easier, and you'll save time.
             </p>
           </div>
           <Link

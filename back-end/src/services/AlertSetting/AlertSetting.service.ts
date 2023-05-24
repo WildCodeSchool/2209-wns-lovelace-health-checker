@@ -127,7 +127,7 @@ export default class AlertSettingService extends AlertSettingRepository {
       );
 
       let customEmailErrorsToAdd: number[] = [];
-      let customEmailErrorsToDelete: AlertSetting[] = [];
+      let customEmailErrorsToRemove: AlertSetting[] = [];
       let customPushErrorsToAdd: number[] = [];
       let customPushErrorsToDelete: AlertSetting[] = [];
 
@@ -137,7 +137,7 @@ export default class AlertSettingService extends AlertSettingRepository {
           customEmailErrors,
           emailAlerts
         );
-        customEmailErrorsToDelete = this.getErrorCodesToRemove(
+        customEmailErrorsToRemove = this.getErrorCodesToRemove(
           customEmailErrors,
           emailAlerts
         );
@@ -177,8 +177,8 @@ export default class AlertSettingService extends AlertSettingRepository {
           );
         }
         // And to conclude, we remove expected errors
-        if (customEmailErrorsToDelete.length > 0) {
-          await AlertSettingRepository.remove(customEmailErrorsToDelete);
+        if (customEmailErrorsToRemove.length > 0) {
+          await AlertSettingRepository.remove(customEmailErrorsToRemove);
         }
       }
 
@@ -237,7 +237,7 @@ export default class AlertSettingService extends AlertSettingRepository {
         (alreadySetAlert: AlertSetting) =>
           alert.httpStatusCode === alreadySetAlert.httpStatusCode
       );
-      if (isAlreadySet != undefined) {
+      if (isAlreadySet == undefined) {
         await this.createAlertSetting(
           alert.httpStatusCode,
           requestSetting,
