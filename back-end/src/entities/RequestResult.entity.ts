@@ -1,4 +1,10 @@
-import { IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import {
+  IsBoolean,
+  IsDate,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+} from "class-validator";
 import { Field, ID, ObjectType } from "type-graphql";
 import {
   Column,
