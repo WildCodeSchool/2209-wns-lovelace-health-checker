@@ -5,10 +5,6 @@ import {
   DataTableSortEvent,
 } from "primereact/datatable";
 import { Calendar, CalendarChangeEvent } from "primereact/calendar";
-import {
-  TriStateCheckbox,
-  TriStateCheckboxChangeEvent,
-} from "primereact/tristatecheckbox";
 import styles from "./RequestResultsTable.module.scss";
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { useEffect, useState } from "react";
@@ -93,7 +89,7 @@ const RequestResultsTable = () => {
         },
       ],
     },
-    getIsAvailable: {
+    duration: {
       operator: FilterOperator.AND,
       constraints: [
         {
@@ -159,7 +155,6 @@ const RequestResultsTable = () => {
   };
 
   const onSort = (event: DataTableSortEvent) => {
-    console.log(event);
     setlazyState({
       ...lazyState,
       sortField: event.sortField,
@@ -209,25 +204,6 @@ const RequestResultsTable = () => {
         placeholder="mm/dd/yyyy"
         mask="99/99/9999"
       />
-    );
-  };
-
-  const availableFilterTemplate = (
-    options: ColumnFilterElementTemplateOptions
-  ) => {
-    return (
-      <div className="flex align-items-center gap-2">
-        <label htmlFor="verified-filter" className="font-bold">
-          Available
-        </label>
-        <TriStateCheckbox
-          itemID="verified-filter"
-          value={options.value}
-          onChange={(e: TriStateCheckboxChangeEvent) =>
-            options.filterCallback(e.value)
-          }
-        />
-      </div>
     );
   };
 
@@ -292,13 +268,27 @@ const RequestResultsTable = () => {
             ]}
             sortable
             field="createdAt"
-            header="Last Result"
+            header="Date"
             headerClassName={`${styles.header}`}
             className={`${styles.createdAt}`}
             body={createdAtBodyTemplate}
             bodyClassName={`text-center ${styles.primary} ${styles.hidden} ${styles.createdAt}`}></Column>
           <Column
-            filter={false}
+            filter
+            filterMatchModeOptions={[
+              { label: "Equals", value: FilterMatchMode.EQUALS },
+              { label: "Not equals", value: FilterMatchMode.NOT_EQUALS },
+              { label: "Greater than", value: FilterMatchMode.GREATER_THAN },
+              {
+                label: "Greater than or equal to",
+                value: FilterMatchMode.GREATER_THAN_OR_EQUAL_TO,
+              },
+              { label: "Less than", value: FilterMatchMode.LESS_THAN },
+              {
+                label: "Less than or equal to",
+                value: FilterMatchMode.LESS_THAN_OR_EQUAL_TO,
+              },
+            ]}
             sortable
             field="duration"
             header="Duration"
@@ -307,10 +297,10 @@ const RequestResultsTable = () => {
             body={durationBodyTemplate}
             bodyClassName={`text-center ${styles.primary} ${styles.hidden} ${styles.duration}`}></Column>
           <Column
-            filter
-            filterElement={availableFilterTemplate}
+            filter={false}
             field="getIsAvailable"
             header="Availability"
+            dataType="boolean"
             headerClassName={`${styles.header}`}
             className={`${styles.isAvailable}`}
             body={isAvailableBodyTemplate}
