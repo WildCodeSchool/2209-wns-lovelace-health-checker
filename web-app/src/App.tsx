@@ -135,7 +135,11 @@ function App() {
           <Route path={PREMIUM_ROUTE} element={<Premium />} />
           <Route
             path={PREMIUM_SUBSCRIPTION_ROUTE}
-            element={<PremiumSubscription />}
+            element={
+              <Protected isLoggedIn={isLogged} loading={loading}>
+                <PremiumSubscription />
+              </Protected>
+            }
           />
 
           <Route
