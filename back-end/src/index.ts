@@ -16,6 +16,7 @@ import RequestSettingResolver from "./resolvers/RequestSetting/RequestSetting.re
 import UserService from "./services/User/User.service";
 
 import { startCrons } from "./services/cron/cron.service";
+import PremiumResolver from "./resolvers/Premium/Premium.resolver";
 
 export type GlobalContext = ExpressContext & {
   user: User | null;
@@ -25,7 +26,12 @@ export type GlobalContext = ExpressContext & {
 const startServer = async () => {
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, RequestResultResolver, RequestSettingResolver],
+      resolvers: [
+        UserResolver,
+        RequestResultResolver,
+        RequestSettingResolver,
+        PremiumResolver,
+      ],
       authChecker: async ({ context }) => {
         return Boolean(context.user);
       },
