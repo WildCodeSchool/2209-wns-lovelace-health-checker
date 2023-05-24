@@ -1,0 +1,93 @@
+@use "../../variables.scss";
+@import "../../components.scss";
+
+.searchBarContainer {
+  background-color: variables.$primary-800;
+  height: 320px;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0px variables.$padding-xl;
+  @media (min-width: variables.$mobile-breakpoint) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0px variables.$padding-xxl;
+  }
+  h1 {
+    z-index: 2;
+  }
+  .starshipImage {
+    height: auto;
+    width: 300px;
+    opacity: 50%;
+    bottom: 0;
+    right: 0;
+    @media (min-width: variables.$mobile-breakpoint) {
+      right: 100px;
+    }
+  }
+}
+
+.contentContainer {
+  @include contentContainer;
+  .content {
+    text-align: center;
+    margin-top: 60px;
+    padding: 0;
+    @media (min-width: variables.$tablet-breakpoint) {
+      padding: 0 150px;
+    }
+  }
+  .price {
+    width: 200px;
+    height: 120px;
+    border-radius: variables.$border-radius-sm;
+    background-color: variables.$primary-100;
+    font-weight: variables.$font-weight-500;
+    font-size: variables.$font-lg;
+    @media (min-width: variables.$mobile-breakpoint) {
+      font-size: variables.$font-xl;
+      height: 200px;
+    }
+    .subPrice {
+      font-size: variables.$font-xs;
+      color: variables.$neutral-800;
+      @media (min-width: variables.$mobile-breakpoint) {
+        font-size: variables.$font-sm;
+      }
+    }
+  }
+  .discount {
+    top: 0;
+    right: 0;
+    color: white;
+    padding: 2px variables.$padding-sm;
+    font-size: variables.$font-xs;
+    background-color: variables.$primary-800;
+    border-top-right-radius: variables.$border-radius-sm;
+    border-bottom-left-radius: variables.$border-radius-sm;
+    @media (min-width: variables.$mobile-breakpoint) {
+      font-size: variables.$font-sm;
+    }
+  }
+}
+
+.btn {
+  @include btn-mobile;
+  margin-top: variables.$margin-md;
+  @media (min-width: variables.$mobile-breakpoint) {
+    @include btn;
+  }
+}
+.btnPrimary {
+  @include btnPrimary;
+}
+.btnSecondary {
+  @include btnSecondary;
+  z-index: 2;
+  transition: none;
+  &:hover {
+    background-color: white;
+    color: variables.$primary-800;
+  }
+}
