@@ -1,0 +1,22 @@
+@use "../../variables.scss";
+@import "../../components.scss";
+
+.contentContainer {
+  @include contentContainer;
+
+  .title {
+    font-size: variables.$font-lg;
+    font-weight: variables.$font-weight-600;
+  }
+
+  .desktopContainer {
+    @include desktopContainer;
+    .bill {
+      font-size: variables.$font-xs;
+    }
+    .switch {
+      width: 35px;
+      height: 15px;
+    }
+  }
+}
