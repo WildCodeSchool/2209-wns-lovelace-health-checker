@@ -31,6 +31,7 @@ export default class AlertSetting {
 
   @ManyToOne(() => RequestSetting, (requestSetting) => requestSetting.alerts, {
     onDelete: "CASCADE",
+    eager: true,
   })
   @Field(() => RequestSetting)
   requestSetting: RequestSetting;
