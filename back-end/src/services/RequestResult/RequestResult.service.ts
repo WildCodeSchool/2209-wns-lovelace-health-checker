@@ -1,13 +1,17 @@
+import { Raw } from "typeorm";
 import Alert from "../../entities/Alert.entity";
 import AlertSetting, { AlertType } from "../../entities/AlertSetting.entity";
 import RequestResult from "../../entities/RequestResult.entity";
 import RequestSetting from "../../entities/RequestSetting.entity";
-import User from "../../entities/User.entity";
+import User, { Role } from "../../entities/User.entity";
+import { Status } from "../../entities/User.entity";
+import PageOfRequestResult from "../../models/PageOfRequestResult";
 import {
   sendMessageOnAlertEmailQueue,
   sendMessageOnAlertPushQueue,
 } from "../../rabbitmq/providers";
 import RequestResultRepository from "../../repositories/RequestResult.repository";
+import { LazyTableStateArgs } from "../../resolvers/RequestSetting/RequestSetting.input";
 import AlertService from "../Alert/Alert.service";
 import AlertSettingService from "../AlertSetting/AlertSetting.service";
 import RequestSettingService from "../RequestSetting/RequestSetting.service";
@@ -180,5 +184,150 @@ export default class RequestResultService extends RequestResultRepository {
     // Is homepage request : true
     // Send the result to web-app (front-end)
     return await this.checkUrl(dummyRequestSetting, true);
+  };
+
+  static getPageOfRequestResult = async (
+    requestSettingId: string,
+    userId: string,
+    lazyTableState: LazyTableStateArgs
+  ): Promise<PageOfRequestResult> => {
+    let { rows, page, sortField, sortOrder, filters } = lazyTableState;
+    let where = {
+      requestSetting: {
+        id: requestSettingId,
+        user: {
+          id: userId,
+        },
+      },
+    };
+
+    const take = rows;
+    const skip = (page - 1) * rows;
+    const order: { [key: string]: string } = {};
+    if (sortField) {
+      order[sortField] = sortOrder === 1 ? "ASC" : "DESC";
+    }
+
+    if (filters) {
+      for (const filter of filters) {
+        if (filter.operator === "or") {
+          where = {
+            ...where,
+            [filter.field]: Raw((alias) => {
+              return filter.constraints
+                .map((constraint) => {
+                  switch (constraint.matchMode) {
+                    case "contains":
+                      return `${alias} LIKE '%${constraint.value}%'`;
+                    case "notContains":
+                      return `${alias} NOT LIKE '%${constraint.value}%'`;
+                    case "startsWith":
+                      return `${alias} LIKE '${constraint.value}%'`;
+                    case "endsWith":
+                      return `${alias} LIKE '%${constraint.value}'`;
+                    case "equals":
+                      return `${alias} = '${constraint.value}'`;
+                    case "notEquals":
+                      return `${alias} <> '${constraint.value}'`;
+                    case "in":
+                      return `${alias} IN (${constraint.value})`;
+                    case "lt":
+                      return `${alias} < ${constraint.value}`;
+                    case "lte":
+                      return `${alias} <= ${constraint.value}`;
+                    case "gt":
+                      return `${alias} > ${constraint.value}`;
+                    case "gte":
+                      return `${alias} >= ${constraint.value}`;
+                    case "dateIs":
+                      return `${alias} = '${constraint.value}'`;
+                    case "dateAfter":
+                      return `${alias} > '${constraint.value}'`;
+                    case "dateBefore":
+                      return `${alias} < '${constraint.value}'`;
+                    case "dateIsNot":
+                      return `${alias} <> '${constraint.value}'`;
+                    default:
+                      throw new Error(
+                        `Invalid matchMode: ${constraint.matchMode}`
+                      );
+                  }
+                })
+                .join(" OR ");
+            }),
+          };
+        } else if (filter.operator === "and") {
+          where = {
+            ...where,
+            [filter.field]: Raw((alias) => {
+              return filter.constraints
+                .map((constraint) => {
+                  switch (constraint.matchMode) {
+                    case "contains":
+                      return `${alias} LIKE '%${constraint.value}%'`;
+                    case "notContains":
+                      return `${alias} NOT LIKE '%${constraint.value}%'`;
+                    case "startsWith":
+                      return `${alias} LIKE '${constraint.value}%'`;
+                    case "endsWith":
+                      return `${alias} LIKE '%${constraint.value}'`;
+                    case "equals":
+                      return `${alias} = '${constraint.value}'`;
+                    case "notEquals":
+                      return `${alias} <> '${constraint.value}'`;
+                    case "in":
+                      return `${alias} IN (${constraint.value})`;
+                    case "lt":
+                      return `${alias} < ${constraint.value}`;
+                    case "lte":
+                      return `${alias} <= ${constraint.value}`;
+                    case "gt":
+                      return `${alias} > ${constraint.value}`;
+                    case "gte":
+                      return `${alias} >= ${constraint.value}`;
+                    case "dateIs":
+                      const startOfDate = new Date(constraint.value);
+                      const endOfDate = new Date(constraint.value);
+                      endOfDate.setDate(endOfDate.getDate() + 1);
+                      return `${alias} >= '${startOfDate.toISOString()}' AND ${alias} < '${endOfDate.toISOString()}'`;
+
+                    case "dateAfter":
+                      const startOfNextDay = new Date(constraint.value);
+                      startOfNextDay.setDate(startOfNextDay.getDate() + 1);
+                      return `${alias} > '${startOfNextDay.toISOString()}'`;
+
+                    case "dateBefore":
+                      const startOfCurrentDay = new Date(constraint.value);
+                      return `${alias} < '${startOfCurrentDay.toISOString()}'`;
+
+                    case "dateIsNot":
+                      const startOfDateNot = new Date(constraint.value);
+                      const endOfDateNot = new Date(constraint.value);
+                      endOfDateNot.setDate(endOfDateNot.getDate() + 1);
+                      return `(${alias} < '${startOfDateNot.toISOString()}' OR ${alias} >= '${endOfDateNot.toISOString()}')`;
+                    default:
+                      throw new Error(
+                        `Invalid matchMode: ${constraint.matchMode}`
+                      );
+                  }
+                })
+                .join(" AND ");
+            }),
+          };
+        }
+      }
+    }
+
+    const [requestResults, totalCount] = await this.repository.findAndCount({
+      where,
+      take,
+      skip,
+      order,
+    });
+
+    return {
+      totalCount,
+      requestResults,
+    };
   };
 }
