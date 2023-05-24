@@ -44,9 +44,11 @@ import styles from "./AccountInformations.module.scss";
 const AccountInformations = ({
   user,
   onDeleteSuccess,
+  refreshProfile,
 }: {
   user: any;
   onDeleteSuccess(): Promise<ApolloQueryResult<MyProfileQuery>>;
+  refreshProfile(): Promise<void>;
 }) => {
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
@@ -93,7 +95,6 @@ const AccountInformations = ({
   };
 
   const onSubmitIdentity = (data: any) => {
-    console.log({ errorsIdentity });
     updateIdentity({
       variables: {
         firstname: data.firstname,
@@ -124,8 +125,8 @@ const AccountInformations = ({
     UpdateIdentityMutation,
     UpdateIdentityMutationVariables
   >(UPDATE_IDENTITY, {
-    onCompleted: (data) => {
-      console.log(data);
+    onCompleted: async () => {
+      await refreshProfile();
       toast.success("Your identity has been updated successfully !", {
         position: toast.POSITION.BOTTOM_RIGHT,
         toastId: "updateIdentity",
@@ -385,8 +386,7 @@ const AccountInformations = ({
                 />
                 <label
                   className={`form-check-label ${styles.checkLabel}`}
-                  htmlFor="disconnectMe"
-                >
+                  htmlFor="disconnectMe">
                   Disconnect me from all my other devices
                 </label>
               </div>
@@ -408,8 +408,7 @@ const AccountInformations = ({
             </p>
             <button
               className={`${styles.dangerButton}`}
-              onClick={() => setShowDeleteAccountModal(true)}
-            >
+              onClick={() => setShowDeleteAccountModal(true)}>
               Delete your account
             </button>
           </div>
