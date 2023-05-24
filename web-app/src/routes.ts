@@ -5,6 +5,7 @@ export const REQUESTS_ROUTE = "/requests";
 export const REQUEST_CREATION_ROUTE = "/request-creation";
 export const REQUEST_DETAILS_ROUTE = `${REQUESTS_ROUTE}/:requestId`;
 export const PREMIUM_ROUTE = "/premium";
+export const PREMIUM_SUBSCRIPTION_ROUTE = `${PREMIUM_ROUTE}/subscription`;
 export const ACCOUNT_ROUTE = "/account";
 export const TERMS_ROUTE = "/terms";
 export const FORGOT_PASSWORD_ROUTE = "/forgot-password";
