@@ -4,10 +4,42 @@ import { InputSwitch } from "primereact/inputswitch";
 import { Checkbox } from "primereact/checkbox";
 import { Link } from "react-router-dom";
 import stripe from "../../assets/images/logoStripe.svg";
+import { gql, useMutation } from "@apollo/client";
+import { toast } from "react-toastify";
+import {
+  SubscribePremiumMutation,
+  SubscribePremiumMutationVariables,
+} from "../../gql/graphql";
+
+const PREMIUM_SUBSCRIPTION = gql`
+  mutation SubscribePremium($plan: String!) {
+    subscribePremium(plan: $plan) {
+      url
+    }
+  }
+`;
+
+enum PREMIUM_PLAN {
+  MONTHLY = "monthly",
+  ANNUALLY = "annually",
+}
 
 const PremiumSubscription = () => {
   const [isYearly, setIsYearly] = useState<boolean>(true);
   const [isTermAgreed, setIsTermAgreed] = useState<boolean>(false);
+
+  const [subscribePremium] = useMutation<
+    SubscribePremiumMutation,
+    SubscribePremiumMutationVariables
+  >(PREMIUM_SUBSCRIPTION, {
+    onCompleted: (data) => {
+      if (data.subscribePremium.url)
+        window.location.href = data.subscribePremium.url;
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   return (
     <div className={`${styles.contentContainer}`}>
@@ -17,10 +49,7 @@ const PremiumSubscription = () => {
       <div className="d-flex justify-content-center align-items-center mt-5">
         <div className={`${styles.desktopContainer}`}>
           <div className="d-flex justify-content-end align-items-center gap-3 ">
-            <span
-              className={`${
-                !isYearly ? styles.active : styles.bill
-              } d-flex justify-content-end`}>
+            <span className={`${!isYearly ? styles.active : styles.bill}`}>
               Bill Monthly
             </span>
             <InputSwitch
@@ -30,10 +59,7 @@ const PremiumSubscription = () => {
                 setIsYearly(e.value as boolean);
               }}
             />
-            <span
-              className={`${
-                isYearly ? styles.active : styles.bill
-              }  d-flex justify-content-end`}>
+            <span className={`${isYearly ? styles.active : styles.bill} `}>
               Bill Yearly
             </span>
           </div>
@@ -84,7 +110,19 @@ const PremiumSubscription = () => {
           </div>
           <div className="d-flex flex-column gap-4 mt-4">
             {isTermAgreed ? (
-              <button className={`${styles.btnPrimary}`}>Checkout</button>
+              <button
+                className={`${styles.btnPrimary}`}
+                onClick={() => {
+                  isYearly
+                    ? subscribePremium({
+                        variables: { plan: PREMIUM_PLAN.ANNUALLY },
+                      })
+                    : subscribePremium({
+                        variables: { plan: PREMIUM_PLAN.MONTHLY },
+                      });
+                }}>
+                Checkout
+              </button>
             ) : (
               <button className={`${styles.btnDisabled}`}>Checkout</button>
             )}

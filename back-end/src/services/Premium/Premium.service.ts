@@ -37,7 +37,7 @@ export default class PremiumService extends PremiumRepository {
     else if (plan === "annually") selectedPlan = PREMIUM_PLAN.ANNUALLY;
 
     const session = await stripe.checkout.sessions.create({
-      success_url: "http://localhost:3000/requests",
+      success_url: `${process.env.FRONT_END_URL}/requests`,
       customer_email: user.email,
       line_items: [{ price: selectedPlan, quantity: 1 }],
       mode: "subscription",

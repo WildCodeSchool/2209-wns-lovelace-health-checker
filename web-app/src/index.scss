@@ -1,10 +1,13 @@
+@use "./variables.scss";
+@import "./components.scss";
+
 .p-column-filter-overlay {
   max-height: 375px !important;
   overflow: scroll !important;
 }
 
 .p-inputswitch .p-inputswitch-slider {
-  background: #4f46e5 !important;
+  background: variables.$primary-800 !important;
 }
 
 .p-inputswitch .p-inputswitch-slider:before {
@@ -15,4 +18,28 @@
   margin-top: -0.625rem;
   border-radius: 50%;
   transition-duration: 0.2s;
+}
+
+.p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box.p-highlight:hover {
+  border-color: variables.$primary-800 !important;
+  background: variables.$primary-800 !important;
+  color: #ffffff;
+}
+
+.p-checkbox .p-checkbox-box.p-highlight {
+  border-color: variables.$primary-800 !important;
+  background: variables.$primary-800 !important;
+}
+
+.p-inputswitch-slider {
+  box-shadow: 0 0 0 0.2rem variables.$primary-800 !important;
+}
+
+.p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box:hover {
+  border-color: variables.$primary-800 !important;
+}
+
+.p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box.p-focus {
+  box-shadow: 0 0 0 0.2rem variables.$primary-800 !important;
+  border-color: variables.$primary-800 !important;
 }
