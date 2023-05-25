@@ -1,16 +1,21 @@
 import * as HttpCookies from "./http-cookies";
+import { Request } from "express";
 
 describe("Utils http-cookies", () => {
   it("returns undefined when no raw cookie", () => {
-    const ctx: any = { req: { headers: { cookie: "" } } };
-    expect(HttpCookies.getSessionIdInCookie(ctx)).toBeUndefined();
+    const req = { headers: { cookie: "" } } as Request;
+    expect(
+      HttpCookies.getSessionIdInCookie(req.headers.cookie)
+    ).toBeUndefined();
   });
   it("returns undefined when cookie is incorrectly formatted", () => {
-    const ctx: any = { req: { headers: { cookie: "12" } } };
-    expect(HttpCookies.getSessionIdInCookie(ctx)).toBeUndefined();
+    const req = { headers: { cookie: "12" } } as Request;
+    expect(
+      HttpCookies.getSessionIdInCookie(req.headers.cookie)
+    ).toBeUndefined();
   });
   it("returns sessionId when cookie is correct", () => {
-    const ctx: any = { req: { headers: { cookie: "sessionId=123" } } };
-    expect(HttpCookies.getSessionIdInCookie(ctx)).toBe("123");
+    const req = { headers: { cookie: "sessionId=123" } } as Request;
+    expect(HttpCookies.getSessionIdInCookie(req.headers.cookie)).toBe("123");
   });
 });

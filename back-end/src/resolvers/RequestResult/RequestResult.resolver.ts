@@ -7,7 +7,7 @@ import {
   Query,
   Resolver,
 } from "type-graphql";
-import { GlobalContext } from "../..";
+import { Context } from "../..";
 
 import RequestResult from "../../entities/RequestResult.entity";
 import User from "../../entities/User.entity";
@@ -36,7 +36,7 @@ export default class RequestResultResolver {
   @Query(() => RequestResult)
   async checkUrlLaunchedManually(
     @Args() { id }: checkUrlLaunchedManuallyArgs,
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<RequestResult> {
     const requestSetting =
       await RequestSettingService.getRequestSettingByIdOrThrowNotFoundError(id);
@@ -53,7 +53,7 @@ export default class RequestResultResolver {
   getPageOfRequestResult(
     @Arg("settingId") settingId: string,
     @Args() lazyEvent: LazyTableStateArgs,
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<PageOfRequestResult> {
     return RequestResultService.getPageOfRequestResult(
       settingId,

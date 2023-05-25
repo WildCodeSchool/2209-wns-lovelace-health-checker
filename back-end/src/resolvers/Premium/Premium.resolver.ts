@@ -1,6 +1,6 @@
 import { Arg, Authorized, Ctx, Mutation, Resolver } from "type-graphql";
 import StripeCheckout from "../../models/StripeCheckout";
-import { GlobalContext } from "../..";
+import { Context } from "../..";
 import PremiumService from "../../services/Premium/Premium.service";
 import User from "../../entities/User.entity";
 
@@ -10,7 +10,7 @@ export default class PremiumResolver {
   @Mutation(() => StripeCheckout)
   async subscribePremium(
     @Arg("plan") plan: "monthly" | "annually",
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<StripeCheckout> {
     return await PremiumService.premiumSubscription(plan, context.user as User);
   }
