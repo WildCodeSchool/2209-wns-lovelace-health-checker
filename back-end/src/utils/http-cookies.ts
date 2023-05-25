@@ -1,12 +1,9 @@
-import { ExpressContext } from "apollo-server-express";
 import { parse } from "cookie";
+import { Context } from "..";
 
 const MAX_AGE_DAYS = 365;
 
-export const setSessionIdInCookie = (
-  ctx: ExpressContext,
-  sessionId: string
-) => {
+export const setSessionIdInCookie = (ctx: Context, sessionId: string) => {
   ctx.res.cookie("sessionId", sessionId, {
     httpOnly: true,
     secure: true,
@@ -16,9 +13,9 @@ export const setSessionIdInCookie = (
 };
 
 export const getSessionIdInCookie = (
-  ctx: ExpressContext
+  cookie: string | undefined
 ): string | undefined => {
-  const rawCookies = ctx.req.headers.cookie;
+  const rawCookies = cookie;
 
   if (!rawCookies) {
     return undefined;
@@ -27,6 +24,6 @@ export const getSessionIdInCookie = (
   return parsedCookies.sessionId;
 };
 
-export const deleteSessionIdInCookie = (ctx: ExpressContext) => {
+export const deleteSessionIdInCookie = (ctx: Context) => {
   ctx.res.clearCookie("sessionId");
 };

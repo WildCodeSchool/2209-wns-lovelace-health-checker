@@ -1,12 +1,7 @@
 import "reflect-metadata";
 
-import { ApolloServer } from "apollo-server";
-import { ApolloServerPluginLandingPageLocalDefault } from "apollo-server-core";
-import { ExpressContext } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
-
 import { getDatabase, initializeRepositories } from "./database/utils";
-import User from "./entities/User.entity";
 import { getSessionIdInCookie } from "./utils/http-cookies";
 import { connectionToRabbitMQ } from "./rabbitmq/config";
 import RequestResultResolver from "./resolvers/RequestResult/RequestResult.resolver";
@@ -17,11 +12,17 @@ import UserService from "./services/User/User.service";
 
 import { startCrons } from "./services/cron/cron.service";
 import PremiumResolver from "./resolvers/Premium/Premium.resolver";
+import { ApolloServer } from "@apollo/server";
+import { startStandaloneServer } from "@apollo/server/standalone";
+import User from "./entities/User.entity";
+import { Request, Response } from "express";
 
-export type GlobalContext = ExpressContext & {
+export interface Context {
+  req: Request;
+  res: Response;
   user: User | null;
-  sessionId: string | undefined;
-};
+  sessionId: string;
+}
 
 const startServer = async () => {
   const server = new ApolloServer({
@@ -36,29 +37,23 @@ const startServer = async () => {
         return Boolean(context.user);
       },
     }),
-    context: async (context): Promise<GlobalContext> => {
-      const sessionId = getSessionIdInCookie(context);
+    csrfPrevention: true,
+    cache: "bounded",
+  });
+
+  // The `listen` method launches a web server.
+  const port = (process.env.SERVER_PORT as unknown as number) || 4000;
+  const { url } = await startStandaloneServer(server, {
+    context: async ({ req, res }) => {
+      const sessionId = getSessionIdInCookie(req.headers.cookie);
       const user = !sessionId
         ? null
         : await UserService.findBySessionId(sessionId);
 
-      return { res: context.res, req: context.req, user, sessionId };
+      return { req, res, user, sessionId };
     },
-    csrfPrevention: true,
-    cache: "bounded",
-    /**
-     * What's up with this embed: true option?
-     * These are our recommended settings for using AS;
-     * they aren't the defaults in AS3 for backwards-compatibility reasons but
-     * will be the defaults in AS4. For production environments, use
-     * ApolloServerPluginLandingPageProductionDefault instead.
-     **/
-    plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
+    listen: { port: port },
   });
-
-  // The `listen` method launches a web server.
-  const port = process.env.SERVER_PORT || 4000;
-  const { url } = await server.listen({ port: port });
   await initializeRepositories();
   await getDatabase();
   await connectionToRabbitMQ();
