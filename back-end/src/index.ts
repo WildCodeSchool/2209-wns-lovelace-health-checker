@@ -13,9 +13,15 @@ import UserService from "./services/User/User.service";
 import { startCrons } from "./services/cron/cron.service";
 import PremiumResolver from "./resolvers/Premium/Premium.resolver";
 import { ApolloServer } from "@apollo/server";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import User from "./entities/User.entity";
 import { Request, Response } from "express";
+import express from "express";
+import { expressMiddleware } from "@apollo/server/express4";
+import cors from "cors";
+import { json } from "body-parser";
+import http from "http";
 
 export interface Context {
   req: Request;
@@ -23,6 +29,9 @@ export interface Context {
   user: User | null;
   sessionId: string;
 }
+
+const app = express();
+const httpServer = http.createServer(app);
 
 const startServer = async () => {
   const server = new ApolloServer({
@@ -33,35 +42,45 @@ const startServer = async () => {
         RequestSettingResolver,
         PremiumResolver,
       ],
-      authChecker: async ({ context }) => {
+      authChecker: async ({ context }: { context: Context }) => {
         return Boolean(context.user);
       },
     }),
     csrfPrevention: true,
     cache: "bounded",
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
 
-  // The `listen` method launches a web server.
-  const port = (process.env.SERVER_PORT as unknown as number) || 4000;
-  const { url } = await startStandaloneServer(server, {
-    context: async ({ req, res }) => {
-      const sessionId = getSessionIdInCookie(req.headers.cookie);
-      const user = !sessionId
-        ? null
-        : await UserService.findBySessionId(sessionId);
+  await server.start();
 
-      return { req, res, user, sessionId };
-    },
-    listen: { port: port },
-  });
   await initializeRepositories();
   await getDatabase();
   await connectionToRabbitMQ();
-
-  console.log(`🚀  Server ready at ${url}`);
-
   startCrons();
   console.log("cron are started");
+
+  app.use(
+    "/",
+    cors<cors.CorsRequest>(),
+    json(),
+    expressMiddleware(server, {
+      context: async ({ req, res }) => {
+        const sessionId = getSessionIdInCookie(req.headers.cookie);
+        const user = !sessionId
+          ? null
+          : await UserService.findBySessionId(sessionId);
+
+        return { req, res, user, sessionId };
+      },
+    })
+  );
+
+  const port = (process.env.SERVER_PORT as unknown as number) || 4000;
+
+  await new Promise<void>((resolve) =>
+    httpServer.listen({ port: port }, resolve)
+  );
+  console.log(`🚀 Server ready at http://localhost:${port}/`);
 };
 
 startServer();
