@@ -24,6 +24,7 @@ interface RequestResult {
   createdAt: any;
   duration: number;
   isAvailable: boolean | undefined;
+  id: string;
   statusCode: number | null | undefined;
 }
 
@@ -51,6 +52,7 @@ const GET_PAGE_OF_REQUEST_RESULT_FILTERED = gql`
         createdAt
         duration
         getIsAvailable
+        id
         statusCode
       }
     }
@@ -122,6 +124,7 @@ const RequestResultsTable = () => {
       const formattedResults = requestResults.map((result: any) => ({
         createdAt: result.createdAt,
         duration: result.duration,
+        id: result.id,
         isAvailable: result.getIsAvailable,
         statusCode: result.statusCode,
       }));
