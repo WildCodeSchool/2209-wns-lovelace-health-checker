@@ -17,6 +17,7 @@ import {
 import {
   AskForNewPasswordArgs,
   ConfirmAccountArgs,
+  ModifyPremiumSubscriptionArgs,
   ResendAccountConfirmationTokenArgs,
   ResetPasswordArgs,
   SignInArgs,
@@ -152,5 +153,22 @@ export default class UserResolver {
     @Ctx() context: Context
   ): Promise<Boolean> {
     return UserService.deleteCurrentUser(context.user as User, currentPassword);
+  }
+
+  @Authorized()
+  @Mutation(() => Boolean)
+  modifyPremiumSubscription(
+    @Args()
+    {
+      hasCanceledPremium,
+      keepPremiumRequestOnPremiumCancellation,
+    }: ModifyPremiumSubscriptionArgs,
+    @Ctx() context: Context
+  ): Promise<Boolean> {
+    return UserService.modifyPremiumSubscription(
+      context.user as User,
+      hasCanceledPremium,
+      keepPremiumRequestOnPremiumCancellation
+    );
   }
 }
