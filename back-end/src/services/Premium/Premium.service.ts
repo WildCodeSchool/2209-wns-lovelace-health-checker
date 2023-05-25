@@ -5,8 +5,8 @@ import PremiumRepository from "../../repositories/Premium.repository";
 import Stripe from "stripe";
 
 enum PREMIUM_PLAN {
-  MONTHLY = "price_1NBHD7HSTP86flDp3nKAe6g7",
-  ANNUALLY = "price_1NBHDvHSTP86flDpM9MQ4kUe",
+  MONTHLY = "price_1NBecxHX9gwxpIP0Djr8zRBv",
+  ANNUALLY = "price_1NBedUHX9gwxpIP0P6N7VKwN",
 }
 
 export default class PremiumService extends PremiumRepository {
