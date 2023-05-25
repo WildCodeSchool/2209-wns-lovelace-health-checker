@@ -14,7 +14,6 @@ import { startCrons } from "./services/cron/cron.service";
 import PremiumResolver from "./resolvers/Premium/Premium.resolver";
 import { ApolloServer } from "@apollo/server";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
-import { startStandaloneServer } from "@apollo/server/standalone";
 import User from "./entities/User.entity";
 import { Request, Response } from "express";
 import express from "express";
@@ -22,6 +21,8 @@ import { expressMiddleware } from "@apollo/server/express4";
 import cors from "cors";
 import { json } from "body-parser";
 import http from "http";
+import bodyParser from "body-parser";
+import stripe from "stripe";
 
 export interface Context {
   req: Request;
@@ -31,6 +32,7 @@ export interface Context {
 }
 
 const app = express();
+const port = (process.env.SERVER_PORT as unknown as number) || 4000;
 const httpServer = http.createServer(app);
 
 const startServer = async () => {
@@ -50,7 +52,6 @@ const startServer = async () => {
     cache: "bounded",
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
-
   await server.start();
 
   await initializeRepositories();
@@ -59,8 +60,10 @@ const startServer = async () => {
   startCrons();
   console.log("cron are started");
 
+  const graphqlEndpoint = "/api";
+
   app.use(
-    "/",
+    graphqlEndpoint,
     cors<cors.CorsRequest>(),
     json(),
     expressMiddleware(server, {
@@ -75,12 +78,17 @@ const startServer = async () => {
     })
   );
 
-  const port = (process.env.SERVER_PORT as unknown as number) || 4000;
-
   await new Promise<void>((resolve) =>
     httpServer.listen({ port: port }, resolve)
   );
-  console.log(`🚀 Server ready at http://localhost:${port}/`);
+  console.log(`🚀 Express Server ready at http://localhost:${port}/`);
+  console.log(
+    `🚀 GraphQL Server ready at http://localhost:${port}${graphqlEndpoint}`
+  );
 };
 
 startServer();
+
+app.get("/test", (req, res) => {
+  res.send("It works");
+});
