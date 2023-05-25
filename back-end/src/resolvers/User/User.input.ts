@@ -157,3 +157,14 @@ export class UpdatePasswordArgs {
   @Field()
   disconnectMe: boolean;
 }
+
+@ArgsType()
+export class ModifyPremiumSubscriptionArgs {
+  @Field()
+  @IsNotEmpty()
+  hasCanceledPremium: boolean;
+
+  @Field()
+  @IsNotEmpty()
+  keepPremiumRequestOnPremiumCancellation: boolean;
+}

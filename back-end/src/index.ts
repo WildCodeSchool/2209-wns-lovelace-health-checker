@@ -4,13 +4,14 @@ import { buildSchema } from "type-graphql";
 import { getDatabase, initializeRepositories } from "./database/utils";
 import { getSessionIdInCookie } from "./utils/http-cookies";
 import { connectionToRabbitMQ } from "./rabbitmq/config";
+
+import UserService from "./services/User/User.service";
+import { startCrons } from "./services/cron/cron.service";
+import RequestSettingResolver from "./resolvers/RequestSetting/RequestSetting.resolver";
 import RequestResultResolver from "./resolvers/RequestResult/RequestResult.resolver";
 import UserResolver from "./resolvers/User/User.resolver";
 
-import RequestSettingResolver from "./resolvers/RequestSetting/RequestSetting.resolver";
-import UserService from "./services/User/User.service";
 
-import { startCrons } from "./services/cron/cron.service";
 import PremiumResolver from "./resolvers/Premium/Premium.resolver";
 import { ApolloServer } from "@apollo/server";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";

@@ -20,10 +20,12 @@ const Account = ({
   user,
   onLogoutSuccess,
   onDeleteSuccess,
+  onUpdatePremiumSuccess,
 }: {
   user: any;
   onLogoutSuccess(): Promise<void>;
   onDeleteSuccess(): Promise<ApolloQueryResult<MyProfileQuery>>;
+  onUpdatePremiumSuccess(): Promise<void>;
 }) => {
   const [selectedTab, setSelectedTab] = useState("informations");
 
@@ -49,39 +51,47 @@ const Account = ({
             className={`${styles.logout}`}
             onClick={async () => {
               await signOut();
-            }}>
+            }}
+          >
             Log out
           </span>
         </div>
         <div
-          className={`d-flex gap-5 mt-5 overflow-scroll ${styles.scrollbar}`}>
+          className={`d-flex gap-5 mt-5 overflow-scroll ${styles.scrollbar}`}
+        >
           <div
             className={`${
               selectedTab === "informations" && styles.selectedTab
-            }  ${styles.tabContainer}`}>
+            }  ${styles.tabContainer}`}
+          >
             <span
               className={`${styles.tabs} `}
-              onClick={() => setSelectedTab("informations")}>
+              onClick={() => setSelectedTab("informations")}
+            >
               Informations
             </span>
           </div>
           <div
             className={`${selectedTab === "premium" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}>
+            }`}
+          >
             <span
               className={`${styles.tabs} `}
-              onClick={() => setSelectedTab("premium")}>
+              onClick={() => setSelectedTab("premium")}
+            >
               Premium
             </span>
           </div>
           <div
             className={`${selectedTab === "bills" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}>
+            }`}
+          >
             <span
               className={`${styles.tabs} `}
-              onClick={() => setSelectedTab("bills")}>
+              onClick={() => setSelectedTab("bills")}
+            >
               Bills
             </span>
           </div>
@@ -94,7 +104,12 @@ const Account = ({
               onDeleteSuccess={onDeleteSuccess}
             />
           )}
-          {selectedTab === "premium" && <AccountPremium />}
+          {selectedTab === "premium" && (
+            <AccountPremium
+              user={user}
+              onUpdatePremiumSuccess={onUpdatePremiumSuccess}
+            />
+          )}
           {selectedTab === "bills" && <AccountBills />}
         </div>
       </div>
