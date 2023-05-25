@@ -1,4 +1,3 @@
-import { ExpressContext } from "apollo-server-express";
 import { compareSync, hashSync } from "bcryptjs";
 import { randomBytes } from "crypto";
 
@@ -10,7 +9,6 @@ import {
   sendMessageOnResetPasswordEmailQueue,
 } from "../../rabbitmq/providers";
 import UserRepository from "../../repositories/User.repository";
-import { getSessionIdInCookie } from "../../utils/http-cookies";
 import SessionService from "../Session/Session.service";
 import {
   ACCOUNT_ALREADY_ACTIVE,
@@ -30,6 +28,7 @@ import {
   UNAUTHORIZED,
   USER_NOT_FOUND,
 } from "../../utils/info-and-error-messages";
+import { Context } from "../..";
 
 export default class UserService extends UserRepository {
   static async createUser(
@@ -194,8 +193,8 @@ export default class UserService extends UserRepository {
     }
   };
 
-  static logout = async (context: ExpressContext) => {
-    const sessionId = getSessionIdInCookie(context);
+  static logout = async (context: Context) => {
+    const sessionId = context.sessionId;
     if (!sessionId) throw new Error(UNAUTHORIZED);
     await SessionService.deleteSessionById(sessionId);
   };

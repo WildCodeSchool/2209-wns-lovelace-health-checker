@@ -48,8 +48,10 @@ import {
   SIGN_UP_ROUTE,
   TERMS_ROUTE,
   REQUEST_DETAILS_ROUTE,
+  PREMIUM_SUBSCRIPTION_ROUTE,
 } from "./routes";
 import RequestDetails from "./pages/RequestDetails/RequestDetails";
+import PremiumSubscription from "./pages/PremiumSubscription/PremiumSubscription";
 
 export const MY_PROFILE = gql`
   query MyProfile {
@@ -131,6 +133,14 @@ function App() {
             }
           />
           <Route path={PREMIUM_ROUTE} element={<Premium />} />
+          <Route
+            path={PREMIUM_SUBSCRIPTION_ROUTE}
+            element={
+              <Protected isLoggedIn={isLogged} loading={loading}>
+                <PremiumSubscription />
+              </Protected>
+            }
+          />
 
           <Route
             path={ACCOUNT_ROUTE}

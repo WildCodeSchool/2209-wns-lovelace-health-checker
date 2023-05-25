@@ -1,0 +1,103 @@
+@use "../../variables.scss";
+@import "../../components.scss";
+
+.contentContainer {
+  @include contentContainer;
+
+  .title {
+    @media screen and (min-width: variables.$mobile-breakpoint) {
+      font-size: variables.$font-lg;
+    }
+    font-size: variables.$font-md;
+    font-weight: variables.$font-weight-600;
+  }
+
+  .desktopContainer {
+    @include desktopContainer;
+    @media screen and (min-width: variables.$mobile-breakpoint) {
+      padding: 35px 100px !important;
+    }
+
+    .bill {
+      font-size: variables.$font-xs;
+    }
+    .active {
+      font-size: variables.$font-xs;
+      font-weight: variables.$font-weight-600;
+    }
+    .switch {
+      width: 35px;
+      height: 15px;
+    }
+    .priceContainer {
+      @media screen and (min-width: variables.$mobile-breakpoint) {
+        background-color: white;
+      }
+      background-color: variables.$primary-100;
+      border-radius: variables.$border-radius-md;
+      padding: variables.$padding-xxl variables.$padding-sm;
+      position: relative;
+      .discount {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: variables.$primary-800;
+        border-bottom-left-radius: variables.$border-radius-md;
+        border-top-right-radius: variables.$border-radius-md;
+        padding: 5px 10px;
+        color: white;
+        font-size: variables.$font-dataTable;
+        font-weight: variables.$font-weight-500;
+      }
+      .price {
+        font-size: 44px;
+        font-weight: variables.$font-weight-600;
+      }
+      .year {
+        font-size: variables.$font-sm;
+        font-weight: variables.$font-weight-400;
+      }
+      .conversion {
+        font-size: variables.$font-xs;
+        font-weight: variables.$font-weight-400;
+        color: variables.$primary-1000;
+        opacity: 0.5;
+      }
+    }
+    .link {
+      color: variables.$primary-800;
+      font-weight: variables.$font-weight-600;
+    }
+    .btnPrimary {
+      @include btnPrimary;
+      border-radius: variables.$border-radius-md;
+      font-weight: variables.$font-weight-600;
+      padding: variables.$padding-md 0;
+    }
+    .btnSecondary {
+      @include btnSecondary;
+      border-radius: variables.$border-radius-md;
+      font-weight: variables.$font-weight-600;
+      padding: variables.$padding-md 0;
+    }
+    .btnDisabled {
+      @include btnDisabled;
+      border-radius: variables.$border-radius-md;
+      font-weight: variables.$font-weight-600;
+      padding: variables.$padding-md 0;
+    }
+    .conditions {
+      font-size: variables.$font-xs;
+      font-weight: variables.$font-weight-400;
+      color: variables.$primary-1000;
+      opacity: 0.79;
+    }
+    .stripeLogo {
+      width: 150px;
+      height: 30px;
+    }
+    .termContainer {
+      cursor: pointer;
+    }
+  }
+}

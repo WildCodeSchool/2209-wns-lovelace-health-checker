@@ -86,7 +86,7 @@ export const onMessageOnResetEmailQueue = async () => {
 export const onMessageOnAutomatedRequestQueue = async () => {
   channel.consume("automated-request", async (message: any) => {
     console.log("Start consuming message on queue automated-request.");
-    let parsedMessage = JSON.parse(
+    const parsedMessage: RequestSetting = JSON.parse(
       String.fromCharCode.apply(String, message.content)
     );
     await RequestResultService.checkUrlOfAutomatedRequest(parsedMessage);
@@ -138,7 +138,7 @@ export const onMessageOnAlertEmailQueue = async () => {
             alert.emailSentAt = new Date();
             alert.isEmailSent = true;
             await AlertService.updateAlert(alert);
-            AlertSettingService.updatePreventAlertUntilOfAlertSettingByType(
+            await AlertSettingService.updatePreventAlertDateByType(
               thirtyMinutesLaterDate,
               requestSetting,
               AlertType.EMAIL,

@@ -1,0 +1,155 @@
+@use "../../variables.scss";
+@import "../../components.scss";
+
+.loader {
+  @include loader;
+}
+
+.tableContainer {
+  @include contentContainer;
+}
+
+.available {
+  color: variables.$green-1000;
+  font-size: variables.$font-sm;
+}
+.notAvailable {
+  color: variables.$red-1000;
+  font-size: variables.$font-sm;
+}
+.createdAt,
+.duration,
+.isAvailable,
+.statusCode {
+  div {
+    justify-content: center;
+    text-align: center;
+  }
+}
+.header {
+  background-color: variables.$primary-200 !important;
+  color: variables.$primary-1000 !important;
+  font-weight: variables.$font-weight-500 !important;
+  div {
+    .p-column-filter-menu {
+      margin-left: none !important;
+      font-size: 5px !important;
+    }
+    button > span {
+      font-size: variables.$font-xs !important;
+    }
+  }
+}
+
+.header > div > div {
+  margin-left: 4px !important;
+  > button {
+    width: 20px !important;
+    height: 20px !important;
+    > svg {
+      width: 12px !important;
+      height: 12px !important;
+    }
+  }
+}
+
+.header > div > svg {
+  width: 12px !important;
+  height: 12px !important;
+}
+
+.primary {
+  color: variables.$primary-1000;
+}
+
+.table {
+  box-shadow: 0 0 4px 2px rgba(0, 0, 0, 0.1);
+  border-radius: variables.$border-radius-sm;
+  overflow: hidden;
+  font-size: variables.$font-dataTable !important;
+}
+
+ul {
+  flex-direction: column;
+}
+
+@media screen and (max-width: 576px) {
+  .paginator {
+    > button {
+      height: 1rem !important;
+      min-width: 2rem !important;
+    }
+    > span {
+      > button {
+        min-width: 1.2rem !important;
+        height: 1.2rem !important;
+      }
+    }
+    > div {
+      height: 2rem !important;
+      width: 4rem !important;
+      > span {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+      }
+      > div {
+        width: 2rem !important;
+      }
+    }
+  }
+}
+
+.paginator {
+  padding: 12px 0px;
+  > button {
+    height: 2rem !important;
+    min-width: 3rem !important;
+  }
+  > span {
+    > button {
+      min-width: 1.8rem !important;
+      height: 1.8rem !important;
+    }
+  }
+  > div {
+    height: 2rem !important;
+    width: 4rem !important;
+    > span {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+    > div {
+      width: 2rem !important;
+    }
+  }
+}
+
+.table > .p-datatable .p-datatable-loading-overlay {
+  z-index: 1 !important;
+}
+
+.hidden {
+  overflow: hidden;
+  &.url {
+    max-width: 230px;
+    text-overflow: ellipsis;
+  }
+  &.createdAt {
+    white-space: nowrap;
+  }
+  &.name {
+    max-width: 130px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.actions {
+  @include clickable;
+  color: variables.$primary-1000;
+  &:hover {
+    color: variables.$primary-500;
+  }
+}

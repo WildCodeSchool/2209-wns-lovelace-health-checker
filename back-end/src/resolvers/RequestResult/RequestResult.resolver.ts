@@ -1,5 +1,13 @@
-import { Args, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
-import { GlobalContext } from "../..";
+import {
+  Arg,
+  Args,
+  Authorized,
+  Ctx,
+  Mutation,
+  Query,
+  Resolver,
+} from "type-graphql";
+import { Context } from "../..";
 
 import RequestResult from "../../entities/RequestResult.entity";
 import User from "../../entities/User.entity";
@@ -10,6 +18,8 @@ import {
   checkUrlArgs,
   checkUrlLaunchedManuallyArgs,
 } from "./RequestResult.input";
+import PageOfRequestResult from "../../models/PageOfRequestResult";
+import { LazyTableStateArgs } from "../RequestSetting/RequestSetting.input";
 
 @Resolver(RequestResult)
 export default class RequestResultResolver {
@@ -26,7 +36,7 @@ export default class RequestResultResolver {
   @Query(() => RequestResult)
   async checkUrlLaunchedManually(
     @Args() { id }: checkUrlLaunchedManuallyArgs,
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<RequestResult> {
     const requestSetting =
       await RequestSettingService.getRequestSettingByIdOrThrowNotFoundError(id);
@@ -36,6 +46,19 @@ export default class RequestResultResolver {
     );
     return await RequestResultService.checkUrlOfRequestSettingByRequestSetting(
       requestSetting
+    );
+  }
+
+  @Query(() => PageOfRequestResult)
+  getPageOfRequestResult(
+    @Arg("settingId") settingId: string,
+    @Args() lazyEvent: LazyTableStateArgs,
+    @Ctx() context: Context
+  ): Promise<PageOfRequestResult> {
+    return RequestResultService.getPageOfRequestResult(
+      settingId,
+      context.user?.id as string,
+      lazyEvent
     );
   }
 }

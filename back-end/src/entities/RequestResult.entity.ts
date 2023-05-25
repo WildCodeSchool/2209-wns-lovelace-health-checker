@@ -1,4 +1,10 @@
-import { IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import {
+  IsBoolean,
+  IsDate,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+} from "class-validator";
 import { Field, ID, ObjectType } from "type-graphql";
 import {
   Column,
@@ -22,9 +28,9 @@ export default class RequestResult {
   ) {
     this.requestSetting = requestSetting;
     this.url = url;
-    this.statusCode = statusCode || undefined;
-    this.duration = duration || undefined;
-    this.headers = headers || undefined;
+    this.statusCode = statusCode ?? undefined;
+    this.duration = duration ?? undefined;
+    this.headers = headers ?? undefined;
     this.createdAt = new Date();
   }
 

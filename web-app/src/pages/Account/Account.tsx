@@ -90,6 +90,7 @@ const Account = ({
           {selectedTab === "informations" && (
             <AccountInformations
               user={user}
+              refreshProfile={onLogoutSuccess}
               onDeleteSuccess={onDeleteSuccess}
             />
           )}

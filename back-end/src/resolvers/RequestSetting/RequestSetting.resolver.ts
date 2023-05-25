@@ -7,7 +7,7 @@ import {
   Query,
   Resolver,
 } from "type-graphql";
-import { GlobalContext } from "../..";
+import { Context } from "../..";
 import RequestSetting from "../../entities/RequestSetting.entity";
 import User from "../../entities/User.entity";
 import PageOfRequestSettingWithLastResult from "../../models/PageOfRequestSettingWithLastResult";
@@ -27,7 +27,7 @@ export default class RequestSettingResolver {
   @Authorized()
   @Query(() => Boolean)
   async checkIfNonPremiumUserHasReachedMaxRequestsCount(
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<boolean> {
     return RequestSettingService.checkIfNonPremiumUserHasReachedMaxRequestsCount(
       context.user as User
@@ -49,7 +49,7 @@ export default class RequestSettingResolver {
       customEmailErrors,
       customPushErrors,
     }: CreateRequestSettingArgs,
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<RequestSetting> {
     return await RequestSettingService.createRequest(
       url,
@@ -81,7 +81,7 @@ export default class RequestSettingResolver {
       customEmailErrors,
       customPushErrors,
     }: UpdateRequestSettingArgs,
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<RequestSetting> {
     return await RequestSettingService.updateRequest(
       id,
@@ -102,7 +102,7 @@ export default class RequestSettingResolver {
   @Query(() => PageOfRequestSettingWithLastResult)
   getPageOfRequestSettingWithLastResult(
     @Args() lazyEvent: LazyTableStateArgs,
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<PageOfRequestSettingWithLastResult> {
     return RequestSettingService.getPageOfRequestSettingWithLastResult(
       context.user?.id as string,
@@ -114,7 +114,7 @@ export default class RequestSettingResolver {
   @Query(() => RequestSettingWithLastResult)
   async getRequestSettingById(
     @Args() { id }: GetRequestSettingByIdArgs,
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ) {
     const user = context.user as User;
     const result =
@@ -131,7 +131,7 @@ export default class RequestSettingResolver {
   @Mutation(() => Boolean)
   deleteRequestSetting(
     @Arg("requestId") requestId: string,
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<Boolean> {
     return RequestSettingService.deleteRequestSettingById(
       context.user as User,

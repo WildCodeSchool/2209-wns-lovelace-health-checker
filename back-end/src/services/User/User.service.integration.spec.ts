@@ -12,6 +12,8 @@ import UserRepository from "../../repositories/User.repository";
 import * as HttpCookies from "../../utils/http-cookies";
 import SessionService from "../Session/Session.service";
 import UserService from "./User.service";
+import { Context } from "../..";
+import { Request, Response } from "express";
 
 const sendMessageOnAccountCreationEmailQueue = () => {
   return jest
@@ -502,7 +504,7 @@ describe("UserService integration", () => {
     const getSessionIdInCookieSpy = jest
       .spyOn(HttpCookies, "getSessionIdInCookie")
       .mockImplementation((context: any) => {
-        return context.cookies.sessionId;
+        return context.sessionId;
       });
 
     const deleteSessionByIdSpy = jest
@@ -511,28 +513,33 @@ describe("UserService integration", () => {
         return data;
       });
 
-    describe("getSessionIdInCookie", () => {
-      it("should be called once", async () => {
-        const context: any = { cookies: { sessionId: "123" } };
-        await UserService.logout(context);
-        expect(getSessionIdInCookieSpy).toHaveBeenCalledTimes(1);
-      });
-    });
     describe("when sessionId", () => {
       it("deleteSessionById is called once", async () => {
-        const context: any = { cookies: { sessionId: "123" } };
+        const req = {} as Request;
+        const res = {} as Response;
+        const user = new User("John", "Doe", "email@email.com", "password");
+        const sessionId = "123";
+        const context: Context = { req, res, user, sessionId };
         await UserService.logout(context);
         expect(deleteSessionByIdSpy).toHaveBeenCalledTimes(1);
       });
       it("deleteSessionById is called with correct sessionId", async () => {
-        const context: any = { cookies: { sessionId: "123" } };
+        const req = {} as Request;
+        const res = {} as Response;
+        const user = new User("John", "Doe", "email@email.com", "password");
+        const sessionId = "123";
+        const context: Context = { req, res, user, sessionId };
         await UserService.logout(context);
         expect(deleteSessionByIdSpy).toHaveBeenCalledWith("123");
       });
     });
     describe("when no sessionId", () => {
       it("throws 'Unauthorized' error message", async () => {
-        const context: any = { cookies: { sessionId: "" } };
+        const req = {} as Request;
+        const res = {} as Response;
+        const user = new User("John", "Doe", "email@email.com", "password");
+        const sessionId = "";
+        const context: Context = { req, res, user, sessionId };
         await expect(UserService.logout(context)).rejects.toThrowError(
           "Unauthorized"
         );

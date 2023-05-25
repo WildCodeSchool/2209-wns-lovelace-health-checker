@@ -201,7 +201,7 @@ const RequestDetailsInformations = ({
             <h2 className={`${styles.header} mt-md-3`}>
               <i className="bi bi-info-circle"></i> General
             </h2>
-            <div className={`${styles.formContent}`}>
+            <div className={`${styles.formContent} text-break`}>
               <div>
                 <div className={`${styles.label}`}>URL</div>
                 <p className={`${styles.value}`}>
@@ -431,7 +431,7 @@ const RequestDetailsInformations = ({
           </div>
 
           {/* Headers */}
-          <div className={`col ${styles.formContainer}`}>
+          <div className={`col ${styles.formContainer} text-break`}>
             <h2 className={`${styles.header} mt-md-3`}>
               <i className="bi bi-card-text"></i> Headers
             </h2>
