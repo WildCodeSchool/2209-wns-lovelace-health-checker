@@ -115,10 +115,8 @@ export default class User {
   @Column({
     type: "enum",
     enum: OnPremiumCancellation,
-    default: OnPremiumCancellation.DISABLED,
   })
-  @Field()
-  @IsNotEmpty()
+  @Field({ nullable: true })
   onPremiumCancellation: OnPremiumCancellation;
 
   @Column({ type: "enum", enum: Status, default: Status.PENDING })
