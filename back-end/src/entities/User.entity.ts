@@ -29,6 +29,11 @@ export enum Role {
   ADMIN = "admin",
 }
 
+export enum OnPremiumCancellation {
+  DEFAULT = "default",
+  DISABLED = "disabled",
+}
+
 @Entity("app_user")
 @ObjectType()
 export default class User {
@@ -107,10 +112,14 @@ export default class User {
   @IsBoolean()
   hasCanceledPremium: boolean;
 
-  @Column({ nullable: true, default: null })
-  @Field({ nullable: true })
-  @IsBoolean()
-  keepPremiumRequestOnPremiumCancellation: boolean;
+  @Column({
+    type: "enum",
+    enum: OnPremiumCancellation,
+    default: OnPremiumCancellation.DISABLED,
+  })
+  @Field()
+  @IsNotEmpty()
+  onPremiumCancellation: OnPremiumCancellation;
 
   @Column({ type: "enum", enum: Status, default: Status.PENDING })
   @Field()
