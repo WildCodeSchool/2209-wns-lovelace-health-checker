@@ -113,6 +113,8 @@ export default class User {
   hasCanceledPremium: boolean;
 
   @Column({
+    nullable: true,
+    default: null,
     type: "enum",
     enum: OnPremiumCancellation,
   })
