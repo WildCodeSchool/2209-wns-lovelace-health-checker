@@ -2,7 +2,10 @@ import { compareSync, hashSync } from "bcryptjs";
 import { randomBytes } from "crypto";
 
 import Session from "../../entities/Session.entity";
-import User, { Status } from "../../entities/User.entity";
+import User, {
+  OnPremiumCancellation,
+  Status,
+} from "../../entities/User.entity";
 import {
   sendMessageOnAccountCreationEmailQueue,
   sendMessageOnResetEmailQueue,
@@ -298,11 +301,10 @@ export default class UserService extends UserRepository {
   public static modifyPremiumSubscription = async (
     user: User,
     hasCanceledPremium: boolean,
-    keepPremiumRequestOnPremiumCancellation: boolean
+    onPremiumCancellation: OnPremiumCancellation
   ): Promise<Boolean> => {
     user.hasCanceledPremium = hasCanceledPremium;
-    user.keepPremiumRequestOnPremiumCancellation =
-      keepPremiumRequestOnPremiumCancellation;
+    user.onPremiumCancellation = onPremiumCancellation;
     user.updatedAt = new Date();
     await this.saveUser(user);
     return true;
