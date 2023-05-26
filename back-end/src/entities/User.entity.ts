@@ -107,6 +107,11 @@ export default class User {
   @IsBoolean()
   hasCanceledPremium: boolean;
 
+  @Column({ nullable: true, default: null })
+  @Field({ nullable: true })
+  @IsBoolean()
+  keepPremiumRequestOnPremiumCancellation: boolean;
+
   @Column({ type: "enum", enum: Status, default: Status.PENDING })
   @Field()
   @IsNotEmpty()

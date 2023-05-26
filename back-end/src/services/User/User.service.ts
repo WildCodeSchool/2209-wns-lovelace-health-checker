@@ -294,4 +294,17 @@ export default class UserService extends UserRepository {
     await this.deleteUser(user);
     return true;
   };
+
+  public static modifyPremiumSubscription = async (
+    user: User,
+    hasCanceledPremium: boolean,
+    keepPremiumRequestOnPremiumCancellation: boolean
+  ): Promise<Boolean> => {
+    user.hasCanceledPremium = hasCanceledPremium;
+    user.keepPremiumRequestOnPremiumCancellation =
+      keepPremiumRequestOnPremiumCancellation;
+    user.updatedAt = new Date();
+    await this.saveUser(user);
+    return true;
+  };
 }

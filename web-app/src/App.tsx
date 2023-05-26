@@ -61,17 +61,31 @@ export const MY_PROFILE = gql`
       lastname
       role
       email
+      hasCanceledPremium
+      keepPremiumRequestOnPremiumCancellation
     }
   }
 `;
 
+export interface User {
+  id: string;
+  firstname: string;
+  lastname: string;
+  role: string;
+  email: string;
+  hasCancelledPremium?: boolean | null | undefined;
+  keepPremiumRequestOnPremiumCancellation?: boolean | null | undefined;
+}
+
 function App() {
   const [isLogged, setIsLogged] = useState(false);
+  const [user, setUser] = useState<User>();
 
   const { loading, refetch, data } = useQuery<MyProfileQuery>(MY_PROFILE, {
     onCompleted: (data) => {
       if (data.myProfile) {
         setIsLogged(true);
+        setUser(data.myProfile);
       }
     },
     onError: () => {
@@ -149,7 +163,8 @@ function App() {
                 <Account
                   onLogoutSuccess={refreshMyProfile}
                   onDeleteSuccess={refetch}
-                  user={data?.myProfile}
+                  onUpdatePremiumSuccess={refreshMyProfile}
+                  user={user}
                 />
               </Protected>
             }

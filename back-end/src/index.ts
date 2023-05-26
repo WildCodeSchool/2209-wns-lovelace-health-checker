@@ -4,13 +4,13 @@ import { buildSchema } from "type-graphql";
 import { getDatabase, initializeRepositories } from "./database/utils";
 import { getSessionIdInCookie } from "./utils/http-cookies";
 import { connectionToRabbitMQ } from "./rabbitmq/config";
+
+import UserService from "./services/User/User.service";
+import { startCrons } from "./services/cron/cron.service";
+import RequestSettingResolver from "./resolvers/RequestSetting/RequestSetting.resolver";
 import RequestResultResolver from "./resolvers/RequestResult/RequestResult.resolver";
 import UserResolver from "./resolvers/User/User.resolver";
 
-import RequestSettingResolver from "./resolvers/RequestSetting/RequestSetting.resolver";
-import UserService from "./services/User/User.service";
-
-import { startCrons } from "./services/cron/cron.service";
 import PremiumResolver from "./resolvers/Premium/Premium.resolver";
 import { ApolloServer } from "@apollo/server";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
@@ -93,17 +93,20 @@ app.get("/test", (req, res) => {
   res.send("It works");
 });
 
-const endpointSecret = process.env.STRIP_ENDPOINT_SECRET;
+const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET;
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2022-11-15",
 });
 
 app.post(
   "/webhook",
-  express.raw({ type: "application/json" }),
+  bodyParser.raw({ type: "application/json" }),
   (request, response) => {
     console.log("passed");
     let event = request.body;
+    console.log(event);
+    console.log(endpointSecret);
     // Only verify the event if you have an endpoint secret defined.
     // Otherwise use the basic event deserialized with JSON.parse
     if (endpointSecret) {
@@ -143,6 +146,6 @@ app.post(
     }
 
     // Return a 200 response to acknowledge receipt of the event
-    response.send();
+    response.status(200).end();
   }
 );
