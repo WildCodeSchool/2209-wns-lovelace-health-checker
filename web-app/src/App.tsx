@@ -62,10 +62,15 @@ export const MY_PROFILE = gql`
       role
       email
       hasCanceledPremium
-      keepPremiumRequestOnPremiumCancellation
+      onPremiumCancellation
     }
   }
 `;
+
+export enum OnPremiumCancellation {
+  DEFAULT = "default",
+  DISABLED = "disabled",
+}
 
 export interface User {
   id: string;
@@ -74,7 +79,7 @@ export interface User {
   role: string;
   email: string;
   hasCancelledPremium?: boolean | null | undefined;
-  keepPremiumRequestOnPremiumCancellation?: boolean | null | undefined;
+  onPremiumCancellation?: string | null | undefined;
 }
 
 function App() {

@@ -8,6 +8,7 @@ import {
   ModifyPremiumSubscriptionMutationVariables,
 } from "../../gql/graphql";
 import { toast } from "react-toastify";
+import { OnPremiumCancellation } from "../../App";
 
 const GET_PREMIUM_BY_USER_ID = gql`
   query GetPremiumByUserIdQuery {
@@ -24,11 +25,11 @@ const GET_PREMIUM_BY_USER_ID = gql`
 const MODIFY_PREMIUM_SUBSCRIPTION = gql`
   mutation ModifyPremiumSubscription(
     $hasCanceledPremium: Boolean!
-    $keepPremiumRequestOnPremiumCancellation: Boolean!
+    $onPremiumCancellation: String!
   ) {
     modifyPremiumSubscription(
       hasCanceledPremium: $hasCanceledPremium
-      keepPremiumRequestOnPremiumCancellation: $keepPremiumRequestOnPremiumCancellation
+      onPremiumCancellation: $onPremiumCancellation
     )
   }
 `;
@@ -78,7 +79,7 @@ const AccountPremium = ({
     },
   });
   type ModifyPremiumSubscriptionInput = {
-    keepPremiumRequestOnPremiumCancellation: boolean;
+    onPremiumCancellation: OnPremiumCancellation;
   };
   const {
     register,
@@ -92,16 +93,14 @@ const AccountPremium = ({
     await modifyPremiumSubscription({
       variables: {
         hasCanceledPremium: !!!user.hasCanceledPremium,
-        keepPremiumRequestOnPremiumCancellation:
-          keepPremiumRequestOnPremiumCancellation ? true : false,
+        onPremiumCancellation: onPremiumCancellation
       },
     });
   };
 
-  const [
-    keepPremiumRequestOnPremiumCancellation,
-    setKeepPremiumRequestOnPremiumCancellation,
-  ] = useState(true);
+  const [onPremiumCancellation, setOnPremiumCancellation] = useState(
+    OnPremiumCancellation.DISABLED
+  );
 
   return (
     <>
@@ -182,10 +181,12 @@ const AccountPremium = ({
                     type="radio"
                     id="stateActive"
                     value="true"
-                    {...register("keepPremiumRequestOnPremiumCancellation")}
-                    checked={keepPremiumRequestOnPremiumCancellation === true}
+                    {...register("onPremiumCancellation")}
+                    checked={
+                      onPremiumCancellation === OnPremiumCancellation.DISABLED
+                    }
                     onClick={() =>
-                      setKeepPremiumRequestOnPremiumCancellation(true)
+                      setOnPremiumCancellation(OnPremiumCancellation.DISABLED)
                     }
                   />
                   <label className="form-check-label" htmlFor="stateActive">
@@ -198,10 +199,12 @@ const AccountPremium = ({
                     type="radio"
                     id="stateInactive"
                     value="false"
-                    {...register("keepPremiumRequestOnPremiumCancellation")}
-                    checked={keepPremiumRequestOnPremiumCancellation === false}
+                    {...register("onPremiumCancellation")}
+                    checked={
+                      onPremiumCancellation === OnPremiumCancellation.DEFAULT
+                    }
                     onClick={() =>
-                      setKeepPremiumRequestOnPremiumCancellation(false)
+                      setOnPremiumCancellation(OnPremiumCancellation.DEFAULT)
                     }
                   />
                   <label className="form-check-label" htmlFor="stateInactive">
@@ -330,7 +333,7 @@ const AccountPremium = ({
                 <>
                   <p>
                     You have chosen to cancel your plan and
-                    {user.keepPremiumRequestOnPremiumCancellation
+                    {user.onPremiumCancellation === OnPremiumCancellation.DISABLED
                       ? " to deactivate your Premium requests "
                       : " to convert your Premium requests to non-Premium requests "}
                     at the end of the billing period.
