@@ -3,7 +3,6 @@ import { DataSource, EntityTarget } from "typeorm";
 import { DATABASE_URL, NODE_ENV, TEST_DATABASE_URL } from "../config";
 import AlertRepository from "../repositories/Alert.repository";
 import AlertSettingRepository from "../repositories/AlertSetting.repository";
-import PremiumRepository from "../repositories/Premium.repository";
 import RequestResultRepository from "../repositories/RequestResult.repository";
 import RequestSettingRepository from "../repositories/RequestSetting.repository";
 import SessionRepository from "../repositories/Session.repository";
@@ -43,7 +42,6 @@ export const getRepository = async (entity: EntityTarget<any>) => {
 export const initializeRepositories = async () => {
   await UserRepository.initializeRepository();
   await SessionRepository.initializeRepository();
-  await PremiumRepository.initializeRepository();
   await RequestSettingRepository.initializeRepository();
   await AlertSettingRepository.initializeRepository();
   await RequestResultRepository.initializeRepository();

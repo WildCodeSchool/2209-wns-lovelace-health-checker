@@ -1,9 +1,10 @@
 import styles from "./Premium.module.scss";
 import spaceshipImage from "../../assets/images/spaceship.png";
 import { useNavigate } from "react-router-dom";
-import { PREMIUM_SUBSCRIPTION_ROUTE } from "../../routes";
+import { ACCOUNT_ROUTE, PREMIUM_SUBSCRIPTION_ROUTE } from "../../routes";
 
-const Premium = () => {
+const Premium = (props: any) => {
+  const isPremium: boolean = props.isPremium;
   const navigate = useNavigate();
   return (
     <div>
@@ -13,9 +14,11 @@ const Premium = () => {
         </h1>
         <button
           className={`col-sm-6 col-12 ${styles.btn} ${styles.btnSecondary}`}
-          onClick={() => navigate(PREMIUM_SUBSCRIPTION_ROUTE)}
+          onClick={() =>
+            navigate(isPremium ? ACCOUNT_ROUTE : PREMIUM_SUBSCRIPTION_ROUTE)
+          }
         >
-          Subscribe to Premium
+          {isPremium ? "See my plan" : "Subscribe to Premium"}
         </button>
         <img
           className={`${styles.starshipImage} position-absolute`}
@@ -61,9 +64,11 @@ const Premium = () => {
           </div>
           <button
             className={`${styles.btn} ${styles.btnPrimary} mt-5`}
-            onClick={() => navigate(PREMIUM_SUBSCRIPTION_ROUTE)}
+            onClick={() =>
+              navigate(isPremium ? ACCOUNT_ROUTE : PREMIUM_SUBSCRIPTION_ROUTE)
+            }
           >
-            Subscribe to Premium
+            {isPremium ? "See my plan" : "Subscribe to Premium"}
           </button>
         </div>
 
@@ -89,9 +94,11 @@ const Premium = () => {
         <div className={`${styles.content} mt-0`}>
           <button
             className={`${styles.btn} ${styles.btnPrimary} mt-5`}
-            onClick={() => navigate(PREMIUM_SUBSCRIPTION_ROUTE)}
+            onClick={() =>
+              navigate(isPremium ? ACCOUNT_ROUTE : PREMIUM_SUBSCRIPTION_ROUTE)
+            }
           >
-            Subscribe to Premium
+            {isPremium ? "See my plan" : "Subscribe to Premium"}
           </button>
         </div>
       </div>

@@ -9,7 +9,7 @@ import RequestResult from "../../entities/RequestResult.entity";
 import RequestSetting, {
   Frequency,
 } from "../../entities/RequestSetting.entity";
-import User, { Role } from "../../entities/User.entity";
+import User, { PremiumPlan, Role } from "../../entities/User.entity";
 import { HeaderElement } from "../../models/header-element.model";
 import RequestResultRepository from "../../repositories/RequestResult.repository";
 import RequestSettingRepository from "../../repositories/RequestSetting.repository";
@@ -402,9 +402,9 @@ describe("RequestService integration", () => {
   });
 
   describe("checkIfNonPremiumUserHasReachedMaxRequestsCount", () => {
-    describe("user doesn't have 'user' role", () => {
+    describe("user has premium plan", () => {
       it("returns false", async () => {
-        user.role = Role.PREMIUM;
+        user.premiumPlan = PremiumPlan.YEARLY;
         const result =
           await RequestSettingService.checkIfNonPremiumUserHasReachedMaxRequestsCount(
             user
@@ -700,9 +700,9 @@ describe("RequestService integration", () => {
         ).rejects.toThrowError(ALERTS_ONLY_FOR_PREMIUM_USERS);
       });
     });
-    describe("if user's role is 'premium' and there's Premium custom errors", () => {
+    describe("if user's premium plan is 'annually' and there's Premium custom errors", () => {
       const user = new User("John", "Doe", "johndoe@email.com", "password");
-      user.role = Role.PREMIUM;
+      user.premiumPlan = PremiumPlan.YEARLY;
       const customEmailErrors: number[] = [400];
       it(`not throws any error`, async () => {
         expect(

@@ -300,10 +300,8 @@ export default class UserService extends UserRepository {
 
   public static modifyPremiumSubscription = async (
     user: User,
-    hasCanceledPremium: boolean,
     onPremiumCancellation: OnPremiumCancellation
   ): Promise<Boolean> => {
-    user.hasCanceledPremium = hasCanceledPremium;
     user.onPremiumCancellation = onPremiumCancellation;
     user.updatedAt = new Date();
     await this.saveUser(user);
