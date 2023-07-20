@@ -44,7 +44,11 @@ export const GET_REQUEST_SETTING_BY_ID = gql`
   }
 `;
 
-const RequestDetails = ({ role }: { role: string | undefined }) => {
+const RequestDetails = ({
+  premiumPlan,
+}: {
+  premiumPlan: string | null | undefined;
+}) => {
   const [selectedTab, setSelectedTab] = useState("informations");
   const navigate = useNavigate();
 
@@ -87,7 +91,8 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
           <i
             onClick={() => navigate(REQUESTS_ROUTE)}
             title="Go back to request list"
-            className={`${styles.previousIcon} bi bi-arrow-left me-3`}></i>
+            className={`${styles.previousIcon} bi bi-arrow-left me-3`}
+          ></i>
           <h1 className={`${styles.pageTitle}`}>Request details</h1>
         </div>
         <div className={`${styles.slider} gap-4 mt-5`}>
@@ -99,7 +104,8 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
             onClick={() => {
               setSelectedTab("informations");
               refetch();
-            }}>
+            }}
+          >
             <span className={`${styles.tabs} `}>Informations</span>
           </div>
           {/* Settings */}
@@ -110,7 +116,8 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
             onClick={() => {
               setSelectedTab("settings");
               refetch();
-            }}>
+            }}
+          >
             <span className={`${styles.tabs} `}>Settings</span>
           </div>
           {/* History */}
@@ -121,7 +128,8 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
             onClick={() => {
               setSelectedTab("history");
               refetch();
-            }}>
+            }}
+          >
             <span className={`${styles.tabs} `}>History</span>
           </div>
           {/* Graph */}
@@ -132,7 +140,8 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
             onClick={() => {
               setSelectedTab("graph");
               refetch();
-            }}>
+            }}
+          >
             <span className={`${styles.tabs} `}>Graph</span>
           </div>
         </div>
@@ -145,7 +154,7 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
       )}
       {selectedTab === "settings" && (
         <RequestCreation
-          role={role}
+          premiumPlan={premiumPlan}
           setRequestDetailsTab={setSelectedTab}
           existingRequest={data?.getRequestSettingById}
         />
