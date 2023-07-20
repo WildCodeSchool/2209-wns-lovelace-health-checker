@@ -13,12 +13,11 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel-plugin for production.
  */
 const documents = {
-    "\n  query MyProfile {\n    myProfile {\n      id\n      firstname\n      lastname\n      role\n      email\n      hasCanceledPremium\n      keepPremiumRequestOnPremiumCancellation\n    }\n  }\n": types.MyProfileDocument,
+    "\n  query MyProfile {\n    myProfile {\n      id\n      firstname\n      lastname\n      role\n      email\n      premiumPlan\n      onPremiumCancellation\n      premiumStartPeriod\n      premiumEndPeriod\n    }\n  }\n": types.MyProfileDocument,
     "\n    mutation UpdateIdentity($lastname: String!, $firstname: String!) {\n      updateIdentity(lastname: $lastname, firstname: $firstname) {\n        lastname\n        firstname\n      }\n    }\n  ": types.UpdateIdentityDocument,
     "\n    mutation UpdatePassword(\n      $currentPassword: String!\n      $newPassword: String!\n      $newPasswordConfirmation: String!\n      $disconnectMe: Boolean!\n    ) {\n      updatePassword(\n        currentPassword: $currentPassword\n        newPassword: $newPassword\n        newPasswordConfirmation: $newPasswordConfirmation\n        disconnectMe: $disconnectMe\n      )\n    }\n  ": types.UpdatePasswordDocument,
     "\n    mutation UpdateEmail($newEmail: String!) {\n      updateEmail(newEmail: $newEmail)\n    }\n  ": types.UpdateEmailDocument,
-    "\n  query GetPremiumByUserIdQuery {\n    getPremiumByUserId {\n      id\n      billingType\n      price\n      startDate\n      endDate\n    }\n  }\n": types.GetPremiumByUserIdQueryDocument,
-    "\n  mutation ModifyPremiumSubscription(\n    $hasCanceledPremium: Boolean!\n    $keepPremiumRequestOnPremiumCancellation: Boolean!\n  ) {\n    modifyPremiumSubscription(\n      hasCanceledPremium: $hasCanceledPremium\n      keepPremiumRequestOnPremiumCancellation: $keepPremiumRequestOnPremiumCancellation\n    )\n  }\n": types.ModifyPremiumSubscriptionDocument,
+    "\n  mutation ModifyPremiumSubscription($onPremiumCancellation: String!) {\n    modifyPremiumSubscription(onPremiumCancellation: $onPremiumCancellation)\n  }\n": types.ModifyPremiumSubscriptionDocument,
     "\n  mutation DeleteUser($currentPassword: String!) {\n    deleteUser(currentPassword: $currentPassword)\n  }\n": types.DeleteUserDocument,
     "\n  query GetPageOfRequestSettingWithLastResult(\n    $first: Int!\n    $rows: Int!\n    $page: Int!\n    $sortField: String!\n    $sortOrder: Int!\n    $filters: [Filter!]\n  ) {\n    getPageOfRequestSettingWithLastResult(\n      first: $first\n      rows: $rows\n      page: $page\n      sortField: $sortField\n      sortOrder: $sortOrder\n      filters: $filters\n    ) {\n      totalCount\n      requestSettingsWithLastResult {\n        requestResult {\n          getIsAvailable\n          statusCode\n          createdAt\n        }\n        requestSetting {\n          id\n          url\n          name\n          frequency\n        }\n      }\n    }\n  }\n": types.GetPageOfRequestSettingWithLastResultDocument,
     "\n  query CheckUrlLaunchedManually($checkUrlLaunchedManuallyId: String!) {\n    checkUrlLaunchedManually(id: $checkUrlLaunchedManuallyId) {\n      id\n      createdAt\n      url\n      getIsAvailable\n      statusCode\n      duration\n      headers\n    }\n  }\n": types.CheckUrlLaunchedManuallyDocument,
@@ -57,7 +56,7 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query MyProfile {\n    myProfile {\n      id\n      firstname\n      lastname\n      role\n      email\n      hasCanceledPremium\n      keepPremiumRequestOnPremiumCancellation\n    }\n  }\n"): (typeof documents)["\n  query MyProfile {\n    myProfile {\n      id\n      firstname\n      lastname\n      role\n      email\n      hasCanceledPremium\n      keepPremiumRequestOnPremiumCancellation\n    }\n  }\n"];
+export function graphql(source: "\n  query MyProfile {\n    myProfile {\n      id\n      firstname\n      lastname\n      role\n      email\n      premiumPlan\n      onPremiumCancellation\n      premiumStartPeriod\n      premiumEndPeriod\n    }\n  }\n"): (typeof documents)["\n  query MyProfile {\n    myProfile {\n      id\n      firstname\n      lastname\n      role\n      email\n      premiumPlan\n      onPremiumCancellation\n      premiumStartPeriod\n      premiumEndPeriod\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -73,11 +72,7 @@ export function graphql(source: "\n    mutation UpdateEmail($newEmail: String!) 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetPremiumByUserIdQuery {\n    getPremiumByUserId {\n      id\n      billingType\n      price\n      startDate\n      endDate\n    }\n  }\n"): (typeof documents)["\n  query GetPremiumByUserIdQuery {\n    getPremiumByUserId {\n      id\n      billingType\n      price\n      startDate\n      endDate\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  mutation ModifyPremiumSubscription(\n    $hasCanceledPremium: Boolean!\n    $keepPremiumRequestOnPremiumCancellation: Boolean!\n  ) {\n    modifyPremiumSubscription(\n      hasCanceledPremium: $hasCanceledPremium\n      keepPremiumRequestOnPremiumCancellation: $keepPremiumRequestOnPremiumCancellation\n    )\n  }\n"): (typeof documents)["\n  mutation ModifyPremiumSubscription(\n    $hasCanceledPremium: Boolean!\n    $keepPremiumRequestOnPremiumCancellation: Boolean!\n  ) {\n    modifyPremiumSubscription(\n      hasCanceledPremium: $hasCanceledPremium\n      keepPremiumRequestOnPremiumCancellation: $keepPremiumRequestOnPremiumCancellation\n    )\n  }\n"];
+export function graphql(source: "\n  mutation ModifyPremiumSubscription($onPremiumCancellation: String!) {\n    modifyPremiumSubscription(onPremiumCancellation: $onPremiumCancellation)\n  }\n"): (typeof documents)["\n  mutation ModifyPremiumSubscription($onPremiumCancellation: String!) {\n    modifyPremiumSubscription(onPremiumCancellation: $onPremiumCancellation)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

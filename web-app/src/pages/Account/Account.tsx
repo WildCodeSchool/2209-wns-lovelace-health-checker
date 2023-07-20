@@ -9,6 +9,7 @@ import AccountPremium from "../../components/AccountPremium/AccountPremium";
 import { MyProfileQuery, SignOutMutation } from "../../gql/graphql";
 import { HOMEPAGE_ROUTE } from "../../routes";
 import styles from "./Account.module.scss";
+import { User } from "../../App";
 
 export const SIGN_OUT = gql`
   mutation SignOut {
@@ -22,7 +23,7 @@ const Account = ({
   onDeleteSuccess,
   onUpdatePremiumSuccess,
 }: {
-  user: any;
+  user: User | undefined;
   onLogoutSuccess(): Promise<void>;
   onDeleteSuccess(): Promise<ApolloQueryResult<MyProfileQuery>>;
   onUpdatePremiumSuccess(): Promise<void>;
@@ -71,18 +72,20 @@ const Account = ({
               Informations
             </span>
           </div>
-          <div
-            className={`${selectedTab === "premium" && styles.selectedTab}  ${
-              styles.tabContainer
-            }`}
-          >
-            <span
-              className={`${styles.tabs} `}
-              onClick={() => setSelectedTab("premium")}
+          {user?.premiumPlan && (
+            <div
+              className={`${selectedTab === "premium" && styles.selectedTab}  ${
+                styles.tabContainer
+              }`}
             >
-              Premium
-            </span>
-          </div>
+              <span
+                className={`${styles.tabs} `}
+                onClick={() => setSelectedTab("premium")}
+              >
+                Premium
+              </span>
+            </div>
+          )}
           <div
             className={`${selectedTab === "bills" && styles.selectedTab}  ${
               styles.tabContainer
@@ -104,7 +107,7 @@ const Account = ({
               onDeleteSuccess={onDeleteSuccess}
             />
           )}
-          {selectedTab === "premium" && (
+          {user && selectedTab === "premium" && (
             <AccountPremium
               user={user}
               onUpdatePremiumSuccess={onUpdatePremiumSuccess}

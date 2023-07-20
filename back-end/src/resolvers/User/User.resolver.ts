@@ -160,15 +160,13 @@ export default class UserResolver {
   modifyPremiumSubscription(
     @Args()
     {
-      hasCanceledPremium,
-      keepPremiumRequestOnPremiumCancellation,
+      onPremiumCancellation,
     }: ModifyPremiumSubscriptionArgs,
     @Ctx() context: Context
   ): Promise<Boolean> {
     return UserService.modifyPremiumSubscription(
       context.user as User,
-      hasCanceledPremium,
-      keepPremiumRequestOnPremiumCancellation
+      onPremiumCancellation
     );
   }
 }

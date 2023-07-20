@@ -61,11 +61,19 @@ export const MY_PROFILE = gql`
       lastname
       role
       email
-      hasCanceledPremium
-      keepPremiumRequestOnPremiumCancellation
+      premiumPlan
+      onPremiumCancellation
+      premiumStartPeriod
+      premiumEndPeriod
     }
   }
 `;
+
+export enum OnPremiumCancellation {
+  DEFAULT = "default",
+  DISABLED = "disabled",
+  STAY = "stay"
+}
 
 export interface User {
   id: string;
@@ -73,12 +81,15 @@ export interface User {
   lastname: string;
   role: string;
   email: string;
-  hasCancelledPremium?: boolean | null | undefined;
-  keepPremiumRequestOnPremiumCancellation?: boolean | null | undefined;
+  premiumPlan?: string | null | undefined;
+  onPremiumCancellation?: string | null | undefined;
+  premiumStartPeriod?: string | null | undefined;
+  premiumEndPeriod?: string | null | undefined;
 }
 
 function App() {
   const [isLogged, setIsLogged] = useState(false);
+  const [isPremium, setIspremium] = useState(false);
   const [user, setUser] = useState<User>();
 
   const { loading, refetch, data } = useQuery<MyProfileQuery>(MY_PROFILE, {
@@ -86,10 +97,14 @@ function App() {
       if (data.myProfile) {
         setIsLogged(true);
         setUser(data.myProfile);
+        if (data.myProfile.premiumPlan) {
+          setIspremium(true);
+        }
       }
     },
     onError: () => {
       setIsLogged(false);
+      setIspremium(false);
     },
   });
 
@@ -103,9 +118,12 @@ function App() {
   return (
     <main className={`container p-0 ${styles.main}`}>
       <div className={styles.content}>
-        <Navbar logged={isLogged} />
+        <Navbar logged={isLogged} isPremium={isPremium} />
         <Routes>
-          <Route path={HOMEPAGE_ROUTE} element={<Home />} />
+          <Route
+            path={HOMEPAGE_ROUTE}
+            element={<Home logged={isLogged} isPremium={isPremium} />}
+          />
           <Route
             path={SIGN_UP_ROUTE}
             element={
@@ -146,7 +164,7 @@ function App() {
               </Protected>
             }
           />
-          <Route path={PREMIUM_ROUTE} element={<Premium />} />
+          <Route path={PREMIUM_ROUTE} element={<Premium isPremium={isPremium} />} />
           <Route
             path={PREMIUM_SUBSCRIPTION_ROUTE}
             element={

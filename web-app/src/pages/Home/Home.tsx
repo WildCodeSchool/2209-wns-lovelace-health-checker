@@ -7,7 +7,7 @@ import FormErrorMessage from "../../components/ErrorMessage/FormErrorMessage";
 
 import HomepageRequestTable from "../../components/HomepageRequestTable/HomepageRequestTable";
 import { CheckUrlMutation, CheckUrlMutationVariables } from "../../gql/graphql";
-import { PREMIUM_ROUTE, SIGN_UP_ROUTE } from "../../routes";
+import { ACCOUNT_ROUTE, PREMIUM_ROUTE, SIGN_UP_ROUTE } from "../../routes";
 import {
   getErrorMessage,
   SERVER_IS_KO_ERROR_MESSAGE,
@@ -62,7 +62,9 @@ const renderErrorSwitch = (error: ApolloError | undefined) => {
   }
 };
 
-const Home = () => {
+const Home = (props: any) => {
+  const isLogged: boolean = props.logged;
+  const isPremium: boolean = props.isPremium;
   const [url, setUrl] = useState("");
   const [search, { data, loading, error }] = useMutation<
     CheckUrlMutation,
@@ -190,10 +192,10 @@ const Home = () => {
 
           <Link
             className="m-0 col-12 col-md-6 d-flex justify-content-center"
-            to={SIGN_UP_ROUTE}
+            to={isLogged ? ACCOUNT_ROUTE : SIGN_UP_ROUTE}
           >
             <button className={`${styles.btn} ${styles.btnPrimary}`}>
-              Create your free account
+              {isLogged ? "See your account" : "Create your free account"}
             </button>
           </Link>
         </div>
@@ -209,10 +211,10 @@ const Home = () => {
           </div>
           <Link
             className="m-0 col-12 col-md-6 d-flex justify-content-center"
-            to={PREMIUM_ROUTE}
+            to={isPremium ? ACCOUNT_ROUTE : PREMIUM_ROUTE}
           >
             <button className={`${styles.btn} ${styles.btnSecondary}`}>
-              Discover Premium
+              {isPremium ? "See your plan" : "Discover Premium"}
             </button>
           </Link>
         </div>
