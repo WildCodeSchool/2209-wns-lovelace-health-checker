@@ -75,6 +75,11 @@ export enum OnPremiumCancellation {
   STAY = "stay"
 }
 
+export enum PremiumPlan {
+  MONTHLY = "monthly",
+  YEARLY = "yearly",
+}
+
 export interface User {
   id: string;
   firstname: string;
@@ -152,7 +157,7 @@ function App() {
             path={REQUEST_CREATION_ROUTE}
             element={
               <PreventRequestCreationPageAccessIfLimitHasBeenReached>
-                <RequestCreation role={data?.myProfile.role} />
+                <RequestCreation premiumPlan={data?.myProfile.premiumPlan} />
               </PreventRequestCreationPageAccessIfLimitHasBeenReached>
             }
           />
@@ -160,11 +165,14 @@ function App() {
             path={REQUEST_DETAILS_ROUTE}
             element={
               <Protected isLoggedIn={isLogged} loading={loading}>
-                <RequestDetails role={data?.myProfile.role} />
+                <RequestDetails premiumPlan={data?.myProfile.premiumPlan} />
               </Protected>
             }
           />
-          <Route path={PREMIUM_ROUTE} element={<Premium isPremium={isPremium} />} />
+          <Route
+            path={PREMIUM_ROUTE}
+            element={<Premium isPremium={isPremium} />}
+          />
           <Route
             path={PREMIUM_SUBSCRIPTION_ROUTE}
             element={

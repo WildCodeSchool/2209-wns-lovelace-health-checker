@@ -46,7 +46,7 @@ import {
 } from "../../utils/form-validations";
 import { REQUESTS_ROUTE } from "../../routes";
 import { AlertType } from "../../utils/alert-types.enum";
-import { Role } from "../../utils/role.enum";
+import { PremiumPlan } from "../../App";
 
 export const CREATE_REQUEST = gql`
   mutation CreateRequestSetting(
@@ -145,11 +145,11 @@ enum AlertChoices {
 }
 
 const RequestCreation = ({
-  role,
+  premiumPlan,
   existingRequest,
   setRequestDetailsTab,
 }: {
-  role: string | undefined;
+  premiumPlan: string | null | undefined;
   existingRequest?:
     | GetRequestSettingByIdQuery["getRequestSettingById"]
     | undefined;
@@ -681,7 +681,8 @@ const RequestCreation = ({
             <p
               className={styles.frequencyLabel}
               title={
-                role === Role.PREMIUM
+                premiumPlan === PremiumPlan.MONTHLY ||
+                premiumPlan === PremiumPlan.YEARLY
                   ? "You can use these frequencies with your Premium plan"
                   : "You must be Premium to unlock these options"
               }
@@ -697,7 +698,12 @@ const RequestCreation = ({
                   id="mn30"
                   value={Frequency.THIRTY_MINUTES}
                   {...register("frequency")}
-                  disabled={role !== Role.PREMIUM}
+                  disabled={
+                    !(
+                      premiumPlan === PremiumPlan.MONTHLY ||
+                      premiumPlan === PremiumPlan.YEARLY
+                    )
+                  }
                   checked={frequency === Frequency.THIRTY_MINUTES}
                   onClick={() => setFrequency(Frequency.THIRTY_MINUTES)}
                 />
@@ -712,7 +718,12 @@ const RequestCreation = ({
                   id="mn15"
                   value={Frequency.FIFTEEN_MINUTES}
                   {...register("frequency")}
-                  disabled={role !== Role.PREMIUM}
+                  disabled={
+                    !(
+                      premiumPlan === PremiumPlan.MONTHLY ||
+                      premiumPlan === PremiumPlan.YEARLY
+                    )
+                  }
                   checked={frequency === Frequency.FIFTEEN_MINUTES}
                   onClick={() => setFrequency(Frequency.FIFTEEN_MINUTES)}
                 />
@@ -727,7 +738,12 @@ const RequestCreation = ({
                   id="mn1"
                   value={Frequency.ONE_MINUTE}
                   {...register("frequency")}
-                  disabled={role !== Role.PREMIUM}
+                  disabled={
+                    !(
+                      premiumPlan === PremiumPlan.MONTHLY ||
+                      premiumPlan === PremiumPlan.YEARLY
+                    )
+                  }
                   checked={frequency === Frequency.ONE_MINUTE}
                   onClick={() => setFrequency(Frequency.ONE_MINUTE)}
                 />
@@ -741,7 +757,8 @@ const RequestCreation = ({
             <p
               className={styles.frequencyLabel}
               title={
-                role === Role.PREMIUM
+                premiumPlan === PremiumPlan.MONTHLY ||
+                premiumPlan === PremiumPlan.YEARLY
                   ? "You can use these frequencies with your Premium plan"
                   : "You must be Premium to unlock these options"
               }
@@ -757,7 +774,12 @@ const RequestCreation = ({
                   id="sec30"
                   value={Frequency.THIRTY_SECONDS}
                   {...register("frequency")}
-                  disabled={role !== Role.PREMIUM}
+                  disabled={
+                    !(
+                      premiumPlan === PremiumPlan.MONTHLY ||
+                      premiumPlan === PremiumPlan.YEARLY
+                    )
+                  }
                   checked={frequency === Frequency.THIRTY_SECONDS}
                   onClick={() => setFrequency(Frequency.THIRTY_SECONDS)}
                 />
@@ -772,7 +794,12 @@ const RequestCreation = ({
                   id="sec15"
                   value={Frequency.FIFTEEN_SECONDS}
                   {...register("frequency")}
-                  disabled={role !== Role.PREMIUM}
+                  disabled={
+                    !(
+                      premiumPlan === PremiumPlan.MONTHLY ||
+                      premiumPlan === PremiumPlan.YEARLY
+                    )
+                  }
                   checked={frequency === Frequency.FIFTEEN_SECONDS}
                   onClick={() => setFrequency(Frequency.FIFTEEN_SECONDS)}
                 />
@@ -787,7 +814,12 @@ const RequestCreation = ({
                   id="sec5"
                   value={Frequency.FIVE_SECONDS}
                   {...register("frequency")}
-                  disabled={role !== Role.PREMIUM}
+                  disabled={
+                    !(
+                      premiumPlan === PremiumPlan.MONTHLY ||
+                      premiumPlan === PremiumPlan.YEARLY
+                    )
+                  }
                   checked={frequency === Frequency.FIVE_SECONDS}
                   onClick={() => setFrequency(Frequency.FIVE_SECONDS)}
                 />
@@ -848,7 +880,8 @@ const RequestCreation = ({
             {/* Specific email */}
             <div
               title={
-                role === Role.PREMIUM
+                premiumPlan === PremiumPlan.MONTHLY ||
+                premiumPlan === PremiumPlan.YEARLY
                   ? "You can use specific email alerts with your Premium plan"
                   : "You must be Premium to unlock specific email alerts"
               }
@@ -859,7 +892,12 @@ const RequestCreation = ({
                 type="radio"
                 {...register("allErrorsEnabledEmail")}
                 id="flexRadioDefault2"
-                disabled={role !== Role.PREMIUM}
+                disabled={
+                  !(
+                    premiumPlan === PremiumPlan.MONTHLY ||
+                    premiumPlan === PremiumPlan.YEARLY
+                  )
+                }
                 checked={
                   emailSpecificErrorRadioIsChecked ||
                   emailAlerts === AlertChoices.SPECIFIC
@@ -880,7 +918,12 @@ const RequestCreation = ({
               isMulti
               value={emailSpecificErrorsInputValue}
               placeholder="Select specific error(s)..."
-              isDisabled={role !== Role.PREMIUM}
+              isDisabled={
+                !(
+                  premiumPlan === PremiumPlan.MONTHLY ||
+                  premiumPlan === PremiumPlan.YEARLY
+                )
+              }
               name="emailSpecificErrors"
               options={HTTP_ERROR_STATUS_CODES}
               className={`${styles.emailSpecificErrors} basic-multi-select`}
@@ -933,7 +976,8 @@ const RequestCreation = ({
             
             <div
               title={
-                role === Role.PREMIUM
+                premiumPlan === PremiumPlan.MONTHLY ||
+                premiumPlan === PremiumPlan.YEARLY
                   ? "You can use specific push alerts with your Premium plan"
                   : "You must be Premium to unlock specific push alerts"
               }
@@ -944,7 +988,12 @@ const RequestCreation = ({
                 type="radio"
                 {...register("allErrorsEnabledPush")}
                 id="flexRadioDefault2"
-                disabled={role !== Role.PREMIUM}
+                disabled={
+                    !(
+                      premiumPlan === PremiumPlan.MONTHLY ||
+                      premiumPlan === PremiumPlan.YEARLY
+                    )
+                  }
                 checked={
                   pushSpecificErrorRadioIsChecked ||
                   pushAlerts === AlertChoices.SPECIFIC
@@ -968,7 +1017,12 @@ const RequestCreation = ({
             <Select
               isMulti
               value={pushSpecificErrorsInputValue}
-              isDisabled={role !== Role.PREMIUM}
+              isDisabled={
+                    !(
+                      premiumPlan === PremiumPlan.MONTHLY ||
+                      premiumPlan === PremiumPlan.YEARLY
+                    )
+                  }
               placeholder="Select specific error(s)..."
               name="pushSpecificErrors"
               options={HTTP_ERROR_STATUS_CODES}
