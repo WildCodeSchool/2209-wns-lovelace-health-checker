@@ -3,7 +3,7 @@ import { Raw } from "typeorm";
 import RequestSetting, {
   Frequency,
 } from "../../entities/RequestSetting.entity";
-import User, { Role } from "../../entities/User.entity";
+import User, { PremiumPlan, Role } from "../../entities/User.entity";
 import PageOfRequestSettingWithLastResult from "../../models/PageOfRequestSettingWithLastResult";
 import RequestSettingWithLastResult from "../../models/RequestSettingWithLastResult";
 import { HeaderElement } from "../../models/header-element.model";
@@ -192,7 +192,12 @@ export default class RequestSettingService extends RequestSettingRepository {
   static checkIfNonPremiumUserHasReachedMaxRequestsCount = async (
     user: User
   ) => {
-    if (user.role === Role.USER) {
+    if (
+      !(
+        user.premiumPlan === PremiumPlan.MONTHLY ||
+        user.premiumPlan === PremiumPlan.YEARLY
+      )
+    ) {
       const userSettingRequests =
         await RequestSettingRepository.getRequestSettingsByUserId(user.id);
       if (
@@ -274,7 +279,10 @@ export default class RequestSettingService extends RequestSettingRepository {
     customPushErrors: number[] | undefined
   ) => {
     if (
-      user.role === Role.USER &&
+      !(
+        user.premiumPlan === PremiumPlan.MONTHLY ||
+        user.premiumPlan === PremiumPlan.YEARLY
+      ) &&
       (customEmailErrors?.length || customPushErrors?.length)
     )
       throw Error(ALERTS_ONLY_FOR_PREMIUM_USERS);

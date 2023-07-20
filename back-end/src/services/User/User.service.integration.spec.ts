@@ -99,7 +99,10 @@ describe("UserService integration", () => {
         expect(users[0].updatedAt).toEqual(null);
         expect(users[0].lastLoggedAt).toEqual(null);
         expect(users[0].customerId).toEqual(null);
-        expect(users[0].hasCanceledPremium).toEqual(null);
+        expect(users[0].onPremiumCancellation).toEqual(null);
+        expect(users[0].premiumPlan).toEqual(null);
+        expect(users[0].premiumEndPeriod).toEqual(null);
+        expect(users[0].premiumStartPeriod).toEqual(null);
         expect(users[0].status).toEqual("pending");
         expect(users[0].role).toEqual("user");
         expect(users[0].confirmationEmailToken).toEqual(null);

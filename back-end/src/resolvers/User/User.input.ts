@@ -163,9 +163,5 @@ export class UpdatePasswordArgs {
 export class ModifyPremiumSubscriptionArgs {
   @Field()
   @IsNotEmpty()
-  hasCanceledPremium: boolean;
-
-  @Field()
-  @IsNotEmpty()
   onPremiumCancellation: OnPremiumCancellation;
 }

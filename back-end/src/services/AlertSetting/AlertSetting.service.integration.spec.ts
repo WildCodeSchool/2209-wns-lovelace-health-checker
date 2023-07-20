@@ -7,7 +7,7 @@ import {
   truncateAllTables,
 } from "../../database/utils";
 import { Frequency } from "../../entities/RequestSetting.entity";
-import User, { Role } from "../../entities/User.entity";
+import User, { PremiumPlan, Role } from "../../entities/User.entity";
 import UserService from "../User/User.service";
 import * as provider from "../../rabbitmq/providers";
 import RequestSettingService from "../RequestSetting/RequestSetting.service";
@@ -852,7 +852,7 @@ describe("AlertSetting integration", () => {
               "janedoe@email.com",
               "password"
             );
-            user.role = Role.PREMIUM;
+            user.premiumPlan = PremiumPlan.MONTHLY;
             await UserRepository.repository.save(user);
 
             const createdUser = await UserRepository.findByEmail(
@@ -899,7 +899,7 @@ describe("AlertSetting integration", () => {
               "janedoe@email.com",
               "password"
             );
-            user.role = Role.PREMIUM;
+            user.premiumPlan = PremiumPlan.MONTHLY;
             await UserRepository.repository.save(user);
 
             const createdUser = await UserRepository.findByEmail(
@@ -967,7 +967,7 @@ describe("AlertSetting integration", () => {
               "janedoe@email.com",
               "password"
             );
-            user.role = Role.PREMIUM;
+            user.premiumPlan = PremiumPlan.MONTHLY;
             await UserRepository.repository.save(user);
 
             const createdUser = await UserRepository.findByEmail(
@@ -1014,7 +1014,7 @@ describe("AlertSetting integration", () => {
               "janedoe@email.com",
               "password"
             );
-            user.role = Role.PREMIUM;
+            user.premiumPlan = PremiumPlan.MONTHLY;
             await UserRepository.repository.save(user);
 
             const createdUser = await UserRepository.findByEmail(

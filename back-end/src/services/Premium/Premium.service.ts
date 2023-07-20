@@ -1,7 +1,5 @@
-import Premium from "../../entities/Premium.entity";
 import User from "../../entities/User.entity";
 import StripeCheckout from "../../models/StripeCheckout";
-import PremiumRepository from "../../repositories/Premium.repository";
 import Stripe from "stripe";
 
 enum PREMIUM_PLAN {
@@ -9,12 +7,7 @@ enum PREMIUM_PLAN {
   ANNUALLY = "price_1NBedUHX9gwxpIP0P6N7VKwN",
 }
 
-export default class PremiumService extends PremiumRepository {
-  public static getPremiumByUserId = (
-    userId: string
-  ): Promise<Premium | null> => {
-    return PremiumRepository.getPremiumByUserId(userId);
-  };
+export default class PremiumService {
 
   static premiumSubscription = async (
     plan: "monthly" | "annually",

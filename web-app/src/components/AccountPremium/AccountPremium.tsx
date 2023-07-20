@@ -3,34 +3,16 @@ import styles from "./AccountPremium.module.scss";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import {
-  GetPremiumByUserIdQueryQuery,
   ModifyPremiumSubscriptionMutation,
   ModifyPremiumSubscriptionMutationVariables,
 } from "../../gql/graphql";
 import { toast } from "react-toastify";
-import { OnPremiumCancellation } from "../../App";
-
-const GET_PREMIUM_BY_USER_ID = gql`
-  query GetPremiumByUserIdQuery {
-    getPremiumByUserId {
-      id
-      billingType
-      price
-      startDate
-      endDate
-    }
-  }
-`;
+import { OnPremiumCancellation, User } from "../../App";
+import { formatDateString } from "../../utils/date";
 
 const MODIFY_PREMIUM_SUBSCRIPTION = gql`
-  mutation ModifyPremiumSubscription(
-    $hasCanceledPremium: Boolean!
-    $onPremiumCancellation: String!
-  ) {
-    modifyPremiumSubscription(
-      hasCanceledPremium: $hasCanceledPremium
-      onPremiumCancellation: $onPremiumCancellation
-    )
+  mutation ModifyPremiumSubscription($onPremiumCancellation: String!) {
+    modifyPremiumSubscription(onPremiumCancellation: $onPremiumCancellation)
   }
 `;
 
@@ -38,32 +20,9 @@ const AccountPremium = ({
   user,
   onUpdatePremiumSuccess,
 }: {
-  user: any;
+  user: User;
   onUpdatePremiumSuccess(): Promise<void>;
 }) => {
-  interface Premium {
-    id: string;
-    billingType: string;
-    price: number;
-    startDate: any;
-    endDate: any;
-  }
-  const [premium, setPremium] = useState<Premium>();
-  const { loading, refetch, data } = useQuery<GetPremiumByUserIdQueryQuery>(
-    GET_PREMIUM_BY_USER_ID,
-    {
-      onCompleted: (data) => {
-        setPremium(data.getPremiumByUserId);
-      },
-      onError: (error) => {
-        toast.error(error.message, {
-          position: toast.POSITION.BOTTOM_RIGHT,
-          toastId: 1,
-        });
-      },
-    }
-  );
-
   const [modifyPremiumSubscription, { error }] = useMutation<
     ModifyPremiumSubscriptionMutation,
     ModifyPremiumSubscriptionMutationVariables
@@ -92,20 +51,20 @@ const AccountPremium = ({
   const onSubmit: SubmitHandler<any> = async () => {
     await modifyPremiumSubscription({
       variables: {
-        hasCanceledPremium: !!!user.hasCanceledPremium,
-        onPremiumCancellation: onPremiumCancellation
+        onPremiumCancellation: onPremiumCancellation,
       },
     });
   };
 
-  const [onPremiumCancellation, setOnPremiumCancellation] = useState(
+  const [onPremiumCancellation, setOnPremiumCancellation] = useState<any>(
     OnPremiumCancellation.DISABLED
   );
 
   return (
     <>
       {/* Cancel confirmation modal */}
-      {!user.hasCanceledPremium && (
+      {(user.onPremiumCancellation === null ||
+        user.onPremiumCancellation === OnPremiumCancellation.STAY) && (
         <div
           className="modal fade"
           id="staticBackdrop"
@@ -151,7 +110,8 @@ const AccountPremium = ({
         </div>
       )}
       {/* Request handling modal */}
-      {!user.hasCanceledPremium && (
+      {(user.onPremiumCancellation === null ||
+        user.onPremiumCancellation === OnPremiumCancellation.STAY) && (
         <div
           className="modal fade"
           id="staticBackdrop2"
@@ -233,7 +193,8 @@ const AccountPremium = ({
         </div>
       )}
       {/* Maintain confirmation modal */}
-      {user.hasCanceledPremium && (
+      {(user.onPremiumCancellation === OnPremiumCancellation.DISABLED ||
+        user.onPremiumCancellation === OnPremiumCancellation.DEFAULT) && (
         <div
           className="modal fade"
           id="staticBackdrop3"
@@ -266,8 +227,12 @@ const AccountPremium = ({
                     type="submit"
                     data-bs-dismiss="modal"
                     className={`${styles.btnModal} ${styles.btnPrimary}`}
+                    {...register("onPremiumCancellation")}
+                    onClick={() =>
+                      setOnPremiumCancellation(OnPremiumCancellation.STAY)
+                    }
                   >
-                    Confirm
+                    Maintain
                   </button>
                 </div>
               </form>
@@ -284,18 +249,28 @@ const AccountPremium = ({
           <div className={`${styles.content}`}>
             <div>
               <div className={`${styles.label}`}>Billing type</div>
-              <p className={`${styles.value}`}>{premium?.billingType}</p>
+              <p className={`${styles.value}`}>
+                {user.premiumPlan!.charAt(0).toUpperCase() +
+                  user.premiumPlan!.slice(1)}
+              </p>
               <div className={`${styles.label}`}>Price</div>
-              <p className={`${styles.value}`}>{premium?.price}</p>
+              <p className={`${styles.value}`}>
+                {user.premiumPlan === "annually" ? "€9.99" : "€0.99"}
+              </p>
               <div className={`${styles.label}`}>Billing period</div>
               <p className={`${styles.value}`}>
-                {premium?.startDate + " - " + premium?.endDate}
+                {formatDateString(user.premiumStartPeriod!) +
+                  " - " +
+                  formatDateString(user.premiumEndPeriod!)}
               </p>
               <div className={`${styles.label}`}>Next payment</div>
-              {user.hasCanceledPremium ? (
+              {user.onPremiumCancellation === OnPremiumCancellation.DISABLED ||
+              user.onPremiumCancellation === OnPremiumCancellation.DEFAULT ? (
                 <p className={`${styles.value}`}>-</p>
               ) : (
-                <p className={`${styles.value}`}>{premium?.endDate}</p>
+                <p className={`${styles.value}`}>
+                  {formatDateString(user.premiumEndPeriod!)}
+                </p>
               )}
             </div>
           </div>
@@ -317,7 +292,8 @@ const AccountPremium = ({
         {/* Cancel your plan */}
         <div className={`col-12 col-md-6 ${styles.container}`}>
           <h2 className={`${styles.header} mt-md-3`}>
-            {user.hasCanceledPremium ? (
+            {user.onPremiumCancellation === OnPremiumCancellation.DISABLED ||
+            user.onPremiumCancellation === OnPremiumCancellation.DEFAULT ? (
               <>
                 <i className="bi bi-check-circle"></i> Maintain your plan
               </>
@@ -329,11 +305,13 @@ const AccountPremium = ({
           </h2>
           <div className={`${styles.content}`}>
             <div>
-              {user.hasCanceledPremium ? (
+              {user.onPremiumCancellation === OnPremiumCancellation.DISABLED ||
+              user.onPremiumCancellation === OnPremiumCancellation.DEFAULT ? (
                 <>
                   <p>
                     You have chosen to cancel your plan and
-                    {user.onPremiumCancellation === OnPremiumCancellation.DISABLED
+                    {user.onPremiumCancellation ===
+                    OnPremiumCancellation.DISABLED
                       ? " to deactivate your Premium requests "
                       : " to convert your Premium requests to non-Premium requests "}
                     at the end of the billing period.
@@ -350,7 +328,8 @@ const AccountPremium = ({
                   period.
                 </p>
               )}
-              {user.hasCanceledPremium ? (
+              {user.onPremiumCancellation === OnPremiumCancellation.DISABLED ||
+              user.onPremiumCancellation === OnPremiumCancellation.DEFAULT ? (
                 <button
                   type="button"
                   data-bs-toggle="modal"
