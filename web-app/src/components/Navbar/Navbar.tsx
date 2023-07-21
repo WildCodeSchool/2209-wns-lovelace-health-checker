@@ -15,7 +15,6 @@ import styles from "./Navbar.module.scss";
 const Navbar = (props: any) => {
   const [selectedTab, setSelectedTab] = useState("search");
   const logged = props.logged;
-
   const route = useLocation();
 
   useEffect(() => {

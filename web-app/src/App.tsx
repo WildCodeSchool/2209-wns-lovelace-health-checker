@@ -48,8 +48,10 @@ import {
   SIGN_UP_ROUTE,
   TERMS_ROUTE,
   REQUEST_DETAILS_ROUTE,
+  PREMIUM_SUBSCRIPTION_ROUTE,
 } from "./routes";
 import RequestDetails from "./pages/RequestDetails/RequestDetails";
+import PremiumSubscription from "./pages/PremiumSubscription/PremiumSubscription";
 
 export const MY_PROFILE = gql`
   query MyProfile {
@@ -59,21 +61,55 @@ export const MY_PROFILE = gql`
       lastname
       role
       email
+      premiumPlan
+      onPremiumCancellation
+      premiumStartPeriod
+      premiumEndPeriod
     }
   }
 `;
 
+export enum OnPremiumCancellation {
+  DEFAULT = "default",
+  DISABLED = "disabled",
+  STAY = "stay"
+}
+
+export enum PremiumPlan {
+  MONTHLY = "monthly",
+  YEARLY = "yearly",
+}
+
+export interface User {
+  id: string;
+  firstname: string;
+  lastname: string;
+  role: string;
+  email: string;
+  premiumPlan?: string | null | undefined;
+  onPremiumCancellation?: string | null | undefined;
+  premiumStartPeriod?: string | null | undefined;
+  premiumEndPeriod?: string | null | undefined;
+}
+
 function App() {
   const [isLogged, setIsLogged] = useState(false);
+  const [isPremium, setIspremium] = useState(false);
+  const [user, setUser] = useState<User>();
 
   const { loading, refetch, data } = useQuery<MyProfileQuery>(MY_PROFILE, {
     onCompleted: (data) => {
       if (data.myProfile) {
         setIsLogged(true);
+        setUser(data.myProfile);
+        if (data.myProfile.premiumPlan) {
+          setIspremium(true);
+        }
       }
     },
     onError: () => {
       setIsLogged(false);
+      setIspremium(false);
     },
   });
 
@@ -87,9 +123,12 @@ function App() {
   return (
     <main className={`container p-0 ${styles.main}`}>
       <div className={styles.content}>
-        <Navbar logged={isLogged} />
+        <Navbar logged={isLogged} isPremium={isPremium} />
         <Routes>
-          <Route path={HOMEPAGE_ROUTE} element={<Home />} />
+          <Route
+            path={HOMEPAGE_ROUTE}
+            element={<Home logged={isLogged} isPremium={isPremium} />}
+          />
           <Route
             path={SIGN_UP_ROUTE}
             element={
@@ -118,7 +157,7 @@ function App() {
             path={REQUEST_CREATION_ROUTE}
             element={
               <PreventRequestCreationPageAccessIfLimitHasBeenReached>
-                <RequestCreation role={data?.myProfile.role} />
+                <RequestCreation premiumPlan={data?.myProfile.premiumPlan} />
               </PreventRequestCreationPageAccessIfLimitHasBeenReached>
             }
           />
@@ -126,11 +165,22 @@ function App() {
             path={REQUEST_DETAILS_ROUTE}
             element={
               <Protected isLoggedIn={isLogged} loading={loading}>
-                <RequestDetails role={data?.myProfile.role} />
+                <RequestDetails premiumPlan={data?.myProfile.premiumPlan} />
               </Protected>
             }
           />
-          <Route path={PREMIUM_ROUTE} element={<Premium />} />
+          <Route
+            path={PREMIUM_ROUTE}
+            element={<Premium isPremium={isPremium} />}
+          />
+          <Route
+            path={PREMIUM_SUBSCRIPTION_ROUTE}
+            element={
+              <Protected isLoggedIn={isLogged} loading={loading}>
+                <PremiumSubscription />
+              </Protected>
+            }
+          />
 
           <Route
             path={ACCOUNT_ROUTE}
@@ -139,7 +189,8 @@ function App() {
                 <Account
                   onLogoutSuccess={refreshMyProfile}
                   onDeleteSuccess={refetch}
-                  user={data?.myProfile}
+                  onUpdatePremiumSuccess={refreshMyProfile}
+                  user={user}
                 />
               </Protected>
             }

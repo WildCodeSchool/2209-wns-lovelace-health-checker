@@ -8,7 +8,6 @@ import {
   Resolver,
 } from "type-graphql";
 
-import { GlobalContext } from "../..";
 import User from "../../entities/User.entity";
 import UserService from "../../services/User/User.service";
 import {
@@ -18,6 +17,7 @@ import {
 import {
   AskForNewPasswordArgs,
   ConfirmAccountArgs,
+  ModifyPremiumSubscriptionArgs,
   ResendAccountConfirmationTokenArgs,
   ResetPasswordArgs,
   SignInArgs,
@@ -30,6 +30,7 @@ import {
   SESSION_NOT_FOUND,
   SIGN_OUT_SUCCESS,
 } from "../../utils/info-and-error-messages";
+import { Context } from "../..";
 
 @Resolver(User)
 export default class UserResolver {
@@ -71,7 +72,7 @@ export default class UserResolver {
   @Mutation(() => User)
   async signIn(
     @Args() { email, password }: SignInArgs,
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<User> {
     const { user, session } = await UserService.signIn(email, password);
     setSessionIdInCookie(context, session.id);
@@ -80,7 +81,7 @@ export default class UserResolver {
 
   @Authorized()
   @Mutation(() => String)
-  async signOut(@Ctx() context: GlobalContext): Promise<string> {
+  async signOut(@Ctx() context: Context): Promise<string> {
     await UserService.logout(context);
     deleteSessionIdInCookie(context);
     return SIGN_OUT_SUCCESS;
@@ -88,7 +89,7 @@ export default class UserResolver {
 
   @Authorized()
   @Query(() => User)
-  async myProfile(@Ctx() context: GlobalContext): Promise<User> {
+  async myProfile(@Ctx() context: Context): Promise<User> {
     return context.user as User;
   }
 
@@ -96,7 +97,7 @@ export default class UserResolver {
   @Mutation(() => User)
   async updateIdentity(
     @Args() { firstname, lastname }: UpdateIdentityArgs,
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<User> {
     return UserService.updateUserIdentity(
       context.user as User,
@@ -115,7 +116,7 @@ export default class UserResolver {
       newPasswordConfirmation,
       disconnectMe,
     }: UpdatePasswordArgs,
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<string> {
     const currentSessionId = context.sessionId;
     if (!currentSessionId) throw Error(SESSION_NOT_FOUND);
@@ -133,7 +134,7 @@ export default class UserResolver {
   async updateEmail(
     @Arg("newEmail") newEmail: string,
 
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<string> {
     return UserService.updateUserEmail(context.user as User, newEmail);
   }
@@ -149,8 +150,23 @@ export default class UserResolver {
   @Mutation(() => Boolean)
   deleteUser(
     @Arg("currentPassword") currentPassword: string,
-    @Ctx() context: GlobalContext
+    @Ctx() context: Context
   ): Promise<Boolean> {
     return UserService.deleteCurrentUser(context.user as User, currentPassword);
+  }
+
+  @Authorized()
+  @Mutation(() => Boolean)
+  modifyPremiumSubscription(
+    @Args()
+    {
+      onPremiumCancellation,
+    }: ModifyPremiumSubscriptionArgs,
+    @Ctx() context: Context
+  ): Promise<Boolean> {
+    return UserService.modifyPremiumSubscription(
+      context.user as User,
+      onPremiumCancellation
+    );
   }
 }

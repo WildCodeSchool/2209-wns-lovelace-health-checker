@@ -9,6 +9,7 @@ import AccountPremium from "../../components/AccountPremium/AccountPremium";
 import { MyProfileQuery, SignOutMutation } from "../../gql/graphql";
 import { HOMEPAGE_ROUTE } from "../../routes";
 import styles from "./Account.module.scss";
+import { User } from "../../App";
 
 export const SIGN_OUT = gql`
   mutation SignOut {
@@ -20,10 +21,12 @@ const Account = ({
   user,
   onLogoutSuccess,
   onDeleteSuccess,
+  onUpdatePremiumSuccess,
 }: {
-  user: any;
+  user: User | undefined;
   onLogoutSuccess(): Promise<void>;
   onDeleteSuccess(): Promise<ApolloQueryResult<MyProfileQuery>>;
+  onUpdatePremiumSuccess(): Promise<void>;
 }) => {
   const [selectedTab, setSelectedTab] = useState("informations");
 
@@ -49,39 +52,49 @@ const Account = ({
             className={`${styles.logout}`}
             onClick={async () => {
               await signOut();
-            }}>
+            }}
+          >
             Log out
           </span>
         </div>
         <div
-          className={`d-flex gap-5 mt-5 overflow-scroll ${styles.scrollbar}`}>
+          className={`d-flex gap-5 mt-5 overflow-scroll ${styles.scrollbar}`}
+        >
           <div
             className={`${
               selectedTab === "informations" && styles.selectedTab
-            }  ${styles.tabContainer}`}>
+            }  ${styles.tabContainer}`}
+          >
             <span
               className={`${styles.tabs} `}
-              onClick={() => setSelectedTab("informations")}>
+              onClick={() => setSelectedTab("informations")}
+            >
               Informations
             </span>
           </div>
-          <div
-            className={`${selectedTab === "premium" && styles.selectedTab}  ${
-              styles.tabContainer
-            }`}>
-            <span
-              className={`${styles.tabs} `}
-              onClick={() => setSelectedTab("premium")}>
-              Premium
-            </span>
-          </div>
+          {user?.premiumPlan && (
+            <div
+              className={`${selectedTab === "premium" && styles.selectedTab}  ${
+                styles.tabContainer
+              }`}
+            >
+              <span
+                className={`${styles.tabs} `}
+                onClick={() => setSelectedTab("premium")}
+              >
+                Premium
+              </span>
+            </div>
+          )}
           <div
             className={`${selectedTab === "bills" && styles.selectedTab}  ${
               styles.tabContainer
-            }`}>
+            }`}
+          >
             <span
               className={`${styles.tabs} `}
-              onClick={() => setSelectedTab("bills")}>
+              onClick={() => setSelectedTab("bills")}
+            >
               Bills
             </span>
           </div>
@@ -90,10 +103,16 @@ const Account = ({
           {selectedTab === "informations" && (
             <AccountInformations
               user={user}
+              refreshProfile={onLogoutSuccess}
               onDeleteSuccess={onDeleteSuccess}
             />
           )}
-          {selectedTab === "premium" && <AccountPremium />}
+          {user && selectedTab === "premium" && (
+            <AccountPremium
+              user={user}
+              onUpdatePremiumSuccess={onUpdatePremiumSuccess}
+            />
+          )}
           {selectedTab === "bills" && <AccountBills />}
         </div>
       </div>

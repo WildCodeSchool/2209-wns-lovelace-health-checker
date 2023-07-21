@@ -5,7 +5,6 @@ import { HttpErrorStatusCode } from "../../utils/http-error-status-codes.enum";
 import { UNAUTHORIZED } from "../../utils/info-and-error-messages";
 
 export default class AlertSettingService extends AlertSettingRepository {
-  // OK
   static async createAlertSetting(
     httpStatusCode: number,
     requestSetting: RequestSetting,
@@ -15,7 +14,7 @@ export default class AlertSettingService extends AlertSettingRepository {
     return await this.saveAlertSetting(alertSetting);
   }
 
-  // OK, BUT ONE TEST IS BROKEN
+  // TODO : A test is missing
   static setAlertsByType = async (
     requestSetting: RequestSetting,
     type: AlertType,
@@ -31,7 +30,6 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
-  // OK
   static setCustomAlerts = async (
     type: AlertType,
     requestSetting: RequestSetting,
@@ -42,7 +40,6 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
-  // OK
   static setAllAlerts = async (
     type: AlertType,
     requestSetting: RequestSetting
@@ -58,7 +55,6 @@ export default class AlertSettingService extends AlertSettingRepository {
     }
   };
 
-  // OK
   static getCompleteAlertListByTypeForGivenRequestSetting = async (
     type: AlertType,
     requestSetting: RequestSetting
@@ -74,7 +70,7 @@ export default class AlertSettingService extends AlertSettingRepository {
     return alertList;
   };
 
-  static updatePreventAlertUntilOfAlertSettingByType = async (
+  static updatePreventAlertDateByType = async (
     preventAlertUntil: Date,
     requestSetting: RequestSetting,
     type: AlertType,
@@ -84,31 +80,31 @@ export default class AlertSettingService extends AlertSettingRepository {
       await AlertSettingRepository.getAlertSettingsByRequestSettingId(
         requestSetting.id
       );
-    alertSettings.forEach((alertSetting) => {
+    for (const alertSetting of alertSettings) {
       if (
         alertSetting.type === type &&
         alertSetting.httpStatusCode === httpStatusCode
       ) {
         alertSetting.preventAlertUntil = preventAlertUntil;
-        AlertSettingRepository.saveAlertSetting(alertSetting);
+        await AlertSettingRepository.saveAlertSetting(alertSetting);
       }
-    });
+    }
   };
 
-  // OK
   static getRequestExistingAlerts = async (requestSetting: RequestSetting) => {
     return await AlertSettingRepository.getAlertSettingsByRequestSettingId(
       requestSetting.id
     );
   };
 
-  // OK
+  // Returns the list of all possible alerts filtered by type
   static getRequestAlertsByType = (alerts: AlertSetting[], type: AlertType) => {
     return alerts.filter((alert) => {
       return alert.type === type;
     });
   };
 
+  // TODO : Some tests are missing
   static updateAlerts = async (
     updatedRequestSetting: RequestSetting,
     customEmailErrors: number[] | undefined,
@@ -131,7 +127,7 @@ export default class AlertSettingService extends AlertSettingRepository {
       );
 
       let customEmailErrorsToAdd: number[] = [];
-      let customEmailErrorsToDelete: AlertSetting[] = [];
+      let customEmailErrorsToRemove: AlertSetting[] = [];
       let customPushErrorsToAdd: number[] = [];
       let customPushErrorsToDelete: AlertSetting[] = [];
 
@@ -141,7 +137,7 @@ export default class AlertSettingService extends AlertSettingRepository {
           customEmailErrors,
           emailAlerts
         );
-        customEmailErrorsToDelete = this.getErrorCodesToRemove(
+        customEmailErrorsToRemove = this.getErrorCodesToRemove(
           customEmailErrors,
           emailAlerts
         );
@@ -181,8 +177,8 @@ export default class AlertSettingService extends AlertSettingRepository {
           );
         }
         // And to conclude, we remove expected errors
-        if (customEmailErrorsToDelete.length > 0) {
-          await AlertSettingRepository.remove(customEmailErrorsToDelete);
+        if (customEmailErrorsToRemove.length > 0) {
+          await AlertSettingRepository.remove(customEmailErrorsToRemove);
         }
       }
 
@@ -236,14 +232,19 @@ export default class AlertSettingService extends AlertSettingRepository {
     type: AlertType,
     requestSetting: RequestSetting
   ) => {
-    alertList.forEach((alert: AlertSetting) => {
+    for (const alert of alertList) {
       const isAlreadySet = existingAlertList.find(
         (alreadySetAlert: AlertSetting) =>
           alert.httpStatusCode === alreadySetAlert.httpStatusCode
       );
-      if (!isAlreadySet)
-        this.createAlertSetting(alert.httpStatusCode, requestSetting, type);
-    });
+      if (isAlreadySet == undefined) {
+        await this.createAlertSetting(
+          alert.httpStatusCode,
+          requestSetting,
+          type
+        );
+      }
+    }
   };
 
   static getErrorCodesToAdd = (
@@ -251,6 +252,8 @@ export default class AlertSettingService extends AlertSettingRepository {
     existingCustomErrors: AlertSetting[]
   ): number[] => {
     let errorCodesToAdd: number[] = [];
+
+    if (incomingCustomErrors && !incomingCustomErrors.length) return [];
 
     incomingCustomErrors?.forEach((incomingCustomError: number) => {
       let isAlertSettingFound = existingCustomErrors.find(
@@ -266,16 +269,18 @@ export default class AlertSettingService extends AlertSettingRepository {
     incomingCustomErrors: number[] | undefined,
     existingCustomErrors: AlertSetting[]
   ): AlertSetting[] => {
-    let errorCodesToDelete: AlertSetting[] = [];
+    let errorCodesToRemove: AlertSetting[] = [];
+
+    if (incomingCustomErrors && !incomingCustomErrors.length) return [];
 
     existingCustomErrors?.forEach((alertSetting: AlertSetting) => {
       let customErrorFound = incomingCustomErrors?.find(
         (incomingCustomError: number) =>
           incomingCustomError === alertSetting.httpStatusCode
       );
-      if (!customErrorFound) errorCodesToDelete.push(alertSetting);
+      if (!customErrorFound) errorCodesToRemove.push(alertSetting);
     });
-    return errorCodesToDelete;
+    return errorCodesToRemove;
   };
 
   static addErrorCodes = async (

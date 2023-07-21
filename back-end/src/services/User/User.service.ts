@@ -1,16 +1,17 @@
-import { ExpressContext } from "apollo-server-express";
 import { compareSync, hashSync } from "bcryptjs";
 import { randomBytes } from "crypto";
 
 import Session from "../../entities/Session.entity";
-import User, { Status } from "../../entities/User.entity";
+import User, {
+  OnPremiumCancellation,
+  Status,
+} from "../../entities/User.entity";
 import {
   sendMessageOnAccountCreationEmailQueue,
   sendMessageOnResetEmailQueue,
   sendMessageOnResetPasswordEmailQueue,
 } from "../../rabbitmq/providers";
 import UserRepository from "../../repositories/User.repository";
-import { getSessionIdInCookie } from "../../utils/http-cookies";
 import SessionService from "../Session/Session.service";
 import {
   ACCOUNT_ALREADY_ACTIVE,
@@ -30,6 +31,7 @@ import {
   UNAUTHORIZED,
   USER_NOT_FOUND,
 } from "../../utils/info-and-error-messages";
+import { Context } from "../..";
 
 export default class UserService extends UserRepository {
   static async createUser(
@@ -194,8 +196,8 @@ export default class UserService extends UserRepository {
     }
   };
 
-  static logout = async (context: ExpressContext) => {
-    const sessionId = getSessionIdInCookie(context);
+  static logout = async (context: Context) => {
+    const sessionId = context.sessionId;
     if (!sessionId) throw new Error(UNAUTHORIZED);
     await SessionService.deleteSessionById(sessionId);
   };
@@ -293,6 +295,16 @@ export default class UserService extends UserRepository {
       throw new Error(INCORRECT_CURRENT_PASSWORD);
     }
     await this.deleteUser(user);
+    return true;
+  };
+
+  public static modifyPremiumSubscription = async (
+    user: User,
+    onPremiumCancellation: OnPremiumCancellation
+  ): Promise<Boolean> => {
+    user.onPremiumCancellation = onPremiumCancellation;
+    user.updatedAt = new Date();
+    await this.saveUser(user);
     return true;
   };
 }

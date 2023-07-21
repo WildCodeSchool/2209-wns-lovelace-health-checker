@@ -25,8 +25,18 @@ export enum Status {
 
 export enum Role {
   USER = "user",
-  PREMIUM = "premium",
   ADMIN = "admin",
+}
+
+export enum OnPremiumCancellation {
+  DEFAULT = "default",
+  DISABLED = "disabled",
+  STAY= "stay",
+}
+
+export enum PremiumPlan {
+  MONTHLY = "monthly",
+  YEARLY = "yearly",
 }
 
 @Entity("app_user")
@@ -104,8 +114,51 @@ export default class User {
 
   @Column({ nullable: true, default: null })
   @Field({ nullable: true })
-  @IsBoolean()
-  hasCanceledPremium: boolean;
+  @IsString()
+  paymentMethodId: string;
+
+  @Column({ nullable: true, default: null })
+  @Field({ nullable: true })
+  @IsString()
+  paymentFailedInvoiceId: string;
+
+  @Column({ nullable: true, default: null })
+  @Field({ nullable: true })
+  @IsDate()
+  paymentFailedInvoiceIdCreatAt: Date;
+
+  @Column({ nullable: true, default: null })
+  @Field({ nullable: true })
+  @IsString()
+  subscriptionId: string;
+
+  @Column({
+    nullable: true,
+    default: null,
+    type: "enum",
+    enum: PremiumPlan,
+  })
+  @Field({ nullable: true })
+  premiumPlan: PremiumPlan;
+
+  @Column({ nullable: true, default: null })
+  @Field({ nullable: true })
+  @IsDate()
+  premiumStartPeriod: Date;
+
+  @Column({ nullable: true, default: null })
+  @Field({ nullable: true })
+  @IsDate()
+  premiumEndPeriod: Date;
+
+  @Column({
+    nullable: true,
+    default: null,
+    type: "enum",
+    enum: OnPremiumCancellation,
+  })
+  @Field({ nullable: true })
+  onPremiumCancellation: OnPremiumCancellation;
 
   @Column({ type: "enum", enum: Status, default: Status.PENDING })
   @Field()

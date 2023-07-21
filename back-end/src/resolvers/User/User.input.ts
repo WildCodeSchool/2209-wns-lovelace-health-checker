@@ -29,6 +29,7 @@ import {
   PASSWORD_CONFIRMATION_MATCH_ERROR_MESSAGE,
   PASSWORD_PATTERN_ERROR_MESSAGE,
 } from "../../utils/form-validations";
+import { OnPremiumCancellation } from "../../entities/User.entity";
 
 @ArgsType()
 export class SignUpArgs {
@@ -156,4 +157,11 @@ export class UpdatePasswordArgs {
 
   @Field()
   disconnectMe: boolean;
+}
+
+@ArgsType()
+export class ModifyPremiumSubscriptionArgs {
+  @Field()
+  @IsNotEmpty()
+  onPremiumCancellation: OnPremiumCancellation;
 }

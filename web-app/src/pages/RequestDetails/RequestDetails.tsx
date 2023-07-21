@@ -15,6 +15,7 @@ import {
 import RequestCreation from "../RequestCreation/RequestCreation";
 
 import styles from "./RequestDetails.module.scss";
+import RequestResultsTable from "../../components/RequestResultsTable/RequestResultsTable";
 
 export const GET_REQUEST_SETTING_BY_ID = gql`
   query GetRequestSettingById($id: String!) {
@@ -43,7 +44,11 @@ export const GET_REQUEST_SETTING_BY_ID = gql`
   }
 `;
 
-const RequestDetails = ({ role }: { role: string | undefined }) => {
+const RequestDetails = ({
+  premiumPlan,
+}: {
+  premiumPlan: string | null | undefined;
+}) => {
   const [selectedTab, setSelectedTab] = useState("informations");
   const navigate = useNavigate();
 
@@ -149,12 +154,12 @@ const RequestDetails = ({ role }: { role: string | undefined }) => {
       )}
       {selectedTab === "settings" && (
         <RequestCreation
-          role={role}
+          premiumPlan={premiumPlan}
           setRequestDetailsTab={setSelectedTab}
           existingRequest={data?.getRequestSettingById}
         />
       )}
-      {selectedTab === "history" && <div>history</div>}
+      {selectedTab === "history" && <RequestResultsTable />}
       {selectedTab === "graph" && <div>graph</div>}
     </>
   );

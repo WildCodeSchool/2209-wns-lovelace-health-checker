@@ -1,0 +1,46 @@
+@use "../../variables.scss";
+@import "../../components.scss";
+
+.btnModal {
+  @include btnModal;
+}
+.btnPrimary {
+  @include btnPrimary;
+}
+.btnSecondary {
+  @include btnSecondary;
+}
+.modalTitle {
+  @include modalTitle;
+}
+.modalHeader {
+  @include modalHeader;
+}
+
+.container {
+  .header {
+    display: flex;
+    gap: 1rem;
+    margin-left: variables.$margin-xs;
+    color: variables.$primary-1000;
+    font-size: variables.$font-md;
+    font-weight: variables.$font-weight-500;
+  }
+  .content {
+    padding: variables.$padding-md;
+    margin-top: variables.$margin-md;
+    background-color: variables.$primary-100;
+    border-radius: variables.$border-radius-sm;
+    .label {
+      font-weight: variables.$font-weight-500;
+    }
+    .value {
+      color: variables.$neutral-800;
+    }
+    .button {
+      @include btn;
+      @include btnSecondary;
+      width: variables.$width-100;
+    }
+  }
+}
